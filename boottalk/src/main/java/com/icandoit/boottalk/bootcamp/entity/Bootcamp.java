@@ -41,28 +41,28 @@ public class Bootcamp extends BaseEntity {
   private String name;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "bt_category")
+  @Column(name = "bt_category", nullable = false)
   private CategoryType category;
 
-  @Column(name = "bt_degree")
+  @Column(name = "bt_degree", nullable = false)
   private int degree;
 
-  @Column(name = "bt_region")
+  @Column(name = "bt_region", nullable = false)
   private String region;
 
-  @Column(name = "bt_capacity")
+  @Column(name = "bt_capacity", nullable = false)
   private int capacity;
 
-  @Column(name = "bt_cost")
+  @Column(name = "bt_cost", nullable = false)
   private boolean cost;
 
-  @Column(name = "bt_start_date")
+  @Column(name = "bt_start_date", nullable = false)
   private LocalDate startDate;
 
-  @Column(name = "bt_end_date")
+  @Column(name = "bt_end_date", nullable = false)
   private LocalDate endDate;
 
-  @Column(name = "bt_link")
+  @Column(name = "bt_link", nullable = false)
   private String link;
 
 }

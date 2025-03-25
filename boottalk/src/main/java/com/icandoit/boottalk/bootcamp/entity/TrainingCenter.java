@@ -27,6 +27,6 @@ public class TrainingCenter extends BaseEntity {
   @Column(name = "t_tc_id")
   private Long id;
 
-  @Column(name = "tc_name")
+  @Column(name = "tc_name", nullable = false)
   private String name;
 }
