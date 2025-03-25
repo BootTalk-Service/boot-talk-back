@@ -19,10 +19,16 @@ public class ReviewService {
 	private final UserRepository userRepository;
 	private final ReviewRepository reviewRepository;
 
+	/**
+	 * 리뷰 등록
+	 * @param request
+	 * @param userId
+	 * @return
+	 */
 	public ReviewResponseDto create(ReviewRequestDto request, Long userId) {
 		Long bootcampId = request.getBootcampId();
 
-		validateCreateReview(bootcampId);
+		validateCreateReview(bootcampId, userId);
 		validateBootCamp(bootcampId);
 
 		Review review = Review.of(
@@ -37,6 +43,10 @@ public class ReviewService {
 		return ReviewResponseDto.from(review);
 	}
 
+	/**
+	 * 리뷰 목록 조회
+	 * @return
+	 */
 	public List<ReviewResponseDto> listAll() {
 
 		List<Review> reviews = reviewRepository.findAll();
@@ -46,6 +56,11 @@ public class ReviewService {
 			.collect(Collectors.toList());
 	}
 
+	/**
+	 * 내 리뷰 목록 조회
+	 * @param userId
+	 * @return
+	 */
 	public List<ReviewResponseDto> listMy(Long userId) {
 
 		List<Review> reviews = reviewRepository.findByUserId(userId);
@@ -55,6 +70,13 @@ public class ReviewService {
 			.collect(Collectors.toList());
 	}
 
+	/**
+	 * 내 리뷰 수정
+	 * @param request
+	 * @param reviewId
+	 * @param userId
+	 * @return
+	 */
 	public ReviewResponseDto update(ReviewRequestDto request, Long reviewId, Long userId) {
 
 		Review review = getReview(reviewId);
@@ -68,6 +90,11 @@ public class ReviewService {
 		return ReviewResponseDto.from(review);
 	}
 
+	/**
+	 * 내 리뷰 삭제
+	 * @param reviewId
+	 * @param userId
+	 */
 	public void delete(Long reviewId, Long userId) {
 
 		Review review = getReview(reviewId);
@@ -86,8 +113,8 @@ public class ReviewService {
 	}
 
 
-	private void validateCreateReview(Long id) {
-		if (reviewRepository.existsByBootcampId(id)) {
+	private void validateCreateReview(Long bootcampId, Long userID) {
+		if (reviewRepository.existsByBootcampIdAndUserId(bootcampId, userID)) {
 			throw new RuntimeException("해당 부트캠프에 이미 리뷰를 작성하였습니다.");
 		}
 	}

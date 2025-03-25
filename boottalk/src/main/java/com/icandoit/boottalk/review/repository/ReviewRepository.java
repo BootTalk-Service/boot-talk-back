@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
 	List<Review> findByUserId(Long userId);
-	boolean existsByBootcampId(Long bootcampId);
+	boolean existsByBootcampIdAndUserId(Long bootcampId, Long userID);
 }
