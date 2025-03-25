@@ -1,6 +1,6 @@
 package com.icandoit.boottalk.review.entity;
 
-import com.icandoit.boottalk.entity.BaseEntity;
+import com.icandoit.boottalk.common.entity.BaseEntity;
 import com.icandoit.boottalk.test.entity.Bootcamp;
 import com.icandoit.boottalk.test.entity.User;
 import com.icandoit.boottalk.review.dto.ReviewRequestDto;

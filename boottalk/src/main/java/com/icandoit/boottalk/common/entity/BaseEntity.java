@@ -1,4 +1,4 @@
-package com.icandoit.boottalk.entity;
+package com.icandoit.boottalk.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
