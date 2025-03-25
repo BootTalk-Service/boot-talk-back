@@ -34,7 +34,6 @@ public class User extends BaseEntity {
   @Enumerated(EnumType.STRING)
   private DesiredCareer desiredCareer;
 
-  private int currentPoint;
   private Timestamp deletedAt;
 
   public static User from(SignUpForm form) {
@@ -44,7 +43,6 @@ public class User extends BaseEntity {
         .email(form.getEmail())
         .profileImage(form.getProfileImage())
         .desiredCareer(form.getDesiredCareer())
-        .currentPoint(0)
         .deletedAt(null)
         .build();
   }
