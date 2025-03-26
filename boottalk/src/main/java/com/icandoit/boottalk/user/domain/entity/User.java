@@ -8,7 +8,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
-import java.math.BigInteger;
 import java.sql.Timestamp;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,37 +23,37 @@ import lombok.Setter;
 @Entity
 public class User extends BaseEntity {
 
-  @Id
-  private BigInteger userId;
+	@Id
+	private Long userId;
 
-  private String name;
-  private String email;
-  private String profileImage;
+	private String name;
+	private String email;
+	private String profileImage;
 
-  @Enumerated(EnumType.STRING)
-  private DesiredCareer desiredCareer;
+	@Enumerated(EnumType.STRING)
+	private DesiredCareer desiredCareer;
 
-  private Timestamp deletedAt;
+	private Timestamp deletedAt;
 
-  public static User from(SignUpForm form) {
-    return User.builder()
-        .userId(form.getUserId())
-        .name(form.getName())
-        .email(form.getEmail())
-        .profileImage(form.getProfileImage())
-        .desiredCareer(form.getDesiredCareer())
-        .deletedAt(null)
-        .build();
-  }
+	public static User from(SignUpForm form) {
+		return User.builder()
+			.userId(form.getUserId())
+			.name(form.getName())
+			.email(form.getEmail())
+			.profileImage(form.getProfileImage())
+			.desiredCareer(form.getDesiredCareer())
+			.deletedAt(null)
+			.build();
+	}
 
-  public User updateFrom(UpdateForm form) {
-    this.name = form.getName();
-    this.email = form.getEmail();
-    this.profileImage = form.getProfileImage();
-    this.desiredCareer = form.getDesiredCareer();
+	public User updateFrom(UpdateForm form) {
+		this.name = form.getName();
+		this.email = form.getEmail();
+		this.profileImage = form.getProfileImage();
+		this.desiredCareer = form.getDesiredCareer();
 
-    return this;
-  }
+		return this;
+	}
 
 
 }

@@ -1,7 +1,6 @@
 package com.icandoit.boottalk.user.domain.form;
 
 import com.icandoit.boottalk.user.domain.type.DesiredCareer;
-import java.math.BigInteger;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,9 +13,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class SignUpForm {
-  private BigInteger userId;
-  private String name;
-  private String email;
-  private String profileImage;
-  private DesiredCareer desiredCareer;
+
+	private Long userId;
+	private String name;
+	private String email;
+	private String profileImage;
+	private DesiredCareer desiredCareer;
 }
