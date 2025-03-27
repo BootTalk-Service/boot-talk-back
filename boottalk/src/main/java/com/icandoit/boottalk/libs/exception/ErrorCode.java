@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum ErrorCode {
 
     /* 400 BAD_REQUEST */
-
+    ALREADY_DELETED_COFFEE_CHAT_INFO(400,"이미 이미 삭제된 커피챗 정보입니다."),
 
     /* 403 FORBIDDEN */
     FORBIDDEN(403, "권한이 없습니다."),
