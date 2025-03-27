@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,29 +24,10 @@ public class TrainingCenter extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long trainingCenterId;
+	@Column(name = "training_center_id")
+	private Long id;
 
-	@Column(nullable = false)
-	private String trainingCenterName;
-
-	@Column(nullable = false)
-	private String trainingCenterPhoneNumber;
-
-	@Column(nullable = false)
-	private String trainingCenterEmail;
-
-	@Column(nullable = false)
-	private String trainingCenterAddress;
-
-	@Column(nullable = false)
-	private String trainingCenterUrl;
-
-	public static TrainingCenter of(String name, String email, String address, String url) {
-		return TrainingCenter.builder()
-			.trainingCenterName(name)
-			.trainingCenterEmail(email)
-			.trainingCenterAddress(address)
-			.trainingCenterUrl(url)
-			.build();
-	}
+	@Column(name = "training_center_name", nullable = false)
+	@NotNull(message = "훈련기관 이름은 필수 항목입니다.")
+	private String name;
 }
