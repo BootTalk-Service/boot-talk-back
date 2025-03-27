@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.icandoit.boottalk.bootcamp.dto.BootcampResponse.BootcampResponseDto;
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
 import com.icandoit.boottalk.bootcamp.service.BootcampService;
+import com.icandoit.boottalk.libs.dto.SuccessResponseDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,23 +26,42 @@ public class BootcampController {
 
 	private final BootcampService bootcampService;
 
-	// 부트캠프 목록 조회
+	/**
+	 * 모든 부트캠프 목록 조회 (페이징)
+	 *
+	 * @param page
+	 * @param size
+	 * @return ResponseEntity with SuccessResponseDto
+	 */
 	@GetMapping
-	public ResponseEntity<List<BootcampResponseDto>> getAllBootcamps(
+	public ResponseEntity<?> getAllBootcamps(
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size
 	) {
-		// TODO : 페이징 처리 수정, 테스트 코드 작성, 필터 조회
 		Pageable pageable = PageRequest.of(page, size);
 		Page<Bootcamp> bootcampPage = bootcampService.findAll(pageable);
 		List<BootcampResponseDto> bootcampResponseDtoList = BootcampResponseDto.from(bootcampPage.getContent());
 
-		return ResponseEntity.ok(bootcampResponseDtoList);
+		return ResponseEntity.ok(
+			SuccessResponseDto.of("부트캠프 목록 조회 성공", bootcampResponseDtoList)
+		);
 	}
 
-	// 단일 부트캠프 조회
+	/**
+	 * 단일 부트캠프 조회
+	 *
+	 * @param bootcampId 부트캠프 ID
+	 * @return ResponseEntity with SuccessResponseDto
+	 */
 	@GetMapping("/{bootcampId}")
-	public ResponseEntity<BootcampResponseDto> getBootcamp(@PathVariable Long bootcampId) {
-		return ResponseEntity.ok(bootcampService.findById(bootcampId));
+	public ResponseEntity<?> getBootcamp(@PathVariable Long bootcampId) {
+		Bootcamp bootcamp = bootcampService.findById(bootcampId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 부트캠프가 존재하지 않습니다."));
+
+		BootcampResponseDto responseDto = BootcampResponseDto.from(bootcamp);
+
+		return ResponseEntity.ok(
+			SuccessResponseDto.of("부트캠프 조회 성공", responseDto)
+		);
 	}
 }
