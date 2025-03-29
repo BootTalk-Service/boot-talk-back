@@ -6,9 +6,7 @@ import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
-@Setter
 @Getter
 @Builder
 @AllArgsConstructor
@@ -26,7 +24,7 @@ public class ReviewResponseDto {
 
 	public static ReviewResponseDto from(Review review) {
 		return ReviewResponseDto.builder()
-			.id(review.getId())
+			.id(review.getReviewId())
 			.bootcampId(review.getBootcamp().getId())
 			.bootcampName(review.getBootcamp().getName())
 			.userName(review.getUser().getName())
