@@ -2,12 +2,12 @@ package com.icandoit.boottalk.bootcamp.entity;
 
 import com.icandoit.boottalk.libs.entity.BaseEntity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,29 +23,20 @@ public class TrainingCenter extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long trainingCenterId;
+	private Long id;
 
-	@Column(nullable = false)
-	private String trainingCenterName;
+	@NotNull(message = "훈련기관 이름은 필수 항목입니다.")
+	private String name;
 
-	@Column(nullable = false)
-	private String trainingCenterPhoneNumber;
+	@NotNull(message = "훈련기관 연락처는 필수 항목입니다.")
+	private String phoneNumber;
 
-	@Column(nullable = false)
-	private String trainingCenterEmail;
+	@NotNull(message = "훈련기관 이메일은 필수 항목입니다.")
+	private String email;
 
-	@Column(nullable = false)
-	private String trainingCenterAddress;
+	@NotNull(message = "훈련기관 주소는 필수 항목입니다.")
+	private String address;
 
-	@Column(nullable = false)
-	private String trainingCenterUrl;
-
-	public static TrainingCenter of(String name, String email, String address, String url) {
-		return TrainingCenter.builder()
-			.trainingCenterName(name)
-			.trainingCenterEmail(email)
-			.trainingCenterAddress(address)
-			.trainingCenterUrl(url)
-			.build();
-	}
+	@NotNull(message = "훈련기관 이메일은 필수 항목입니다.")
+	private String url;
 }
