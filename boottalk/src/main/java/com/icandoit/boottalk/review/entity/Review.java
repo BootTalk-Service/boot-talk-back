@@ -1,9 +1,10 @@
 package com.icandoit.boottalk.review.entity;
 
-import com.icandoit.boottalk.common.entity.BaseEntity;
+import com.icandoit.boottalk.libs.entity.BaseEntity;
+import com.icandoit.boottalk.review.dto.ReviewRequestDto;
 import com.icandoit.boottalk.test.entity.Bootcamp;
 import com.icandoit.boottalk.test.entity.User;
-import com.icandoit.boottalk.review.dto.ReviewRequestDto;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,20 +16,18 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Table(name = "review")
 @Entity
 @Builder
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Review extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private Long reviewId;
 
 	@ManyToOne
 	@JoinColumn(name = "bootcamp_id")
@@ -43,12 +42,17 @@ public class Review extends BaseEntity {
 
 	public static Review of(ReviewRequestDto dto, Bootcamp bootcamp, User user) {
 		return Review.builder()
-			.id(dto.getId())
+			.reviewId(dto.getReviewId())
 			.bootcamp(bootcamp)
 			.user(user)
 			.content(dto.getContent())
 			.rating(dto.getRating())
 			.build();
+	}
+
+	public void update(ReviewRequestDto dto) {
+		this.content = dto.getContent();
+		this.rating = dto.getRating();
 	}
 
 }
