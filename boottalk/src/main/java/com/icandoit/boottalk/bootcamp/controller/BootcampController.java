@@ -26,15 +26,9 @@ public class BootcampController {
 
 	private final BootcampService bootcampService;
 
-	/**
-	 * 모든 부트캠프 목록 조회 (페이징)
-	 *
-	 * @param page
-	 * @param size
-	 * @return ResponseEntity with SuccessResponseDto
-	 */
+	// 부트캠프 목록 조회
 	@GetMapping
-	public ResponseEntity<?> getAllBootcamps(
+	public ResponseEntity<SuccessResponseDto<List<BootcampResponseDto>>> getAllBootcamps(
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size
 	) {
@@ -47,14 +41,9 @@ public class BootcampController {
 		);
 	}
 
-	/**
-	 * 단일 부트캠프 조회
-	 *
-	 * @param bootcampId 부트캠프 ID
-	 * @return ResponseEntity with SuccessResponseDto
-	 */
+	// 단일 부트캠프 조회
 	@GetMapping("/{bootcampId}")
-	public ResponseEntity<?> getBootcamp(@PathVariable Long bootcampId) {
+	public ResponseEntity<SuccessResponseDto<BootcampResponseDto>> getBootcamp(@PathVariable Long bootcampId) {
 		Bootcamp bootcamp = bootcampService.findById(bootcampId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 부트캠프가 존재하지 않습니다."));
 
