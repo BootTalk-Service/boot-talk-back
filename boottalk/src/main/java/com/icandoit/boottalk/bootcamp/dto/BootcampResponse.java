@@ -29,20 +29,19 @@ public class BootcampResponse {
 		private LocalDate bootcampEndDate;
 
 		public static BootcampResponseDto from(Bootcamp bootcamp) {
-			BootcampCategoryType bootcampCategoryType = bootcamp.getCategory();
+			BootcampCategoryType bootcampCategoryType = bootcamp.getBootcampCategoryType();
 
 			return BootcampResponseDto.builder()
 				.bootcampId(bootcamp.getId())
 				.trainingCenterName(bootcamp.getTrainingCenter().getName())
-				.bootcampName(bootcamp.getName())
-				.bootcampRegion(bootcamp.getRegion())
-				.bootcampCost(bootcamp.isCost())
-				.bootcampLink(bootcamp.getLink())
+				.bootcampName(bootcamp.getBootcampName())
+				.bootcampRegion(bootcamp.getBootcampRegion())
+				.bootcampCost(bootcamp.isBootcampCost())
+				.bootcampLink(bootcamp.getBootcampLink())
 				.bootcampCategory(bootcampCategoryType.getKoreanNameByEnglishName(bootcampCategoryType.getKoreanName()))
-				.bootcampDegree(bootcamp.getDegree())
-				.bootcampCapacity(bootcamp.getCapacity())
-				.bootcampStartDate(bootcamp.getStartDate())
-				.bootcampEndDate(bootcamp.getEndDate())
+				.bootcampDegree(bootcamp.getBootcampDegree())
+				.bootcampCapacity(bootcamp.getBootcampCapacity())
+				.bootcampEndDate(bootcamp.getBootcampEndDate())
 				.build();
 		}
 

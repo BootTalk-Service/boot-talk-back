@@ -1,12 +1,10 @@
 package com.icandoit.boottalk.libs.dto;
 
-import lombok.Getter;
 
 /**
  * @param message 응답 메시지
  * @param data    선택적으로 포함할 데이터
  */
-@Getter
 public record SuccessResponseDto<T>(String message, T data) {
 
     /**
