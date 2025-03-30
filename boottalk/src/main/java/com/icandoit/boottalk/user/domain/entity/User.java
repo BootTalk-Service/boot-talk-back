@@ -1,14 +1,18 @@
 package com.icandoit.boottalk.user.domain.entity;
 
-import com.icandoit.boottalk.common.entity.BaseEntity;
+import java.sql.Timestamp;
+
+import com.icandoit.boottalk.libs.entity.BaseEntity;
 import com.icandoit.boottalk.user.domain.form.SignUpForm;
 import com.icandoit.boottalk.user.domain.form.UpdateForm;
 import com.icandoit.boottalk.user.domain.type.DesiredCareer;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.sql.Timestamp;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,7 +20,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
-@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,7 +27,8 @@ import lombok.Setter;
 public class User extends BaseEntity {
 
 	@Id
-	private Long userId;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private long userId;
 
 	private String name;
 	private String email;
@@ -33,9 +37,10 @@ public class User extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	private DesiredCareer desiredCareer;
 
+	@Setter
 	private Timestamp deletedAt;
 
-	public static User from(SignUpForm form) {
+	public static User of(SignUpForm form) {
 		return User.builder()
 			.userId(form.getUserId())
 			.name(form.getName())
@@ -46,7 +51,7 @@ public class User extends BaseEntity {
 			.build();
 	}
 
-	public User updateFrom(UpdateForm form) {
+	public User updateOf(UpdateForm form) {
 		this.name = form.getName();
 		this.email = form.getEmail();
 		this.profileImage = form.getProfileImage();
@@ -54,6 +59,5 @@ public class User extends BaseEntity {
 
 		return this;
 	}
-
 
 }
