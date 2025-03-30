@@ -1,6 +1,7 @@
 package com.icandoit.boottalk.bootcamp.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,7 +21,7 @@ public class BootcampResponse {
 		private String trainingCenterName;
 		private String bootcampName;
 		private String bootcampRegion;
-		private Boolean bootcampCost;
+		private boolean bootcampCost;
 		private String bootcampLink;
 		private String bootcampCategory;
 		private int bootcampDegree;
@@ -28,21 +29,26 @@ public class BootcampResponse {
 		private LocalDate bootcampStartDate;
 		private LocalDate bootcampEndDate;
 
+		private LocalDateTime createdAt;
+		private LocalDateTime updatedAt;
+
 		public static BootcampResponseDto from(Bootcamp bootcamp) {
-			BootcampCategoryType bootcampCategoryType = bootcamp.getCategory();
+			BootcampCategoryType bootcampCategoryType = bootcamp.getBootcampCategoryType();
 
 			return BootcampResponseDto.builder()
-				.bootcampId(bootcamp.getId())
-				.trainingCenterName(bootcamp.getTrainingCenter().getName())
-				.bootcampName(bootcamp.getName())
-				.bootcampRegion(bootcamp.getRegion())
-				.bootcampCost(bootcamp.isCost())
-				.bootcampLink(bootcamp.getLink())
-				.bootcampCategory(bootcampCategoryType.getKoreanNameByEnglishName(bootcampCategoryType.getKoreanName()))
-				.bootcampDegree(bootcamp.getDegree())
-				.bootcampCapacity(bootcamp.getCapacity())
-				.bootcampStartDate(bootcamp.getStartDate())
-				.bootcampEndDate(bootcamp.getEndDate())
+				.bootcampId(bootcamp.getBootcampId())
+				.trainingCenterName(bootcamp.getTrainingCenter().getTrainingCenterName())
+				.bootcampName(bootcamp.getBootcampName())
+				.bootcampRegion(bootcamp.getBootcampRegion())
+				.bootcampCost(bootcamp.isBootcampCost())
+				.bootcampLink(bootcamp.getBootcampLink())
+				.bootcampCategory(bootcampCategoryType.getKoreanName())
+				.bootcampDegree(bootcamp.getBootcampDegree())
+				.bootcampCapacity(bootcamp.getBootcampCapacity())
+				.bootcampStartDate(bootcamp.getBootcampStartDate())
+				.bootcampEndDate(bootcamp.getBootcampEndDate())
+				.createdAt(bootcamp.getCreatedAt())
+				.updatedAt(bootcamp.getUpdatedAt())
 				.build();
 		}
 
