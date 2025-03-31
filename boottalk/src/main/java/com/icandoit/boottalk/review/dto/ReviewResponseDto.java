@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import com.icandoit.boottalk.review.entity.Review;
 
 public record ReviewResponseDto(
-	Long id,
+	Long reviewId,
 	Long bootcampId,
 	String bootcampName,
 	String userName,
