@@ -7,13 +7,13 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.icandoit.boottalk.bootcamp.dto.BootcampResponseDto;
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
 import com.icandoit.boottalk.bootcamp.exception.BootcampCustomException;
 import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -28,6 +28,7 @@ public class BootcampService {
 	}
 
 	// 부트캠프 단일 조회
+	@Transactional(readOnly = true)
 	public BootcampResponseDto findById(Long id) {
 		Optional<Bootcamp> bootcamp = bootcampRepository.findById(id);
 
@@ -39,6 +40,7 @@ public class BootcampService {
 	}
 
 	// 부트캠프 목록 페이징
+	@Transactional(readOnly = true)
 	public Page<Bootcamp> findAll(Pageable pageable) {
 		return bootcampRepository.findAll(pageable);
 	}
