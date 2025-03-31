@@ -6,8 +6,9 @@ import com.icandoit.boottalk.review.dto.ReviewRequestDto;
 import com.icandoit.boottalk.review.dto.ReviewResponseDto;
 import com.icandoit.boottalk.review.entity.Review;
 import com.icandoit.boottalk.review.repository.ReviewRepository;
-import com.icandoit.boottalk.test.repository.BootCampRepository;
-import com.icandoit.boottalk.test.repository.UserRepository;
+import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
+import com.icandoit.boottalk.user.domain.repository.UserRepository;
+
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -18,14 +19,14 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ReviewService {
 
-	private final BootCampRepository bootcampRepository;
+	private final BootcampRepository bootcampRepository;
 	private final UserRepository userRepository;
 	private final ReviewRepository reviewRepository;
 
 
 	@Transactional
 	public ReviewResponseDto create(ReviewRequestDto request, Long userId) {
-		Long bootcampId = request.getBootcampId();
+		Long bootcampId = request.bootcampId();
 
 		validateCreateReview(bootcampId, userId);
 		validateBootCamp(bootcampId);
@@ -53,7 +54,7 @@ public class ReviewService {
 	
 	public List<ReviewResponseDto> listMy(Long userId) {
 
-		List<Review> reviews = reviewRepository.findByUserId(userId);
+		List<Review> reviews = reviewRepository.findByUser_UserId(userId);
 
 		return reviews.stream()
 			.map(review -> ReviewResponseDto.from(review))
@@ -64,8 +65,8 @@ public class ReviewService {
 	public ReviewResponseDto update(ReviewRequestDto request, Long reviewId, Long userId) {
 
 		Review review = getReview(reviewId);
-		validateBootCamp(review.getBootcamp().getId());
-		validateReview(review.getUser().getId(), userId);
+		validateBootCamp(review.getBootcamp().getBootcampId());
+		validateReview(review.getUser().getUserId(), userId);
 
 		review.update(request);
 
@@ -76,8 +77,8 @@ public class ReviewService {
 	public void delete(Long reviewId, Long userId) {
 
 		Review review = getReview(reviewId);
-		validateBootCamp(review.getBootcamp().getId());
-		validateReview(review.getUser().getId(), userId);
+		validateBootCamp(review.getBootcamp().getBootcampId());
+		validateReview(review.getUser().getUserId(), userId);
 
 		// TODO: 리뷰를 삭제하면 이미 리뷰 작성으로 적립받은 포인트는 어떻게 되는 것인지?
 
@@ -91,7 +92,7 @@ public class ReviewService {
 	}
 
 	private void validateCreateReview(Long bootcampId, Long userId) {
-		if (reviewRepository.existsByBootcampIdAndUserId(bootcampId, userId)) {
+		if (reviewRepository.existsByBootcamp_BootcampIdAndUser_UserId(bootcampId, userId)) {
 			throw new CustomException(ErrorCode.DUPLICATE_REVIEW);
 		}
 	}

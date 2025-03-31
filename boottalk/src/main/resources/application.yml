@@ -4,9 +4,9 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/boottalk_db
-    username: user
-    password: 1234
+    url: jdbc:mysql://localhost:3306/boottalk
+    username: boot_user
+    password: boot1234
   jpa:
     hibernate:
       ddl-auto: update

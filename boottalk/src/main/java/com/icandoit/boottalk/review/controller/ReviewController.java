@@ -1,6 +1,6 @@
 package com.icandoit.boottalk.review.controller;
 
-import java.util.Collections;
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.icandoit.boottalk.libs.dto.SuccessResponseDto;
 import com.icandoit.boottalk.review.dto.ReviewRequestDto;
+import com.icandoit.boottalk.review.dto.ReviewResponseDto;
 import com.icandoit.boottalk.review.service.ReviewService;
 
 import lombok.RequiredArgsConstructor;
@@ -28,40 +28,40 @@ public class ReviewController {
 
 	// 리뷰 등록
 	@PostMapping
-	public ResponseEntity<SuccessResponseDto> create(@RequestBody @Validated ReviewRequestDto request) {
+	public ResponseEntity<ReviewResponseDto> create(@RequestBody @Validated ReviewRequestDto request) {
 		Long userId = 1L; // test
-		return ResponseEntity.ok(SuccessResponseDto.of("리뷰 등록 완료", reviewService.create(request, userId)));
+		return ResponseEntity.ok(reviewService.create(request, userId));
 	}
 
 	// 리뷰 목록 조회
 	@GetMapping
-	public ResponseEntity<SuccessResponseDto> listAll() {
+	public ResponseEntity<List<ReviewResponseDto>> listAll() {
 		// TODO : 페이징 처리
-		return ResponseEntity.ok(SuccessResponseDto.of("전체 리뷰 목록 조회 완료", reviewService.listAll()));
+		return ResponseEntity.ok(reviewService.listAll());
 	}
 
 	// 내 리뷰 목록 조회
 	@GetMapping("/my")
-	public ResponseEntity<SuccessResponseDto> listMy() {
+	public ResponseEntity<List<ReviewResponseDto>> listMy() {
 		// TODO : 페이징 처리
 		Long userId = 1L; // test
-		return ResponseEntity.ok(SuccessResponseDto.of("사용자가 작성한 리뷰 조회 성공", reviewService.listMy(userId)));
+		return ResponseEntity.ok(reviewService.listMy(userId));
 	}
 
 	// 내 리뷰 수정
 	@PutMapping("/my/{reviewId}")
-	public ResponseEntity<SuccessResponseDto> update(@PathVariable Long reviewId, @RequestBody @Validated ReviewRequestDto request) {
+	public ResponseEntity<ReviewResponseDto> update(@PathVariable Long reviewId, @RequestBody @Validated ReviewRequestDto request) {
 		Long userId = 1L; // test
-		return ResponseEntity.ok(SuccessResponseDto.of("리뷰 수정 완료", reviewService.update(request, reviewId, userId)));
+		return ResponseEntity.ok(reviewService.update(request, reviewId, userId));
 
 	}
 
 	// 내 리뷰 삭제
 	@DeleteMapping("/my/{reviewId}")
-	public ResponseEntity<SuccessResponseDto> delete(@PathVariable Long reviewId) {
+	public ResponseEntity<Void> delete(@PathVariable Long reviewId) {
 		Long userId = 1L; // test
 		reviewService.delete(reviewId, userId);
-		return ResponseEntity.ok(SuccessResponseDto.of("리뷰 삭제 성공", Collections.emptyMap()));
+		return ResponseEntity.ok().build();
 	}
 
 }
