@@ -54,9 +54,6 @@ public class CoffeeChatInfo extends BaseEntity {
     @Column(nullable = false)
     private String introduction;
 
-    @Column(nullable = false)
-    private Boolean deleted = false;
-
     @OneToMany(mappedBy = "coffeeChatInfo", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CoffeeChatTime> availableTimes = new ArrayList<>();
 
@@ -67,7 +64,6 @@ public class CoffeeChatInfo extends BaseEntity {
             .userType(UserType.valueOf(userType))
             .jobType(JobType.valueOf(jobType))
             .introduction(introduction)
-            .deleted(false)
             .build();
     }
 
@@ -79,14 +75,6 @@ public class CoffeeChatInfo extends BaseEntity {
 
     public void setUser(User user) {
         this.user = user;
-    }
-
-    public void delete() {
-        this.deleted = Boolean.TRUE;
-    }
-
-    public boolean isDeleted() {
-        return this.deleted;
     }
 
     public void addAvailableTime(CoffeeChatTime time) {

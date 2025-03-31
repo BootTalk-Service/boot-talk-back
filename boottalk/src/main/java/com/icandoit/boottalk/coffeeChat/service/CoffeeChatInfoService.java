@@ -71,11 +71,7 @@ public class CoffeeChatInfoService {
         CoffeeChatInfo coffeeChatInfo = coffeeChatInfoRepository.findByUser_UserId(userId)
             .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        if (coffeeChatInfo.isDeleted()) {
-            throw new CustomException(ErrorCode.ALREADY_DELETED_COFFEE_CHAT_INFO);
-        }
-
-        coffeeChatInfo.delete();
+        coffeeChatInfoRepository.delete(coffeeChatInfo);
         return CoffeeChatInfoResponseDto.from(coffeeChatInfo);
     }
 }

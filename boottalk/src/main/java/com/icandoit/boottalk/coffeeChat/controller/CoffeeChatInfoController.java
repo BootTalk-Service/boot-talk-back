@@ -2,9 +2,12 @@ package com.icandoit.boottalk.coffeeChat.controller;
 
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoRequestDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoResponseDto;
+import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatSearchRequestDto;
 import com.icandoit.boottalk.coffeeChat.service.CoffeeChatInfoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,7 +46,7 @@ public class CoffeeChatInfoController {
 // todo : 추후 querydsl 적용하여 진행하겠습니당..
 
 //    @GetMapping("/search")
-//    public ResponseEntity<SuccessResponseDto<Page<CoffeeChatInfoResponseDto>>> searchCoffeeChatInfo(
+//    public ResponseEntity<PagedModel<CoffeeChatInfoResponseDto>> searchCoffeeChatInfo(
 //        CoffeeChatSearchRequestDto searchDto
 //    ) {
 //        CoffeeChatSearchRequestDto processedDto = CoffeeChatSearchRequestDto.from(searchDto);
