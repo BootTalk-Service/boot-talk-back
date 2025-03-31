@@ -38,9 +38,7 @@ public class CoffeeChatInfoService {
 
     @Transactional
     public CoffeeChatInfoResponseDto getMyCoffeeChatInfo(Long userId) {
-        CoffeeChatInfo coffeeChatInfo = coffeeChatInfoRepository.findByUser_UserId(userId)
-            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
+        CoffeeChatInfo coffeeChatInfo = getCoffeeChatInfoByUserId(userId);
         return CoffeeChatInfoResponseDto.from(coffeeChatInfo);
     }
 
@@ -58,8 +56,7 @@ public class CoffeeChatInfoService {
     public CoffeeChatInfoResponseDto updateMyCoffeeChatInfo(
         Long userId, CoffeeChatInfoRequestDto requestDto) {
 
-        CoffeeChatInfo coffeeChatInfo = coffeeChatInfoRepository.findByUser_UserId(userId)
-            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        CoffeeChatInfo coffeeChatInfo = getCoffeeChatInfoByUserId(userId);
 
         coffeeChatInfo.update(requestDto);
         return CoffeeChatInfoResponseDto.from(coffeeChatInfo);
@@ -68,10 +65,14 @@ public class CoffeeChatInfoService {
     @Transactional
     public CoffeeChatInfoResponseDto deleteMyCoffeeChatInfo(Long userId) {
 
-        CoffeeChatInfo coffeeChatInfo = coffeeChatInfoRepository.findByUser_UserId(userId)
-            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        CoffeeChatInfo coffeeChatInfo = getCoffeeChatInfoByUserId(userId);
 
         coffeeChatInfoRepository.delete(coffeeChatInfo);
         return CoffeeChatInfoResponseDto.from(coffeeChatInfo);
+    }
+
+    private CoffeeChatInfo getCoffeeChatInfoByUserId(Long userId) {
+        return coffeeChatInfoRepository.findByUser_UserId(userId)
+            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 }
