@@ -42,7 +42,8 @@ public class ReviewService {
 
 		return ReviewResponseDto.from(review);
 	}
-	
+
+	@Transactional(readOnly = true)
 	public List<ReviewResponseDto> listAll() {
 
 		List<Review> reviews = reviewRepository.findAll();
@@ -51,7 +52,8 @@ public class ReviewService {
 			.map(review -> ReviewResponseDto.from(review))
 			.collect(Collectors.toList());
 	}
-	
+
+	@Transactional(readOnly = true)
 	public List<ReviewResponseDto> listMy(Long userId) {
 
 		List<Review> reviews = reviewRepository.findByUser_UserId(userId);
