@@ -1,7 +1,6 @@
 package com.icandoit.boottalk.point_history.service;
 
 import static com.icandoit.boottalk.libs.exception.ErrorCode.*;
-import static com.icandoit.boottalk.point_history.domain.type.PointType.*;
 
 import org.springframework.stereotype.Service;
 
@@ -27,30 +26,24 @@ public class CreatePointHistoryService {
 
 		//포인트 사용
 		if (eventType.getPointType() == PointType.USED) {
-
 			if (changedPoint > currentPoint) {
 				throw new CustomException(INSUFFICIENT_POINT);
 			}
 
-			return PointHistoryDto.from(
-				pointHistoryRepository.save(
-					PointHistory.builder()
-						.userId(userId)
-						.currentPoint(currentPoint - changedPoint)
-						.changedPoint(changedPoint)
-						.pointType(USED)
-						.eventType(eventType)
-						.build()));
+			currentPoint -= changedPoint;
+
+		} else {
+		//포인트 적립
+			currentPoint += changedPoint;
 		}
 
-		//포인트 적립
 		return PointHistoryDto.from(
 			pointHistoryRepository.save(
 			PointHistory.builder()
 				.userId(userId)
-				.currentPoint(currentPoint + changedPoint)
+				.currentPoint(currentPoint)
 				.changedPoint(changedPoint)
-				.pointType(EARNED)
+				.pointType(eventType.getPointType())
 				.eventType(eventType)
 				.build()));
 	}
