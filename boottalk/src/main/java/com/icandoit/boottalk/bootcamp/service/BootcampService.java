@@ -1,6 +1,5 @@
 package com.icandoit.boottalk.bootcamp.service;
 
-import static com.icandoit.boottalk.bootcamp.dto.BootcampResponse.*;
 import static com.icandoit.boottalk.bootcamp.exception.BootcampErrorCode.*;
 
 import java.util.Optional;
@@ -9,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.icandoit.boottalk.bootcamp.dto.BootcampResponseDto;
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
 import com.icandoit.boottalk.bootcamp.exception.BootcampCustomException;
 import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;

@@ -14,7 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.icandoit.boottalk.bootcamp.dto.BootcampResponse.BootcampResponseDto;
+import com.icandoit.boottalk.bootcamp.dto.BootcampResponseDto;
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
 import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.entity.TrainingCenter;
@@ -91,19 +91,19 @@ class BootcampServiceTest {
 
 		//when
 		BootcampResponseDto response = bootcampService.findById(1L);
-		BootcampCategoryType categoryType = BootcampCategoryType.fromKoreanName(response.getBootcampCategory());
+		BootcampCategoryType categoryType = BootcampCategoryType.fromKoreanName(response.bootcampCategory());
 
 		//then
-		assertEquals(response.getBootcampId(), bootcamp.getBootcampId());
-		assertEquals(response.getBootcampName(), bootcamp.getBootcampName());
+		assertEquals(response.bootcampId(), bootcamp.getBootcampId());
+		assertEquals(response.bootcampName(), bootcamp.getBootcampName());
 		assertEquals(categoryType, bootcamp.getBootcampCategoryType());
-		assertEquals(response.getBootcampDegree(), bootcamp.getBootcampDegree());
-		assertEquals(response.getBootcampRegion(), bootcamp.getBootcampRegion());
-		assertEquals(response.getBootcampCapacity(), bootcamp.getBootcampCapacity());
-		assertEquals(response.isBootcampCost(), bootcamp.isBootcampCost());
-		assertEquals(response.getBootcampStartDate(), bootcamp.getBootcampStartDate());
-		assertEquals(response.getBootcampEndDate(), bootcamp.getBootcampEndDate());
-		assertEquals(response.getBootcampLink(), bootcamp.getBootcampLink());
+		assertEquals(response.bootcampDegree(), bootcamp.getBootcampDegree());
+		assertEquals(response.bootcampRegion(), bootcamp.getBootcampRegion());
+		assertEquals(response.bootcampCapacity(), bootcamp.getBootcampCapacity());
+		assertEquals(response.bootcampCost(), bootcamp.isBootcampCost());
+		assertEquals(response.bootcampStartDate(), bootcamp.getBootcampStartDate());
+		assertEquals(response.bootcampEndDate(), bootcamp.getBootcampEndDate());
+		assertEquals(response.bootcampLink(), bootcamp.getBootcampLink());
 		verify(bootcampRepository, times(1)).findById(1L);
 	}
 
