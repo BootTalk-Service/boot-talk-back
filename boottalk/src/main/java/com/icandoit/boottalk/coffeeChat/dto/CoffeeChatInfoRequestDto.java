@@ -1,17 +1,24 @@
 package com.icandoit.boottalk.coffeeChat.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import com.icandoit.boottalk.libs.exception.CustomException;
+import com.icandoit.boottalk.libs.exception.ErrorCode;
+import jakarta.validation.constraints.NotBlank;
 
-@Getter
-@AllArgsConstructor
-public class CoffeeChatInfoRequestDto {
+public record CoffeeChatInfoRequestDto(
+    @NotBlank(message = "userType은 필수 입력값입니다.")
+    String userType,
 
-    public String userType;
-    public String jobType;
-    public String introduction;
+    @NotBlank(message = "jobType은 필수 입력값입니다.")
+    String jobType,
 
-    public static CoffeeChatInfoRequestDto of(String userType, String jobType, String introduction) {
-        return new CoffeeChatInfoRequestDto(userType,jobType,introduction);
+    @NotBlank(message = "소개글은 필수 입력값입니다.")
+    String introduction
+) {
+
+    public void validate() {
+        if (introduction != null && introduction.length() > 1000) {
+            throw new CustomException(ErrorCode.EXCEEDS_MAX_LENGTH);
+        }
     }
 }
+

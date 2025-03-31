@@ -2,30 +2,27 @@ package com.icandoit.boottalk.coffeeChat.dto;
 
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatInfo;
 import java.time.LocalDateTime;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-public class CoffeeChatInfoResponseDto {
 
-    private Long coffeeChatInfoId;
-    private String userType;
-    private String jobType;
-    private String introduction;
-    private LocalDateTime createAt;
-    private LocalDateTime updateAt;
+public record CoffeeChatInfoResponseDto(
+    Long coffeeChatInfoId,
+    Long userId,
+    String userType,
+    String jobType,
+    String introduction,
+    LocalDateTime createdAt,
+    LocalDateTime updatedAt
+) {
 
     public static CoffeeChatInfoResponseDto from(CoffeeChatInfo coffeeChatInfo) {
-        return CoffeeChatInfoResponseDto.builder()
-            .coffeeChatInfoId(coffeeChatInfo.getCoffeeChatInfoId())
-            .userType(String.valueOf(coffeeChatInfo.getUserType()))
-            .jobType(String.valueOf(coffeeChatInfo.getJobType()))
-            .introduction(coffeeChatInfo.getIntroduction())
-            .build();
+        return new CoffeeChatInfoResponseDto(
+            coffeeChatInfo.getCoffeeChatInfoId(),
+            coffeeChatInfo.getUser().getUserId(),
+            coffeeChatInfo.getUserType().name(),
+            coffeeChatInfo.getJobType().name(),
+            coffeeChatInfo.getIntroduction(),
+            coffeeChatInfo.getCreatedAt(),
+            coffeeChatInfo.getUpdatedAt()
+        );
     }
 }

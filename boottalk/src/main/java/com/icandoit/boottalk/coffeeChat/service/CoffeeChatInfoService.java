@@ -2,17 +2,14 @@ package com.icandoit.boottalk.coffeeChat.service;
 
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoRequestDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoResponseDto;
-import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatSearchRequestDto;
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatInfo;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatInfoRepository;
-import com.icandoit.boottalk.libs.dto.SuccessResponseDto;
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
-import jakarta.persistence.EntityNotFoundException;
+import com.icandoit.boottalk.user.domain.entity.User;
+import com.icandoit.boottalk.user.domain.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,32 +17,35 @@ import org.springframework.stereotype.Service;
 public class CoffeeChatInfoService {
 
     private final CoffeeChatInfoRepository coffeeChatInfoRepository;
+    private final UserRepository userRepository;
 
     @Transactional
-    public SuccessResponseDto<CoffeeChatInfoResponseDto> createCoffeeChatInfo(
+    public CoffeeChatInfoResponseDto createCoffeeChatInfo(Long userId,
         CoffeeChatInfoRequestDto requestDto) {
-
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         CoffeeChatInfo coffeeChatInfo = CoffeeChatInfo.of(
-            // userID
-            requestDto.userType,
-            requestDto.jobType,
-            requestDto.introduction
+            user,
+            requestDto.userType(),
+            requestDto.jobType(),
+            requestDto.introduction()
         );
+        coffeeChatInfo.setUser(user);
+
         CoffeeChatInfo savedInfo = coffeeChatInfoRepository.save(coffeeChatInfo);
-        return SuccessResponseDto.of("커피챗 등록의 성공하였습니다.", CoffeeChatInfoResponseDto.from(savedInfo));
+        return CoffeeChatInfoResponseDto.from(savedInfo);
     }
 
     @Transactional
-    public SuccessResponseDto<CoffeeChatInfoResponseDto> getMyCoffeeChatInfo(Long userId) {
-        CoffeeChatInfo coffeeChatInfo = coffeeChatInfoRepository.findByUserId(userId)
+    public CoffeeChatInfoResponseDto getMyCoffeeChatInfo(Long userId) {
+        CoffeeChatInfo coffeeChatInfo = coffeeChatInfoRepository.findByUser_UserId(userId)
             .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        return SuccessResponseDto.of("내 커피챗 조회를 성공하였습니다.",
-            CoffeeChatInfoResponseDto.from(coffeeChatInfo));
+        return CoffeeChatInfoResponseDto.from(coffeeChatInfo);
     }
 
     // todo : querydsl 적용하여 다시 하겠습니당..
-//    public SuccessResponseDto<Page<CoffeeChatInfoResponseDto>> searchCoffeeChatInfo(
+//    public Page<CoffeeChatInfoResponseDto> searchCoffeeChatInfo(
 //        CoffeeChatSearchRequestDto requestDto, Pageable pageable) {
 //        Page<CoffeeChatInfo> coffeeChatPage = coffeeChatInfoRepository.findAllBySearch(requestDto, pageable);
 //
@@ -55,29 +55,27 @@ public class CoffeeChatInfoService {
 
 
     @Transactional
-    public SuccessResponseDto<CoffeeChatInfoResponseDto> updateMyCoffeeChatInfo(
+    public CoffeeChatInfoResponseDto updateMyCoffeeChatInfo(
         Long userId, CoffeeChatInfoRequestDto requestDto) {
 
-        CoffeeChatInfo coffeeChatInfo = coffeeChatInfoRepository.findByUserId(userId)
+        CoffeeChatInfo coffeeChatInfo = coffeeChatInfoRepository.findByUser_UserId(userId)
             .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         coffeeChatInfo.update(requestDto);
-        return SuccessResponseDto.of("커피챗 정보가 수정되었습니다.",
-            CoffeeChatInfoResponseDto.from(coffeeChatInfo));
+        return CoffeeChatInfoResponseDto.from(coffeeChatInfo);
     }
 
     @Transactional
-    public SuccessResponseDto<CoffeeChatInfoResponseDto> deleteMyCoffeeChatInfo(Long userId) {
+    public CoffeeChatInfoResponseDto deleteMyCoffeeChatInfo(Long userId) {
 
-        CoffeeChatInfo coffeeChatInfo = coffeeChatInfoRepository.findByUserId(userId)
+        CoffeeChatInfo coffeeChatInfo = coffeeChatInfoRepository.findByUser_UserId(userId)
             .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         if (coffeeChatInfo.isDeleted()) {
             throw new CustomException(ErrorCode.ALREADY_DELETED_COFFEE_CHAT_INFO);
         }
 
-        coffeeChatInfo.deleted();
-        return SuccessResponseDto.of("커피챗 정보가 삭제되었습니다.",
-            CoffeeChatInfoResponseDto.from(coffeeChatInfo));
+        coffeeChatInfo.delete();
+        return CoffeeChatInfoResponseDto.from(coffeeChatInfo);
     }
 }
