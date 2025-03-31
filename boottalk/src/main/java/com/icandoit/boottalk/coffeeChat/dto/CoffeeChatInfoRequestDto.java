@@ -14,9 +14,9 @@ public record CoffeeChatInfoRequestDto(
     @NotBlank(message = "소개글은 필수 입력값입니다.")
     String introduction
 ) {
-
+    private static final int MAX_INTRODUCTION_LENGTH = 1000;
     public void validate() {
-        if (introduction != null && introduction.length() > 1000) {
+        if (introduction != null && introduction.length() > MAX_INTRODUCTION_LENGTH) {
             throw new CustomException(ErrorCode.EXCEEDS_MAX_LENGTH);
         }
     }
