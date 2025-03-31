@@ -1,16 +1,15 @@
 package com.icandoit.boottalk.user.controller;
 
-import com.icandoit.boottalk.common.dto.BaseResponse;
-import com.icandoit.boottalk.user.domain.dto.UserDto;
-import com.icandoit.boottalk.user.domain.form.SignUpForm;
-import com.icandoit.boottalk.user.service.SignUpService;
-
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.icandoit.boottalk.user.domain.form.SignUpForm;
+import com.icandoit.boottalk.user.service.SignUpService;
+
+import lombok.RequiredArgsConstructor;
 
 
 @RestController
