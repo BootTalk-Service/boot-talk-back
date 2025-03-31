@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.icandoit.boottalk.bootcamp.dto.BootcampResponse.BootcampResponseDto;
+import com.icandoit.boottalk.bootcamp.dto.BootcampResponseDto;
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
 import com.icandoit.boottalk.bootcamp.service.BootcampService;
 

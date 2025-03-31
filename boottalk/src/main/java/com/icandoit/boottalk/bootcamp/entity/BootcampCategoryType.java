@@ -14,7 +14,9 @@ public enum BootcampCategoryType {
 	APPLICATION_SW_ENGINEERING("응용SW엔지니어링"),
 	SMART_EQUIPMENT_DESIGN("스마트설비설계"),
 	INFORMATION_SECURITY_MANAGEMENT("정보보호관리·운영"),
-	SW_PRODUCT_PLANNING("SW제품기획");
+	SW_PRODUCT_PLANNING("SW제품기획"),
+	BIGDATA_ANALYSIS("빅데이터분석"),
+	AI_SERVICE_IMPLEMENTATION("인공지능서비스구현");
 
 	private final String koreanName;
 	private static final Map<String, String> englishToKoreanMap = new HashMap<>();

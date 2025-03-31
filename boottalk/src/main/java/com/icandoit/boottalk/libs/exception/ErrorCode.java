@@ -8,8 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum ErrorCode {
 
     /* 400 BAD_REQUEST */
-
-
+    EXCEEDS_MAX_LENGTH(400,"최대 길이를 초과했습니다." ),
     /* 403 FORBIDDEN */
     FORBIDDEN(403, "권한이 없습니다."),
     NOT_REVIEW_OWNER(403, "사용자가 작성한 리뷰가 아닙니다."),
@@ -23,6 +22,7 @@ public enum ErrorCode {
     /* 409 CONFLICT */
     DUPLICATE_REVIEW(409,"해당 부트캠프에 이미 리뷰를 작성하였습니다."),
 
+    USER_COFFEE_CHAT_NOT_FOUND(404,"유저의 해당하는 커피챗을 찾을 수 없습니다."),
     /* 500 INTERNAL_SERVER_ERROR */
     INTERNAL_SERVER_ERROR(500, "서버 오류가 발생했습니다.");
 
