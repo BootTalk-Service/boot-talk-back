@@ -1,6 +1,6 @@
 package com.icandoit.boottalk.point_history.domain.entity;
 
-import com.icandoit.boottalk.common.entity.BaseEntity;
+import com.icandoit.boottalk.libs.entity.BaseEntity;
 import com.icandoit.boottalk.point_history.domain.type.EventType;
 import com.icandoit.boottalk.point_history.domain.type.PointType;
 
@@ -31,13 +31,18 @@ public class PointHistory extends BaseEntity {
 	@Column(nullable = false)
 	private long userId;
 
+	@Column(nullable = false)
 	private int currentPoint;
+
+	@Column(nullable = false)
 	private int changedPoint;
 
 	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
 	private PointType pointType;
 
 	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
 	private EventType eventType;
 
 }
