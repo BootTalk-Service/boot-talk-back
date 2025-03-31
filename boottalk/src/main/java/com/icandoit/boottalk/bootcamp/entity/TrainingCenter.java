@@ -40,12 +40,13 @@ public class TrainingCenter extends BaseEntity {
 	@Column(nullable = false)
 	private String trainingCenterUrl;
 
-	public static TrainingCenter of(String name, String email, String address, String url) {
+	public static TrainingCenter of(String name, String email, String address, String url, String phoneNumber) {
 		return TrainingCenter.builder()
 			.trainingCenterName(name)
 			.trainingCenterEmail(email)
 			.trainingCenterAddress(address)
 			.trainingCenterUrl(url)
+			.trainingCenterPhoneNumber(phoneNumber)
 			.build();
 	}
 }
