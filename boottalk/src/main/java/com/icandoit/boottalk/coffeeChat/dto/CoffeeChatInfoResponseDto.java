@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 public record CoffeeChatInfoResponseDto(
     Long coffeeChatInfoId,
     Long userId,
+    String userName,
     String userType,
     String jobType,
     String introduction,
@@ -18,6 +19,7 @@ public record CoffeeChatInfoResponseDto(
         return new CoffeeChatInfoResponseDto(
             coffeeChatInfo.getCoffeeChatInfoId(),
             coffeeChatInfo.getUser().getUserId(),
+            coffeeChatInfo.getUser().getName(),
             coffeeChatInfo.getUserType().name(),
             coffeeChatInfo.getJobType().name(),
             coffeeChatInfo.getIntroduction(),
