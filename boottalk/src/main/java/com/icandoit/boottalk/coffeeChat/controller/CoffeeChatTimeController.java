@@ -6,7 +6,6 @@ import com.icandoit.boottalk.coffeeChat.service.CoffeeChatTimeService;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/coffee-chats/times")
 @RequiredArgsConstructor
 public class CoffeeChatTimeController {
+
     private final CoffeeChatTimeService coffeeChatTimeService;
 
     @PostMapping("/available-times")
@@ -29,7 +29,7 @@ public class CoffeeChatTimeController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity <List<CoffeeChatTimeResponseDto>> getMyCoffeeChatTimes() {
+    public ResponseEntity<List<CoffeeChatTimeResponseDto>> getMyCoffeeChatTimes() {
         Long userId = 1L;
 
         return ResponseEntity.ok(coffeeChatTimeService.getMyCoffeeChatTimes(userId));

@@ -47,11 +47,9 @@ public class CoffeeChatTimeService {
 
         coffeeChatTimeRepository.saveAll(coffeeChatTimes);
 
-        List<CoffeeChatTimeResponseDto> responseDtos = coffeeChatTimes.stream()
+        return coffeeChatTimes.stream()
             .map(CoffeeChatTimeResponseDto::from)
             .collect(Collectors.toList());
-
-        return responseDtos;
     }
 
     @Transactional(readOnly = true)
