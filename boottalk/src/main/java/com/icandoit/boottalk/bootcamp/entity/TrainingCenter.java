@@ -29,16 +29,12 @@ public class TrainingCenter extends BaseEntity {
 	@Column(nullable = false)
 	private String trainingCenterName;
 
-	@Column(nullable = false)
 	private String trainingCenterPhoneNumber;
 
-	@Column(nullable = false)
 	private String trainingCenterEmail;
 
-	@Column(nullable = false)
 	private String trainingCenterAddress;
 
-	@Column(nullable = false)
 	private String trainingCenterUrl;
 
 	public static TrainingCenter of(String name, String email, String address, String url, String phoneNumber) {
