@@ -19,7 +19,7 @@ public class SignUpService {
   @Transactional
   public void signUp(SignUpForm form) {
 
-    User user = userRepository.findByResourceUserId(form.getResourceUserId()).orElse(null);
+    User user = userRepository.findById(form.getUserId()).orElse(null);
 
     // 이미 회원가입된 유저인 경우에는 예외처리
     // 회원가입되었던 유저중에서 회원탈퇴한 회원이 다시 회원가입 시도하는 경우,
@@ -35,4 +35,6 @@ public class SignUpService {
 
     userRepository.save(User.of(form));
   }
+
+
 }
