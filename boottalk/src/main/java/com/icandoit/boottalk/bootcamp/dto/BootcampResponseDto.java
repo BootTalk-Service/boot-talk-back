@@ -1,7 +1,6 @@
 package com.icandoit.boottalk.bootcamp.dto;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,8 +8,8 @@ import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
 
 public record BootcampResponseDto(
 	Long bootcampId,
-	String trainingCenterName,
 	String bootcampName,
+	String trainingCenterName,
 	String bootcampRegion,
 	boolean bootcampCost,
 	String bootcampLink,
@@ -18,15 +17,13 @@ public record BootcampResponseDto(
 	int bootcampDegree,
 	int bootcampCapacity,
 	LocalDate bootcampStartDate,
-	LocalDate bootcampEndDate,
-	LocalDateTime createdAt,
-	LocalDateTime updatedAt
+	LocalDate bootcampEndDate
 ) {
 	public static BootcampResponseDto from(Bootcamp bootcamp) {
 		return new BootcampResponseDto(
 			bootcamp.getBootcampId(),
-			bootcamp.getTrainingCenter().getTrainingCenterName(),
 			bootcamp.getBootcampName(),
+			bootcamp.getTrainingCenter().getTrainingCenterName(),
 			bootcamp.getBootcampRegion(),
 			bootcamp.isBootcampCost(),
 			bootcamp.getBootcampLink(),
@@ -34,9 +31,7 @@ public record BootcampResponseDto(
 			bootcamp.getBootcampDegree(),
 			bootcamp.getBootcampCapacity(),
 			bootcamp.getBootcampStartDate(),
-			bootcamp.getBootcampEndDate(),
-			bootcamp.getCreatedAt(),
-			bootcamp.getUpdatedAt()
+			bootcamp.getBootcampEndDate()
 		);
 	}
 

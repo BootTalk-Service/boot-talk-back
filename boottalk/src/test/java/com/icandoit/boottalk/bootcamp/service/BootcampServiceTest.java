@@ -94,16 +94,16 @@ class BootcampServiceTest {
 		BootcampCategoryType categoryType = BootcampCategoryType.fromKoreanName(response.bootcampCategory());
 
 		//then
-		assertEquals(response.bootcampId(), bootcamp.getBootcampId());
-		assertEquals(response.bootcampName(), bootcamp.getBootcampName());
-		assertEquals(categoryType, bootcamp.getBootcampCategoryType());
-		assertEquals(response.bootcampDegree(), bootcamp.getBootcampDegree());
-		assertEquals(response.bootcampRegion(), bootcamp.getBootcampRegion());
-		assertEquals(response.bootcampCapacity(), bootcamp.getBootcampCapacity());
-		assertEquals(response.bootcampCost(), bootcamp.isBootcampCost());
-		assertEquals(response.bootcampStartDate(), bootcamp.getBootcampStartDate());
-		assertEquals(response.bootcampEndDate(), bootcamp.getBootcampEndDate());
-		assertEquals(response.bootcampLink(), bootcamp.getBootcampLink());
+		assertEquals(bootcamp.getBootcampId(), response.bootcampId());
+		assertEquals(bootcamp.getBootcampName(), response.bootcampName());
+		assertEquals(bootcamp.getBootcampCategoryType(), categoryType);
+		assertEquals(bootcamp.getBootcampDegree(), response.bootcampDegree());
+		assertEquals(bootcamp.getBootcampRegion(), response.bootcampRegion());
+		assertEquals(bootcamp.getBootcampCapacity(), response.bootcampCapacity());
+		assertEquals(bootcamp.isBootcampCost(), response.bootcampCost());
+		assertEquals(bootcamp.getBootcampStartDate(), response.bootcampStartDate());
+		assertEquals(bootcamp.getBootcampEndDate(), response.bootcampEndDate());
+		assertEquals(bootcamp.getBootcampLink(), response.bootcampLink());
 		verify(bootcampRepository, times(1)).findById(1L);
 	}
 

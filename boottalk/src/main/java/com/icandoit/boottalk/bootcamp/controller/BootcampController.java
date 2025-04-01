@@ -44,4 +44,8 @@ public class BootcampController {
 	public ResponseEntity<BootcampResponseDto> getBootcamp(@PathVariable Long bootcampId) {
 		return ResponseEntity.ok(bootcampService.findById(bootcampId));
 	}
+
+	// TODO : 검색 조회 (엔드 포인트 /search 진행 예정)
+
+	// TODO : 부트캠프 리뷰 조회 (엔드 포인트 /{bootcampId}/reviews)
 }
