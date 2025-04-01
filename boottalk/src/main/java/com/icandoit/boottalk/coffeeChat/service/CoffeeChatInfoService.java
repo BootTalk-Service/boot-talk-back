@@ -26,6 +26,7 @@ public class CoffeeChatInfoService {
             .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         CoffeeChatInfo coffeeChatInfo = CoffeeChatInfo.of(
             user,
+            user.getName(),
             requestDto.userType(),
             requestDto.jobType(),
             requestDto.introduction()
