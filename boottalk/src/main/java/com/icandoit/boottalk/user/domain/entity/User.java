@@ -33,6 +33,8 @@ public class User extends BaseEntity {
 	private String name;
 	private String email;
 	private String profileImage;
+	//네이버에서 주는 고유 Id
+	private String resourceUserId;
 
 	@Enumerated(EnumType.STRING)
 	private DesiredCareer desiredCareer;
@@ -42,10 +44,10 @@ public class User extends BaseEntity {
 
 	public static User of(SignUpForm form) {
 		return User.builder()
-			.userId(form.getUserId())
 			.name(form.getName())
 			.email(form.getEmail())
 			.profileImage(form.getProfileImage())
+			.resourceUserId(form.getResourceUserId())
 			.desiredCareer(form.getDesiredCareer())
 			.deletedAt(null)
 			.build();
