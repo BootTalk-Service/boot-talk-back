@@ -2,22 +2,30 @@ package com.icandoit.boottalk.coffeeChat.service;
 
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoRequestDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoResponseDto;
+import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatListDto;
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatInfo;
+import com.icandoit.boottalk.coffeeChat.entity.enums.JobType;
+import com.icandoit.boottalk.coffeeChat.entity.enums.UserType;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatInfoRepository;
+import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatQueryRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
 import com.icandoit.boottalk.user.domain.entity.User;
 import com.icandoit.boottalk.user.domain.repository.UserRepository;
-import jakarta.transaction.Transactional;
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class CoffeeChatInfoService {
 
-    private final CoffeeChatInfoRepository coffeeChatInfoRepository;
     private final UserRepository userRepository;
+    private final CoffeeChatInfoRepository coffeeChatInfoRepository;
+    private final CoffeeChatQueryRepository coffeeChatQueryRepository;
 
     @Transactional
     public CoffeeChatInfoResponseDto createCoffeeChatInfo(Long userId,
@@ -32,7 +40,6 @@ public class CoffeeChatInfoService {
             requestDto.introduction()
         );
         coffeeChatInfo.setUser(user);
-
         CoffeeChatInfo savedInfo = coffeeChatInfoRepository.save(coffeeChatInfo);
         return CoffeeChatInfoResponseDto.from(savedInfo);
     }
@@ -43,14 +50,14 @@ public class CoffeeChatInfoService {
         return CoffeeChatInfoResponseDto.from(coffeeChatInfo);
     }
 
-    // todo : querydsl 적용하여 다시 하겠습니당..
-//    public Page<CoffeeChatInfoResponseDto> searchCoffeeChatInfo(
-//        CoffeeChatSearchRequestDto requestDto, Pageable pageable) {
-//        Page<CoffeeChatInfo> coffeeChatPage = coffeeChatInfoRepository.findAllBySearch(requestDto, pageable);
-//
-//        Page<CoffeeChatInfoResponseDto> responsePage = coffeeChatPage.map(CoffeeChatInfoResponseDto::new);
-//
-//    }
+    @Transactional(readOnly = true) 
+    public Page<CoffeeChatListDto> getFilteredCoffeeChatResults(
+        @Nullable JobType jobType,
+        @Nullable UserType userType,
+        Pageable pageable
+    ) {
+        return coffeeChatQueryRepository.getFilteredCoffeeChatResults(jobType, userType, pageable);
+    }
 
 
     @Transactional
