@@ -37,6 +37,7 @@ public class Employ24ApiService {
 	private static final String HOST = "www.work24.go.kr";
 	private static final String LIST_API_PATH = "/cm/openApi/call/hr/callOpenApiSvcInfo310L01.do";
 	private static final String DETAIL_API_PATH = "/cm/openApi/call/hr/callOpenApiSvcInfo310L02.do";
+	// TODO : 추후에 AUTH_KEY 관리 방식 지정하기
 	private static final String AUTH_KEY = "646d5bd7-af0c-42b1-94db-fd6d2c6908f7";
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
@@ -105,7 +106,7 @@ public class Employ24ApiService {
 
 		BootcampCategoryType category = BootcampCategoryType.fromKoreanName(categoryName);
 
-		boolean hasCost = !(detail.bootcampCourseName().equals("K-디지털트레이닝") || dto.maxCapacity().equals("0"));
+		boolean hasCost = !(detail.bootcampCourseName().equals("K-디지털트레이닝") || dto.cost().equals("0"));
 
 		Bootcamp bootcamp = Bootcamp.of(
 			center,

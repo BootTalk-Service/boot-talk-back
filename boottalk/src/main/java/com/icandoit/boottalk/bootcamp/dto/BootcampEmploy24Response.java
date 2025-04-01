@@ -16,7 +16,8 @@ public class BootcampEmploy24Response {
 		@JsonProperty("trainstCstId") String trainingCenterId,
 		@JsonProperty("trprDegr") String bootcampDegree,
 		@JsonProperty("trprId") String bootcampId,
-		@JsonProperty("yardMan") String maxCapacity
+		@JsonProperty("yardMan") String maxCapacity,
+		@JsonProperty("courseMan") String cost
 	) {
 	}
 
