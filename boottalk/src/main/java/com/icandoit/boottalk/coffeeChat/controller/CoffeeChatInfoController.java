@@ -64,8 +64,9 @@ public class CoffeeChatInfoController {
     }
 
     @DeleteMapping("/my")
-    public ResponseEntity<CoffeeChatInfoResponseDto> deleteCoffeeChatInfo() {
+    public ResponseEntity<Void> deleteCoffeeChatInfo() {
         Long userId = 1L;
-        return ResponseEntity.ok(coffeeChatInfoService.deleteMyCoffeeChatInfo(userId));
+        coffeeChatInfoService.deleteMyCoffeeChatInfo(userId);
+        return ResponseEntity.ok().build();
     }
 }

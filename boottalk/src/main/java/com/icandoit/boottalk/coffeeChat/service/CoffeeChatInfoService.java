@@ -63,12 +63,9 @@ public class CoffeeChatInfoService {
     }
 
     @Transactional
-    public CoffeeChatInfoResponseDto deleteMyCoffeeChatInfo(Long userId) {
-
+    public void deleteMyCoffeeChatInfo(Long userId) {
         CoffeeChatInfo coffeeChatInfo = getCoffeeChatInfoByUserId(userId);
-
         coffeeChatInfoRepository.delete(coffeeChatInfo);
-        return CoffeeChatInfoResponseDto.from(coffeeChatInfo);
     }
 
     private CoffeeChatInfo getCoffeeChatInfoByUserId(Long userId) {
