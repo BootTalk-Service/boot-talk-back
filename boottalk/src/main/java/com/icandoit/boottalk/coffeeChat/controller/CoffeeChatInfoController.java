@@ -47,7 +47,7 @@ public class CoffeeChatInfoController {
         return ResponseEntity.ok(coffeeChatInfoService.getMyCoffeeChatInfo(userId));
     }
 
-    @GetMapping
+    @GetMapping("/search")
     public ResponseEntity<Page<CoffeeChatListDto>> getCoffeeChats(
         @RequestParam(required = false) JobType jobType,
         @RequestParam(required = false) UserType userType,
