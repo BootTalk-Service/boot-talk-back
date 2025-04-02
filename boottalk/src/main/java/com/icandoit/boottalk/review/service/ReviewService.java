@@ -1,5 +1,6 @@
 package com.icandoit.boottalk.review.service;
 
+import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
 import com.icandoit.boottalk.review.dto.ReviewRequestDto;
@@ -22,24 +23,23 @@ public class ReviewService {
 	private final BootcampRepository bootcampRepository;
 	private final UserRepository userRepository;
 	private final ReviewRepository reviewRepository;
-
+	private final CourseRepository courseRepository;
 
 	@Transactional
 	public ReviewResponseDto create(ReviewRequestDto request, Long userId) {
-		Long bootcampId = request.bootcampId();
+		String trainingProgramId = request.trainingProgramId();
 
-		validateCreateReview(bootcampId, userId);
-		validateBootCamp(bootcampId);
+		validateCreateReview(trainingProgramId, userId);
+		validateCourse(trainingProgramId);
 
 		Review review = Review.of(
 			request,
-			bootcampRepository.findById(bootcampId).get(),
+			courseRepository.findByTrainingProgramId(trainingProgramId).get(),
 			userRepository.findById(userId).get()
 		);
 		reviewRepository.save(review);
 
 		// TODO: 포인트 적립 추가
-
 		return ReviewResponseDto.from(review);
 	}
 
@@ -49,7 +49,7 @@ public class ReviewService {
 		List<Review> reviews = reviewRepository.findAll();
 
 		return reviews.stream()
-			.map(review -> ReviewResponseDto.from(review))
+			.map(ReviewResponseDto::from)
 			.collect(Collectors.toList());
 	}
 
@@ -59,15 +59,15 @@ public class ReviewService {
 		List<Review> reviews = reviewRepository.findByUser_UserId(userId);
 
 		return reviews.stream()
-			.map(review -> ReviewResponseDto.from(review))
+			.map(ReviewResponseDto::from)
 			.collect(Collectors.toList());
 	}
 	
 	@Transactional
 	public ReviewResponseDto update(ReviewRequestDto request, Long reviewId, Long userId) {
-
 		Review review = getReview(reviewId);
-		validateBootCamp(review.getBootcamp().getBootcampId());
+
+		validateCourse(review.getCourse().getTrainingProgramId());
 		validateReview(review.getUser().getUserId(), userId);
 
 		review.update(request);
@@ -79,11 +79,10 @@ public class ReviewService {
 	public void delete(Long reviewId, Long userId) {
 
 		Review review = getReview(reviewId);
-		validateBootCamp(review.getBootcamp().getBootcampId());
+		validateCourse(review.getCourse().getTrainingProgramId());
 		validateReview(review.getUser().getUserId(), userId);
 
 		// TODO: 리뷰를 삭제하면 이미 리뷰 작성으로 적립받은 포인트는 어떻게 되는 것인지?
-
 		reviewRepository.delete(review);
 
 	}
@@ -93,8 +92,8 @@ public class ReviewService {
 			orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
 	}
 
-	private void validateCreateReview(Long bootcampId, Long userId) {
-		if (reviewRepository.existsByBootcamp_BootcampIdAndUser_UserId(bootcampId, userId)) {
+	private void validateCreateReview(String trainingProgramId, Long userId) {
+		if (reviewRepository.existsByCourse_TrainingProgramIdAndUser_UserId(trainingProgramId, userId)) {
 			throw new CustomException(ErrorCode.DUPLICATE_REVIEW);
 		}
 	}
@@ -105,8 +104,8 @@ public class ReviewService {
 		}
 	}
 
-	private void validateBootCamp(Long id) {
-		if (!bootcampRepository.existsById(id)) {
+	private void validateCourse(String trainingProgramId) {
+		if (courseRepository.findByTrainingProgramId(trainingProgramId).isEmpty()) {
 			throw new CustomException(ErrorCode.BOOTCAMP_NOT_FOUND);
 		}
 	}

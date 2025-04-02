@@ -38,6 +38,10 @@ public class Bootcamp extends BaseEntity {
 	@JoinColumn(name = "training_center_id", nullable = false)
 	private TrainingCenter trainingCenter;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "course_id", nullable = false)
+	private Course course;
+
 	@Column(nullable = false)
 	private String bootcampName;
 
@@ -67,11 +71,12 @@ public class Bootcamp extends BaseEntity {
 	private String bootcampLink;
 
 	public static Bootcamp of(
-		TrainingCenter trainingCenter, String name, BootcampCategoryType categoryType, int degree, String region,
+		TrainingCenter trainingCenter, Course course, String name, BootcampCategoryType categoryType, int degree, String region,
 		int capacity, boolean cost, LocalDate startDate, LocalDate endDate, String link
 	) {
 		return Bootcamp.builder()
 			.trainingCenter(trainingCenter)
+			.course(course)
 			.bootcampName(name)
 			.bootcampCategoryType(categoryType)
 			.bootcampDegree(degree)
