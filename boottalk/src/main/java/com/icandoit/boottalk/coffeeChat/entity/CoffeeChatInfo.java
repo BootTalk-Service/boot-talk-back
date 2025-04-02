@@ -77,10 +77,6 @@ public class CoffeeChatInfo extends BaseEntity {
         this.introduction = requestDto.introduction();
     }
 
-    public void setUser(User user) {
-        this.user = user;
-    }
-
     public void addAvailableTime(CoffeeChatTime time) {
         availableTimes.add(time);
         time.setCoffeeChatInfo(this);

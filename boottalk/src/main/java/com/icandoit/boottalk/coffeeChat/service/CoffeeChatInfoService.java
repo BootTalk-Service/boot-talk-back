@@ -39,7 +39,6 @@ public class CoffeeChatInfoService {
             requestDto.jobType(),
             requestDto.introduction()
         );
-        coffeeChatInfo.setUser(user);
         CoffeeChatInfo savedInfo = coffeeChatInfoRepository.save(coffeeChatInfo);
         return CoffeeChatInfoResponseDto.from(savedInfo);
     }
