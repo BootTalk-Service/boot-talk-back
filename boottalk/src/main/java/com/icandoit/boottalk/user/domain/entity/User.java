@@ -2,11 +2,12 @@ package com.icandoit.boottalk.user.domain.entity;
 
 import java.sql.Timestamp;
 
+import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
 import com.icandoit.boottalk.libs.entity.BaseEntity;
 import com.icandoit.boottalk.user.domain.form.SignUpForm;
 import com.icandoit.boottalk.user.domain.form.UpdateForm;
-import com.icandoit.boottalk.user.domain.type.DesiredCareer;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -30,33 +31,39 @@ public class User extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long userId;
 
-	private String name;
-	private String email;
-	private String profileImage;
+	@Column(nullable = false, updatable = false)
+	private String userName;
 
+	@Column(nullable = false)
+	private String email;
+
+	private String profileImage;
+	//네이버에서 주는 고유 Id
+	@Column(nullable = false)
+	private String resourceUserId;
+
+	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
-	private DesiredCareer desiredCareer;
+	private BootcampCategoryType desiredCareer;
 
 	@Setter
 	private Timestamp deletedAt;
 
 	public static User of(SignUpForm form) {
 		return User.builder()
-			.userId(form.getUserId())
-			.name(form.getName())
+			.userName(form.getUserName())
 			.email(form.getEmail())
 			.profileImage(form.getProfileImage())
+			.resourceUserId(form.getResourceUserId())
 			.desiredCareer(form.getDesiredCareer())
 			.deletedAt(null)
 			.build();
 	}
 
 	public User updateOf(UpdateForm form) {
-		this.name = form.getName();
 		this.email = form.getEmail();
 		this.profileImage = form.getProfileImage();
 		this.desiredCareer = form.getDesiredCareer();
-
 		return this;
 	}
 

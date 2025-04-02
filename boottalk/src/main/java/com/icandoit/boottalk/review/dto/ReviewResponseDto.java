@@ -19,7 +19,7 @@ public record ReviewResponseDto(
 			review.getReviewId(),
 			review.getBootcamp().getBootcampId(),
 			review.getBootcamp().getBootcampName(),
-			review.getUser().getName(),
+			review.getUser().getUserName(),
 			review.getContent(),
 			review.getRating(),
 			review.getCreatedAt(),
