@@ -46,13 +46,13 @@ public class CoffeeChatApplicationController {
     }
     
     // 커피챗 신청 상세 조회
-    @GetMapping("{coffeeChatAppId}")
+    @GetMapping("/{coffeeChatAppId}")
     public ResponseEntity<CoffeeChatApplicationResponseDto> getCoffeeChatApp(@PathVariable Long coffeeChatAppId) {
         return ResponseEntity.ok(coffeeChatAppService.getCoffeeChatApp(coffeeChatAppId));
     }
 
     // 커피챗 신청 수정
-    @PutMapping("{coffeeChatAppId}")
+    @PutMapping("/{coffeeChatAppId}")
     public ResponseEntity<CoffeeChatApplicationResponseDto> updateCoffeeChatApp(
         @PathVariable Long coffeeChatAppId,
         @Valid @RequestBody CoffeeChatApplicationUpdateDto request) {
@@ -62,7 +62,7 @@ public class CoffeeChatApplicationController {
     }
 
     // 커피챗 신청 삭제
-    @DeleteMapping("{coffeeChatAppId}")
+    @DeleteMapping("/{coffeeChatAppId}")
     public ResponseEntity<Void> deleteCoffeeChatApp(@PathVariable Long coffeeChatAppId) {
         // TODO : 사용자 인증 사용 시 수정
         Long userId = 1L;
