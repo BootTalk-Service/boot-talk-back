@@ -21,7 +21,7 @@ public class UserDto {
 
   public static UserDto from(User user) {
     return UserDto.builder()
-        .name(user.getName())
+        .name(user.getUserName())
         .email(user.getEmail())
         .profileImage(user.getProfileImage())
         .desiredCareer(user.getDesiredCareer())
