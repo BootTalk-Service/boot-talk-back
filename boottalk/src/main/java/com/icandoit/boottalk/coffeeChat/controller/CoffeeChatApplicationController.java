@@ -55,7 +55,7 @@ public class CoffeeChatApplicationController {
     @PutMapping("{coffeeChatAppId}")
     public ResponseEntity<CoffeeChatApplicationResponseDto> updateCoffeeChatApp(
         @PathVariable Long coffeeChatAppId,
-        @Valid @RequestBody CoffeeChatApplicationUpdateDto request) { // TODO: 유효성 검사가 제대로 적용이 안되어 확인 필요
+        @Valid @RequestBody CoffeeChatApplicationUpdateDto request) {
         // TODO : 사용자 인증 사용 시 수정
         Long userId = 1L;
         return ResponseEntity.ok(coffeeChatAppService.updateCoffeeChatApp(userId, coffeeChatAppId, request));
