@@ -2,10 +2,10 @@ package com.icandoit.boottalk.user.domain.entity;
 
 import java.sql.Timestamp;
 
+import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
 import com.icandoit.boottalk.libs.entity.BaseEntity;
 import com.icandoit.boottalk.user.domain.form.SignUpForm;
 import com.icandoit.boottalk.user.domain.form.UpdateForm;
-import com.icandoit.boottalk.user.domain.type.DesiredCareer;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,7 +31,7 @@ public class User extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long userId;
 
-	@Column(nullable = false)
+	@Column(nullable = false, updatable = false)
 	private String userName;
 
 	@Column(nullable = false)
@@ -44,7 +44,7 @@ public class User extends BaseEntity {
 
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
-	private DesiredCareer desiredCareer;
+	private BootcampCategoryType desiredCareer;
 
 	@Setter
 	private Timestamp deletedAt;
@@ -61,11 +61,9 @@ public class User extends BaseEntity {
 	}
 
 	public User updateOf(UpdateForm form) {
-		this.userName = form.getName();
 		this.email = form.getEmail();
 		this.profileImage = form.getProfileImage();
 		this.desiredCareer = form.getDesiredCareer();
-
 		return this;
 	}
 
