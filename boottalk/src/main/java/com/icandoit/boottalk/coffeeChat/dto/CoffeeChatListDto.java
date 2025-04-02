@@ -1,15 +1,15 @@
 package com.icandoit.boottalk.coffeeChat.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import com.icandoit.boottalk.coffeeChat.entity.enums.JobType;
+import com.icandoit.boottalk.coffeeChat.entity.enums.UserType;
 
-@Getter
-@AllArgsConstructor
-public class CoffeeChatListDto {
-    private Long coffeeChatInfoId;
-    private Long userId;
-    private String userName;
-    private String userType;
-    private String jobType;
-    private String introduction;
+public record CoffeeChatListDto(
+    Long coffeeChatInfoId,
+    Long userId,
+    String userName,
+    UserType userType,
+    JobType jobType,
+    String introduction
+) {
+
 }

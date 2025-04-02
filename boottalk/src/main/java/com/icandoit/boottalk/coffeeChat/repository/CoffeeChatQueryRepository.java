@@ -37,8 +37,8 @@ public class CoffeeChatQueryRepository {
                 coffeeChatInfo.coffeeChatInfoId,
                 user.userId,
                 user.name, // todo: user 테이블 name 테이블 변경 시 userName으로 변경
-                coffeeChatInfo.userType.stringValue(),
-                coffeeChatInfo.jobType.stringValue(),
+                coffeeChatInfo.userType,
+                coffeeChatInfo.jobType,
                 coffeeChatInfo.introduction
             ))
             .from(coffeeChatInfo)

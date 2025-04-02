@@ -41,8 +41,8 @@ class CoffeeChatInfoServiceTest {
     @BeforeEach
     void setUp() {
         coffeeChatList = Arrays.asList(
-            new CoffeeChatListDto(1L, 1L, "test1", "PROFESSIONAL", "BACKEND", "백엔드 현업자 test1입니다."),
-            new CoffeeChatListDto(2L, 2L, "test2", "GRADUATE", "FRONTEND",
+            new CoffeeChatListDto(1L, 1L, "test1", UserType.PROFESSIONAL, JobType.BACKEND, "백엔드 현업자 test1입니다."),
+            new CoffeeChatListDto(2L, 2L, "test2", UserType.GRADUATE, JobType.FRONTEND,
                 "프론트엔드 코스 수료자 test2 입니다.")
         );
         pageable = PageRequest.of(0, 10);
@@ -73,7 +73,7 @@ class CoffeeChatInfoServiceTest {
         JobType jobType = JobType.BACKEND;
 
         List<CoffeeChatListDto> filteredList = coffeeChatList.stream()
-            .filter(dto -> "BACKEND".equals(dto.getJobType()))
+            .filter(dto -> "BACKEND".equals(dto.jobType()))
             .collect(Collectors.toList());
 
         Page<CoffeeChatListDto> filteredPage = new PageImpl<>(filteredList, pageable,
@@ -97,7 +97,7 @@ class CoffeeChatInfoServiceTest {
         UserType userType = UserType.PROFESSIONAL;
 
         List<CoffeeChatListDto> filteredList = coffeeChatList.stream()
-            .filter(dto -> "PROFESSIONAL".equals(dto.getUserType()))
+            .filter(dto -> "PROFESSIONAL".equals(dto.userType()))
             .collect(Collectors.toList());
 
         Page<CoffeeChatListDto> filteredPage = new PageImpl<>(filteredList, pageable,
