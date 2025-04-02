@@ -73,7 +73,7 @@ class CoffeeChatInfoServiceTest {
         JobType jobType = JobType.BACKEND;
 
         List<CoffeeChatListDto> filteredList = coffeeChatList.stream()
-            .filter(dto -> "BACKEND".equals(dto.jobType()))
+            .filter(dto -> JobType.BACKEND.equals(dto.jobType()))
             .collect(Collectors.toList());
 
         Page<CoffeeChatListDto> filteredPage = new PageImpl<>(filteredList, pageable,
@@ -97,7 +97,7 @@ class CoffeeChatInfoServiceTest {
         UserType userType = UserType.PROFESSIONAL;
 
         List<CoffeeChatListDto> filteredList = coffeeChatList.stream()
-            .filter(dto -> "PROFESSIONAL".equals(dto.userType()))
+            .filter(dto -> UserType.PROFESSIONAL.equals(dto.userType()))
             .collect(Collectors.toList());
 
         Page<CoffeeChatListDto> filteredPage = new PageImpl<>(filteredList, pageable,
