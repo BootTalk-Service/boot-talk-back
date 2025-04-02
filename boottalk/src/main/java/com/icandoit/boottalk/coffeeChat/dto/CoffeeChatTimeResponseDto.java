@@ -5,7 +5,7 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 
 public record CoffeeChatTimeResponseDto(
-    Long id,
+    Long coffeeChatTimeId,
     DayOfWeek dayOfWeek,
     LocalTime startTime,
     LocalTime endTime
@@ -13,7 +13,7 @@ public record CoffeeChatTimeResponseDto(
 
     public static CoffeeChatTimeResponseDto from(CoffeeChatTime coffeeChatTime) {
         return new CoffeeChatTimeResponseDto(
-            coffeeChatTime.getId(),
+            coffeeChatTime.getCoffeeChatTimeId(),
             coffeeChatTime.getDayOfWeek(),
             coffeeChatTime.getStartTime(),
             coffeeChatTime.getEndTime()
