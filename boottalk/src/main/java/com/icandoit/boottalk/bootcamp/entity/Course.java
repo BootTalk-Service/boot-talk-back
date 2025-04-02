@@ -46,4 +46,12 @@ public class Course extends BaseEntity {
 		this.totalScore = totalScore;
 		this.reviewCount = reviewCount;
 	}
+
+	public static Course of(String trainingProgramId, String courseName, TrainingCenter trainingCenter) {
+		return Course.builder()
+			.trainingProgramId(trainingProgramId)
+			.courseName(courseName)
+			.trainingCenter(trainingCenter)
+			.build();
+	}
 }

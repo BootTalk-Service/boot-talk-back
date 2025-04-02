@@ -125,11 +125,7 @@ public class Employ24ApiService {
 	private Course saveOrGetCourse(BootcampListResponseDto dto, TrainingCenter center) {
 		return courseRepository.findByTrainingProgramId(dto.bootcampId())
 			.orElseGet(() -> courseRepository.save(
-				Course.builder()
-					.trainingProgramId(dto.bootcampId())
-					.trainingCenter(center)
-					.courseName(dto.bootcampName())
-					.build()
+				Course.of(dto.bootcampId(), dto.bootcampName(), center)
 			));
 	}
 
