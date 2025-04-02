@@ -3,13 +3,14 @@ package com.icandoit.boottalk.coffeeChat.dto;
 import java.time.LocalDateTime;
 
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatApplication;
+import com.icandoit.boottalk.coffeeChat.entity.enums.StatusType;
 
 public record CoffeeChatApplicationResponseDto(
     Long coffeeChatAppId,
     Long coffeeChatInfoId,
     Long applierUserId,
     String applierName,
-    String status,
+    StatusType status,
     String content,
     LocalDateTime coffeeChatStartTime,
     LocalDateTime coffeeChatEndTime,
@@ -24,8 +25,8 @@ public record CoffeeChatApplicationResponseDto(
             coffeeChatApp.getCoffeeChatAppId(),
             coffeeChatApp.getCoffeeChatInfo().getCoffeeChatInfoId(),
             coffeeChatApp.getApplier().getUserId(),
-            coffeeChatApp.getApplier().getName(),
-            coffeeChatApp.getStatus().name(),
+            coffeeChatApp.getApplier().getUserName(),
+            coffeeChatApp.getStatus(),
             showContent ? coffeeChatApp.getContent() : null,
             coffeeChatApp.getCoffeeChatStartTime(),
             coffeeChatApp.getCoffeeChatEndTime(),
