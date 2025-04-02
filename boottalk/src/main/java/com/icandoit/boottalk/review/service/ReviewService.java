@@ -1,5 +1,6 @@
 package com.icandoit.boottalk.review.service;
 
+import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
 import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
@@ -13,6 +14,9 @@ import com.icandoit.boottalk.user.domain.repository.UserRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,6 +91,15 @@ public class ReviewService {
 
 	}
 
+	// 부트캠프 ID 로부터 Course 를 조회한 후, 해당 Course 에 작성된 리뷰를 페이징 처리하여 반환
+	@Transactional(readOnly = true)
+	public Page<ReviewResponseDto> getReviewsBootcampId(Long bootcampId, Pageable pageable) {
+		Bootcamp bootcamp = getBootcamp(bootcampId);
+
+		return reviewRepository.findByCourse(bootcamp.getCourse(), pageable)
+			.map(ReviewResponseDto::from);
+	}
+
 	private Review getReview(Long id) {
 		return reviewRepository.findById(id).
 			orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
@@ -108,6 +121,11 @@ public class ReviewService {
 		if (courseRepository.findByTrainingProgramId(trainingProgramId).isEmpty()) {
 			throw new CustomException(ErrorCode.BOOTCAMP_NOT_FOUND);
 		}
+	}
+
+	private Bootcamp getBootcamp(Long id) {
+		return bootcampRepository.findById(id)
+			.orElseThrow(() -> new CustomException(ErrorCode.BOOTCAMP_NOT_FOUND));
 	}
 
 }
