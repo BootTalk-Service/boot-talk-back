@@ -1,7 +1,6 @@
 package com.icandoit.boottalk.bootcamp.dto;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,9 +17,7 @@ public record BootcampResponseDto(
 	int bootcampDegree,
 	int bootcampCapacity,
 	LocalDate bootcampStartDate,
-	LocalDate bootcampEndDate,
-	LocalDateTime createdAt,
-	LocalDateTime updatedAt
+	LocalDate bootcampEndDate
 ) {
 	public static BootcampResponseDto from(Bootcamp bootcamp) {
 		return new BootcampResponseDto(
@@ -34,9 +31,7 @@ public record BootcampResponseDto(
 			bootcamp.getBootcampDegree(),
 			bootcamp.getBootcampCapacity(),
 			bootcamp.getBootcampStartDate(),
-			bootcamp.getBootcampEndDate(),
-			bootcamp.getCreatedAt(),
-			bootcamp.getUpdatedAt()
+			bootcamp.getBootcampEndDate()
 		);
 	}
 

@@ -43,6 +43,9 @@ public class CoffeeChatInfo extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(nullable = false, updatable = false)
+    private String userName;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserType userType;
@@ -57,24 +60,21 @@ public class CoffeeChatInfo extends BaseEntity {
     @OneToMany(mappedBy = "coffeeChatInfo", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CoffeeChatTime> availableTimes = new ArrayList<>();
 
-    public static CoffeeChatInfo of(User user, String userType, String jobType,
+    public static CoffeeChatInfo of(User user, String userName, UserType userType, JobType jobType,
         String introduction) {
         return CoffeeChatInfo.builder()
             .user(user)
-            .userType(UserType.valueOf(userType))
-            .jobType(JobType.valueOf(jobType))
+            .userName(userName)
+            .userType(userType)
+            .jobType(jobType)
             .introduction(introduction)
             .build();
     }
 
     public void update(CoffeeChatInfoRequestDto requestDto) {
-        this.userType = UserType.valueOf(requestDto.userType());
-        this.jobType = JobType.valueOf(requestDto.jobType());
+        this.userType = requestDto.userType();
+        this.jobType = requestDto.jobType();
         this.introduction = requestDto.introduction();
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public void addAvailableTime(CoffeeChatTime time) {

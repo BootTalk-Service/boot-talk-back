@@ -31,9 +31,11 @@ public enum ErrorCode {
     DUPLICATE_REVIEW(409,"해당 부트캠프에 이미 리뷰를 작성하였습니다."),
     NOT_PENDING_STATUS(409, "커피챗 신청이 '대기 중' 상태일 때만 수정할 수 있습니다."),
 
+    /* 409 Conflict */
+    COFFEE_CHAT_ALREADY_EXISTS(409, "이미 생성된 커피챗이 있습니다."),
+
     /* 500 INTERNAL_SERVER_ERROR */
     INTERNAL_SERVER_ERROR(500, "서버 오류가 발생했습니다.");
-
 
     private final Integer httpStatus;
     private final String message;
