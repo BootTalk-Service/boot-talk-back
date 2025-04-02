@@ -8,8 +8,8 @@ import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
 
 public record BootcampResponseDto(
 	Long bootcampId,
-	String bootcampName,
 	String trainingCenterName,
+	String bootcampName,
 	String bootcampRegion,
 	boolean bootcampCost,
 	String bootcampLink,
@@ -22,8 +22,8 @@ public record BootcampResponseDto(
 	public static BootcampResponseDto from(Bootcamp bootcamp) {
 		return new BootcampResponseDto(
 			bootcamp.getBootcampId(),
-			bootcamp.getBootcampName(),
 			bootcamp.getTrainingCenter().getTrainingCenterName(),
+			bootcamp.getBootcampName(),
 			bootcamp.getBootcampRegion(),
 			bootcamp.isBootcampCost(),
 			bootcamp.getBootcampLink(),
