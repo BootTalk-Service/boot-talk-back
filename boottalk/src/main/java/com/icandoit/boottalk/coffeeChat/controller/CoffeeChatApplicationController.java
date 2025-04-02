@@ -44,12 +44,6 @@ public class CoffeeChatApplicationController {
         Long userId = 1L;
         return ResponseEntity.ok(coffeeChatAppService.getMyCoffeeChatApps(userId));
     }
-    
-    // 커피챗 신청 상세 조회
-    @GetMapping("/{coffeeChatAppId}")
-    public ResponseEntity<CoffeeChatApplicationResponseDto> getCoffeeChatApp(@PathVariable Long coffeeChatAppId) {
-        return ResponseEntity.ok(coffeeChatAppService.getCoffeeChatApp(coffeeChatAppId));
-    }
 
     // 커피챗 신청 수정
     @PutMapping("/{coffeeChatAppId}")
