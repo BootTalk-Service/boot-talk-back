@@ -32,6 +32,10 @@ public class CoffeeChatInfoService {
         CoffeeChatInfoRequestDto requestDto) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (coffeeChatInfoRepository.existsByUserId(userId)) {
+            throw new CustomException(ErrorCode.COFFEE_CHAT_ALREADY_EXISTS);
+        }
         CoffeeChatInfo coffeeChatInfo = CoffeeChatInfo.of(
             user,
             user.getName(),
@@ -39,7 +43,6 @@ public class CoffeeChatInfoService {
             requestDto.jobType(),
             requestDto.introduction()
         );
-        coffeeChatInfo.setUser(user);
         CoffeeChatInfo savedInfo = coffeeChatInfoRepository.save(coffeeChatInfo);
         return CoffeeChatInfoResponseDto.from(savedInfo);
     }

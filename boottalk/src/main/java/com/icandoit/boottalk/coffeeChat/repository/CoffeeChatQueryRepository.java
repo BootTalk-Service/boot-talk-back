@@ -4,7 +4,6 @@ import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatListDto;
 import com.icandoit.boottalk.coffeeChat.entity.QCoffeeChatInfo;
 import com.icandoit.boottalk.coffeeChat.entity.enums.JobType;
 import com.icandoit.boottalk.coffeeChat.entity.enums.UserType;
-import com.icandoit.boottalk.user.domain.entity.QUser;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -29,20 +28,18 @@ public class CoffeeChatQueryRepository {
         Pageable pageable
     ) {
         QCoffeeChatInfo coffeeChatInfo = QCoffeeChatInfo.coffeeChatInfo;
-        QUser user = QUser.user;
 
         List<CoffeeChatListDto> content = queryFactory
             .select(Projections.constructor(
                 CoffeeChatListDto.class,
                 coffeeChatInfo.coffeeChatInfoId,
-                user.userId,
-                user.name, // todo: user 테이블 name 테이블 변경 시 userName으로 변경
+                coffeeChatInfo.user.userId,
+                coffeeChatInfo.userName,
                 coffeeChatInfo.userType,
                 coffeeChatInfo.jobType,
                 coffeeChatInfo.introduction
             ))
             .from(coffeeChatInfo)
-            .join(coffeeChatInfo.user, user)
             .where(
                 jobTypeEq(jobType),
                 userTypeEq(userType)

@@ -60,25 +60,21 @@ public class CoffeeChatInfo extends BaseEntity {
     @OneToMany(mappedBy = "coffeeChatInfo", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CoffeeChatTime> availableTimes = new ArrayList<>();
 
-    public static CoffeeChatInfo of(User user, String userName, String userType, String jobType,
+    public static CoffeeChatInfo of(User user, String userName, UserType userType, JobType jobType,
         String introduction) {
         return CoffeeChatInfo.builder()
             .user(user)
             .userName(userName)
-            .userType(UserType.valueOf(userType))
-            .jobType(JobType.valueOf(jobType))
+            .userType(userType)
+            .jobType(jobType)
             .introduction(introduction)
             .build();
     }
 
     public void update(CoffeeChatInfoRequestDto requestDto) {
-        this.userType = UserType.valueOf(requestDto.userType());
-        this.jobType = JobType.valueOf(requestDto.jobType());
+        this.userType = requestDto.userType();
+        this.jobType = requestDto.jobType();
         this.introduction = requestDto.introduction();
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public void addAvailableTime(CoffeeChatTime time) {
