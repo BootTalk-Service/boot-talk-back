@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "training_center")
 @Getter
 @Builder
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class TrainingCenter extends BaseEntity {
 
@@ -28,24 +29,21 @@ public class TrainingCenter extends BaseEntity {
 	@Column(nullable = false)
 	private String trainingCenterName;
 
-	@Column(nullable = false)
 	private String trainingCenterPhoneNumber;
 
-	@Column(nullable = false)
 	private String trainingCenterEmail;
 
-	@Column(nullable = false)
 	private String trainingCenterAddress;
 
-	@Column(nullable = false)
 	private String trainingCenterUrl;
 
-	public static TrainingCenter of(String name, String email, String address, String url) {
+	public static TrainingCenter of(String name, String email, String address, String url, String phoneNumber) {
 		return TrainingCenter.builder()
 			.trainingCenterName(name)
 			.trainingCenterEmail(email)
 			.trainingCenterAddress(address)
 			.trainingCenterUrl(url)
+			.trainingCenterPhoneNumber(phoneNumber)
 			.build();
 	}
 }
