@@ -20,9 +20,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
 import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
+import com.icandoit.boottalk.bootcamp.entity.Course;
 import com.icandoit.boottalk.bootcamp.entity.TrainingCenter;
 import com.icandoit.boottalk.bootcamp.exception.BootcampCustomException;
 import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
+import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
 import com.icandoit.boottalk.bootcamp.repository.TrainingCenterRepository;
 
 import lombok.Getter;
@@ -44,6 +46,7 @@ public class Employ24ApiService {
 	private final RestTemplate restTemplate;
 	private final TrainingCenterRepository trainingCenterRepository;
 	private final BootcampRepository bootcampRepository;
+	private final CourseRepository courseRepository;
 
 	private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 
@@ -93,7 +96,20 @@ public class Employ24ApiService {
 			return;
 		}
 
-		TrainingCenter center = trainingCenterRepository.findByTrainingCenterName(dto.trainingCenterName())
+		TrainingCenter center = saveOrGetTrainingCenter(dto, detail);
+
+		Course course = saveOrGetCourse(dto, center);
+
+		BootcampCategoryType category = BootcampCategoryType.fromKoreanName(categoryName);
+		Bootcamp bootcamp = createBootcampEntity(center, course, dto, category, detail);
+
+		bootcampRepository.save(bootcamp);
+		log.info("저장 성공: {}", bootcamp.getBootcampName());
+	}
+
+	// TrainingCenter가 존재하지 않으면 저장, 있으면 조회해서 반환
+	private TrainingCenter saveOrGetTrainingCenter(BootcampListResponseDto dto, BootcampDetailResponseDto detail) {
+		return trainingCenterRepository.findByTrainingCenterName(dto.trainingCenterName())
 			.orElseGet(() -> trainingCenterRepository.save(
 				TrainingCenter.of(
 					dto.trainingCenterName(),
@@ -103,32 +119,41 @@ public class Employ24ApiService {
 					detail.trainingCenterTelephoneNumber()
 				)
 			));
+	}
 
-		BootcampCategoryType category = BootcampCategoryType.fromKoreanName(categoryName);
+	// Cource가 존재하지 않으면 저장, 있으면 조회해서 반환
+	private Course saveOrGetCourse(BootcampListResponseDto dto, TrainingCenter center) {
+		return courseRepository.findByTrainingProgramId(dto.bootcampId())
+			.orElseGet(() -> courseRepository.save(
+				Course.of(dto.bootcampId(), dto.bootcampName(), center)
+			));
+	}
 
-		boolean hasCost = !(detail.bootcampCourseName().equals("K-디지털트레이닝") || dto.cost().equals("0"));
-
-		Bootcamp bootcamp = Bootcamp.of(
+	// Bootcamp Entity 생성
+	private Bootcamp createBootcampEntity(
+		TrainingCenter center, Course course, BootcampListResponseDto dto,
+		BootcampCategoryType category, BootcampDetailResponseDto detail
+	) {
+		return Bootcamp.of(
 			center,
+			course,
 			dto.bootcampName(),
 			category,
 			Integer.parseInt(dto.bootcampDegree()),
 			detail.address1(),
 			Integer.parseInt(dto.maxCapacity()),
-			hasCost,
+			!(detail.bootcampCourseName().equals("K-디지털트레이닝") || dto.cost().equals("0")),
 			LocalDate.parse(dto.trainingStartDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd")),
 			LocalDate.parse(dto.trainingEndDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd")),
 			dto.bootcampLink()
 		);
-
-		bootcampRepository.save(bootcamp);
-		log.info("저장 성공: {}", bootcamp.getBootcampName());
 	}
+
 
 	// 중복 데이터 여부 확인
 	private boolean isDuplicate(BootcampListResponseDto dto) {
-		return bootcampRepository.existsByBootcampNameAndBootcampDegree(
-			dto.bootcampName(), Integer.parseInt(dto.bootcampDegree())
+		return bootcampRepository.existsByCourse_TrainingProgramIdAndBootcampDegree(
+			dto.bootcampId(), Integer.parseInt(dto.bootcampDegree())
 		);
 	}
 
@@ -155,7 +180,7 @@ public class Employ24ApiService {
 		}
 	}
 
-	// 응답 JSON 파싱 → BootcampList DTO로 변환
+	// 응답 JSON 파싱 → BootcampList DTO 로 변환
 	private List<BootcampListResponseDto> parseListResponse(String body) {
 		try {
 			JsonNode jsonList = objectMapper.readTree(body).get("srchList");

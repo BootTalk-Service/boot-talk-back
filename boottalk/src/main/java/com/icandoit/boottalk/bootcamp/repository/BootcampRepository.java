@@ -1,9 +1,10 @@
 package com.icandoit.boottalk.bootcamp.repository;
 
-import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface BootcampRepository extends JpaRepository <Bootcamp, Long> {
+import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
 
-	boolean existsByBootcampNameAndBootcampDegree(String bootcampName, int bootcampDegree);
+public interface BootcampRepository extends JpaRepository <Bootcamp, Long> {
+	// trainingProgramId와 bootcampDegree(기수)를 기준으로 부트캠프 존재 여부 확인.
+	boolean existsByCourse_TrainingProgramIdAndBootcampDegree(String trainingProgramId, int bootcampDegree);
 }
