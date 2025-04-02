@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +24,7 @@ public class CoffeeChatTimeService {
     private final CoffeeChatInfoRepository coffeeChatInfoRepository;
     private final CoffeeChatTimeRepository coffeeChatTimeRepository;
 
+    @Transactional
     public List<CoffeeChatTimeResponseDto> createCoffeeChatTimes(Long userId,
         @Valid CoffeeChatTimeRequestDto requestDto) {
 
@@ -39,15 +41,28 @@ public class CoffeeChatTimeService {
                 timeDto.startTime(),
                 timeDto.endTime()
             );
+            coffeeChatInfo.addAvailableTime(time);
             coffeeChatTimes.add(time);
         }
 
-        List<CoffeeChatTime> savedTimes = coffeeChatTimeRepository.saveAll(coffeeChatTimes);
+        coffeeChatTimeRepository.saveAll(coffeeChatTimes);
 
-        List<CoffeeChatTimeResponseDto> responseDtos = savedTimes.stream()
+        return coffeeChatTimes.stream()
             .map(CoffeeChatTimeResponseDto::from)
             .collect(Collectors.toList());
+    }
 
-        return responseDtos;
+    @Transactional(readOnly = true)
+    public List<CoffeeChatTimeResponseDto> getMyCoffeeChatTimes(Long userId) {
+        List<CoffeeChatTime> coffeeChatTimes = coffeeChatTimeRepository.findAllWithCoffeeChatInfoByUserId(
+            userId);
+
+        if (coffeeChatTimes.isEmpty()) {
+            throw new CustomException(ErrorCode.USER_COFFEE_CHAT_NOT_FOUND);
+        }
+
+        return coffeeChatTimes.stream()
+            .map(CoffeeChatTimeResponseDto::from)
+            .collect(Collectors.toList());
     }
 }

@@ -29,7 +29,7 @@ public class CoffeeChatTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long coffeeChatTimeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coffee_chat_info_id")

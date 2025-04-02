@@ -2,12 +2,16 @@ package com.icandoit.boottalk.coffeeChat.controller;
 
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoRequestDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoResponseDto;
-import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatSearchRequestDto;
+import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatListDto;
+import com.icandoit.boottalk.coffeeChat.entity.enums.JobType;
+import com.icandoit.boottalk.coffeeChat.entity.enums.UserType;
 import com.icandoit.boottalk.coffeeChat.service.CoffeeChatInfoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.web.PagedModel;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -42,19 +47,19 @@ public class CoffeeChatInfoController {
         return ResponseEntity.ok(coffeeChatInfoService.getMyCoffeeChatInfo(userId));
     }
 
-// 커피챗 목록 검색 (전체)
-// todo : 추후 querydsl 적용하여 진행하겠습니당..
-
-//    @GetMapping("/search")
-//    public ResponseEntity<PagedModel<CoffeeChatInfoResponseDto>> searchCoffeeChatInfo(
-//        CoffeeChatSearchRequestDto searchDto
-//    ) {
-//        CoffeeChatSearchRequestDto processedDto = CoffeeChatSearchRequestDto.from(searchDto);
-//
-//        SuccessResponseDto<Page<CoffeeChatInfoResponseDto>> response =
-//            coffeeChatInfoService.searchCoffeeChatInfo(processedDto);
-//        return ResponseEntity.ok(response);
-//    }
+    @GetMapping("/search")
+    public ResponseEntity<Page<CoffeeChatListDto>> getCoffeeChats(
+        @RequestParam(required = false) JobType jobType,
+        @RequestParam(required = false) UserType userType,
+        @PageableDefault(
+            sort = "CREATED_AT",
+            direction = Sort.Direction.DESC
+        ) Pageable pageable
+    ) {
+        return ResponseEntity.ok(
+            coffeeChatInfoService.getFilteredCoffeeChatResults(jobType, userType, pageable)
+        );
+    }
 
     @PutMapping("/my")
     public ResponseEntity<CoffeeChatInfoResponseDto> updateCoffeeChatInfo(
@@ -64,8 +69,9 @@ public class CoffeeChatInfoController {
     }
 
     @DeleteMapping("/my")
-    public ResponseEntity<CoffeeChatInfoResponseDto> deleteCoffeeChatInfo() {
+    public ResponseEntity<Void> deleteCoffeeChatInfo() {
         Long userId = 1L;
-        return ResponseEntity.ok(coffeeChatInfoService.deleteMyCoffeeChatInfo(userId));
+        coffeeChatInfoService.deleteMyCoffeeChatInfo(userId);
+        return ResponseEntity.ok().build();
     }
 }

@@ -1,14 +1,17 @@
 package com.icandoit.boottalk.coffeeChat.dto;
 
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatInfo;
+import com.icandoit.boottalk.coffeeChat.entity.enums.JobType;
+import com.icandoit.boottalk.coffeeChat.entity.enums.UserType;
 import java.time.LocalDateTime;
 
 
 public record CoffeeChatInfoResponseDto(
     Long coffeeChatInfoId,
     Long userId,
-    String userType,
-    String jobType,
+    String userName,
+    UserType userType,
+    JobType jobType,
     String introduction,
     LocalDateTime createdAt,
     LocalDateTime updatedAt
@@ -18,8 +21,9 @@ public record CoffeeChatInfoResponseDto(
         return new CoffeeChatInfoResponseDto(
             coffeeChatInfo.getCoffeeChatInfoId(),
             coffeeChatInfo.getUser().getUserId(),
-            coffeeChatInfo.getUserType().name(),
-            coffeeChatInfo.getJobType().name(),
+            coffeeChatInfo.getUser().getName(),
+            coffeeChatInfo.getUserType(),
+            coffeeChatInfo.getJobType(),
             coffeeChatInfo.getIntroduction(),
             coffeeChatInfo.getCreatedAt(),
             coffeeChatInfo.getUpdatedAt()
