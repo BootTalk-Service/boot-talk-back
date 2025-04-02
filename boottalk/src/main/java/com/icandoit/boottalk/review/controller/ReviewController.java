@@ -34,6 +34,7 @@ public class ReviewController {
 	}
 
 	// 리뷰 목록 조회
+	// TODO : 필터 : 날짜순, 직군별
 	@GetMapping
 	public ResponseEntity<List<ReviewResponseDto>> listAll() {
 		// TODO : 페이징 처리
@@ -64,5 +65,7 @@ public class ReviewController {
 		reviewService.delete(reviewId, userId);
 		return ResponseEntity.ok().build();
 	}
+
+	// TODO : 상세 부트캠프 리뷰 리스트 조회
 
 }

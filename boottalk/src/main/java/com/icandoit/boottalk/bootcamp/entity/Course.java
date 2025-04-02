@@ -42,6 +42,7 @@ public class Course extends BaseEntity {
 	private int totalScore;
 	private int reviewCount;
 
+	// TODO : 리뷰가 추가될 때 해당 필드 관리 예정
 	public void updateReviewStats(int totalScore, int reviewCount) {
 		this.totalScore = totalScore;
 		this.reviewCount = reviewCount;
@@ -52,6 +53,8 @@ public class Course extends BaseEntity {
 			.trainingProgramId(trainingProgramId)
 			.courseName(courseName)
 			.trainingCenter(trainingCenter)
+			.totalScore(0)
+			.reviewCount(0)
 			.build();
 	}
 }
