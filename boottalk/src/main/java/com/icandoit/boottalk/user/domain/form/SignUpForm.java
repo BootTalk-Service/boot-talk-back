@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class SignUpForm {
 
 	private String resourceUserId;
-	private String name;
+	private String userName;
 	private String email;
 	private String profileImage;
 	private DesiredCareer desiredCareer;

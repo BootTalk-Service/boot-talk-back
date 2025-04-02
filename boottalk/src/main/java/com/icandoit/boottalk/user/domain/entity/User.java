@@ -7,6 +7,7 @@ import com.icandoit.boottalk.user.domain.form.SignUpForm;
 import com.icandoit.boottalk.user.domain.form.UpdateForm;
 import com.icandoit.boottalk.user.domain.type.DesiredCareer;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -30,12 +31,18 @@ public class User extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long userId;
 
-	private String name;
+	@Column(nullable = false)
+	private String userName;
+
+	@Column(nullable = false)
 	private String email;
+
 	private String profileImage;
 	//네이버에서 주는 고유 Id
+	@Column(nullable = false)
 	private String resourceUserId;
 
+	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private DesiredCareer desiredCareer;
 
@@ -44,7 +51,7 @@ public class User extends BaseEntity {
 
 	public static User of(SignUpForm form) {
 		return User.builder()
-			.name(form.getName())
+			.userName(form.getUserName())
 			.email(form.getEmail())
 			.profileImage(form.getProfileImage())
 			.resourceUserId(form.getResourceUserId())
@@ -54,7 +61,7 @@ public class User extends BaseEntity {
 	}
 
 	public User updateOf(UpdateForm form) {
-		this.name = form.getName();
+		this.userName = form.getName();
 		this.email = form.getEmail();
 		this.profileImage = form.getProfileImage();
 		this.desiredCareer = form.getDesiredCareer();
