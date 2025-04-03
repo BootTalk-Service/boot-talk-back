@@ -1,7 +1,17 @@
 package com.icandoit.boottalk.review.service;
 
+import static com.icandoit.boottalk.bootcamp.exception.BootcampErrorCode.*;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
+import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.entity.Course;
+import com.icandoit.boottalk.bootcamp.exception.BootcampCustomException;
+import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
 import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
@@ -10,18 +20,10 @@ import com.icandoit.boottalk.review.dto.ReviewResponseDto;
 import com.icandoit.boottalk.review.dto.ReviewUpdateRequestDto;
 import com.icandoit.boottalk.review.entity.Review;
 import com.icandoit.boottalk.review.repository.ReviewRepository;
-import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
 import com.icandoit.boottalk.user.domain.entity.User;
 import com.icandoit.boottalk.user.domain.repository.UserRepository;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -55,23 +57,24 @@ public class ReviewService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<ReviewResponseDto> listAll() {
+	public Page<ReviewResponseDto> listAll(Pageable pageable, String category) {
+		if (category != null && !category.isBlank()) {
+			if (!BootcampCategoryType.isValidKoreanName(category)) {
+				throw new BootcampCustomException(INVALID_CATEGORY_NAME);
+			}
+			BootcampCategoryType categoryType = BootcampCategoryType.fromKoreanName(category);
+			return reviewRepository.findByBootcampCategory(categoryType, pageable)
+				.map(ReviewResponseDto::from);
+		}
 
-		List<Review> reviews = reviewRepository.findAll();
-
-		return reviews.stream()
-			.map(ReviewResponseDto::from)
-			.collect(Collectors.toList());
+		return reviewRepository.findAll(pageable)
+			.map(ReviewResponseDto::from);
 	}
 
 	@Transactional(readOnly = true)
-	public List<ReviewResponseDto> listMy(Long userId) {
-
-		List<Review> reviews = reviewRepository.findByUser_UserId(userId);
-
-		return reviews.stream()
-			.map(ReviewResponseDto::from)
-			.collect(Collectors.toList());
+	public Page<ReviewResponseDto> listMy(Long userId, Pageable pageable) {
+		return reviewRepository.findByUser_UserId(userId, pageable)
+			.map(ReviewResponseDto::from);
 	}
 	
 	@Transactional
