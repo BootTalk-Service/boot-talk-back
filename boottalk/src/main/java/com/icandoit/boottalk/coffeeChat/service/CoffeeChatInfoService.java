@@ -3,8 +3,6 @@ package com.icandoit.boottalk.coffeeChat.service;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoRequestDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoResponseDto;
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatInfo;
-import com.icandoit.boottalk.coffeeChat.entity.enums.JobType;
-import com.icandoit.boottalk.coffeeChat.entity.enums.MentoType;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatInfoRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
@@ -49,16 +47,6 @@ public class CoffeeChatInfoService {
         CoffeeChatInfo coffeeChatInfo = getCoffeeChatInfoByUserId(userId);
         return CoffeeChatInfoResponseDto.from(coffeeChatInfo);
     }
-
-    @Transactional(readOnly = true) 
-    public Page<CoffeeChatListDto> getFilteredCoffeeChatResults(
-        @Nullable JobType jobType,
-        @Nullable MentoType mentoType,
-        Pageable pageable
-    ) {
-        return coffeeChatQueryRepository.getFilteredCoffeeChatResults(jobType, mentoType, pageable);
-    }
-
 
     @Transactional
     public CoffeeChatInfoResponseDto updateMyCoffeeChatInfo(

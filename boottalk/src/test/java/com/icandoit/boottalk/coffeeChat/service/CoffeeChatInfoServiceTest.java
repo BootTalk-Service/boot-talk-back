@@ -8,11 +8,12 @@ import static org.mockito.Mockito.when;
 
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatListDto;
 import com.icandoit.boottalk.coffeeChat.entity.enums.JobType;
-import com.icandoit.boottalk.coffeeChat.entity.enums.UserType;
+import com.icandoit.boottalk.coffeeChat.entity.enums.MentoType;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatQueryRepository;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.hibernate.usertype.UserType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,9 +42,9 @@ class CoffeeChatInfoServiceTest {
     @BeforeEach
     void setUp() {
         coffeeChatList = Arrays.asList(
-            new CoffeeChatListDto(1L, 1L, "test1", UserType.PROFESSIONAL, JobType.BACKEND,
+            new CoffeeChatListDto(1L, 1L, "test1", MentoType.PROFESSIONAL, JobType.BACKEND,
                 "백엔드 현업자 test1입니다."),
-            new CoffeeChatListDto(2L, 2L, "test2", UserType.GRADUATE, JobType.FRONTEND,
+            new CoffeeChatListDto(2L, 2L, "test2", MentoType.GRADUATE, JobType.FRONTEND,
                 "프론트엔드 코스 수료자 test2 입니다.")
         );
         pageable = PageRequest.of(0, 10);
@@ -96,10 +97,10 @@ class CoffeeChatInfoServiceTest {
     @Test
     @DisplayName("UserType으로 필터링 시 해당하는 결과만 반환해야 함")
     void getFilteredCoffeeChatResults_WithUserType_ReturnsFilteredResults() {
-        UserType userType = UserType.PROFESSIONAL;
+        MentoType userType = MentoType.PROFESSIONAL;
 
         List<CoffeeChatListDto> filteredList = coffeeChatList.stream()
-            .filter(dto -> UserType.PROFESSIONAL.equals(dto.userType()))
+            .filter(dto -> MentoType.PROFESSIONAL.equals(dto.mentoType()))
             .collect(Collectors.toList());
 
         Page<CoffeeChatListDto> filteredPage = new PageImpl<>(filteredList, pageable,
