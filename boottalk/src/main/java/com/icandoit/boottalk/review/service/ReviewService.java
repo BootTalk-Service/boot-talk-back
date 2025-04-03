@@ -1,10 +1,12 @@
 package com.icandoit.boottalk.review.service;
 
+import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
 import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
-import com.icandoit.boottalk.review.dto.ReviewRequestDto;
+import com.icandoit.boottalk.review.dto.ReviewCreateRequestDto;
 import com.icandoit.boottalk.review.dto.ReviewResponseDto;
+import com.icandoit.boottalk.review.dto.ReviewUpdateRequestDto;
 import com.icandoit.boottalk.review.entity.Review;
 import com.icandoit.boottalk.review.repository.ReviewRepository;
 import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
@@ -13,6 +15,9 @@ import com.icandoit.boottalk.user.domain.repository.UserRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +31,8 @@ public class ReviewService {
 	private final CourseRepository courseRepository;
 
 	@Transactional
-	public ReviewResponseDto create(ReviewRequestDto request, Long userId) {
+	public ReviewResponseDto create(ReviewCreateRequestDto request, Long userId) {
+		// TODO : 리뷰 작성시 해당 코스에 평점 반영하는 로직 필요
 		String trainingProgramId = request.trainingProgramId();
 
 		validateCreateReview(trainingProgramId, userId);
@@ -64,7 +70,8 @@ public class ReviewService {
 	}
 	
 	@Transactional
-	public ReviewResponseDto update(ReviewRequestDto request, Long reviewId, Long userId) {
+	public ReviewResponseDto update(ReviewUpdateRequestDto request, Long reviewId, Long userId) {
+		// TODO : 리뷰 수정시 해당 코스의 평점 업데이트 하는 로직 추가
 		Review review = getReview(reviewId);
 
 		validateCourse(review.getCourse().getTrainingProgramId());
@@ -77,7 +84,7 @@ public class ReviewService {
 
 	@Transactional
 	public void delete(Long reviewId, Long userId) {
-
+		// TODO : 리뷰 삭제시 해당 코스의 평점 업데이트하는 로직 추가
 		Review review = getReview(reviewId);
 		validateCourse(review.getCourse().getTrainingProgramId());
 		validateReview(review.getUser().getUserId(), userId);
@@ -85,6 +92,15 @@ public class ReviewService {
 		// TODO: 리뷰를 삭제하면 이미 리뷰 작성으로 적립받은 포인트는 어떻게 되는 것인지?
 		reviewRepository.delete(review);
 
+	}
+
+	// 부트캠프 ID 로부터 Course 를 조회한 후, 해당 Course 에 작성된 리뷰를 페이징 처리하여 반환
+	@Transactional(readOnly = true)
+	public Page<ReviewResponseDto> getReviewsBootcampId(Long bootcampId, Pageable pageable) {
+		Bootcamp bootcamp = getBootcamp(bootcampId);
+
+		return reviewRepository.findByCourse(bootcamp.getCourse(), pageable)
+			.map(ReviewResponseDto::from);
 	}
 
 	private Review getReview(Long id) {
@@ -108,6 +124,11 @@ public class ReviewService {
 		if (courseRepository.findByTrainingProgramId(trainingProgramId).isEmpty()) {
 			throw new CustomException(ErrorCode.BOOTCAMP_NOT_FOUND);
 		}
+	}
+
+	private Bootcamp getBootcamp(Long id) {
+		return bootcampRepository.findById(id)
+			.orElseThrow(() -> new CustomException(ErrorCode.BOOTCAMP_NOT_FOUND));
 	}
 
 }

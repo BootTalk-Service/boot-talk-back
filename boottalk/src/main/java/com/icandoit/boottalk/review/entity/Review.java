@@ -2,7 +2,8 @@ package com.icandoit.boottalk.review.entity;
 
 import com.icandoit.boottalk.bootcamp.entity.Course;
 import com.icandoit.boottalk.libs.entity.BaseEntity;
-import com.icandoit.boottalk.review.dto.ReviewRequestDto;
+import com.icandoit.boottalk.review.dto.ReviewCreateRequestDto;
+import com.icandoit.boottalk.review.dto.ReviewUpdateRequestDto;
 import com.icandoit.boottalk.user.domain.entity.User;
 
 import jakarta.persistence.Column;
@@ -46,7 +47,7 @@ public class Review extends BaseEntity {
 	@Column(nullable = false)
 	private int rating;
 
-	public static Review of(ReviewRequestDto dto, Course course, User user) {
+	public static Review of(ReviewCreateRequestDto dto, Course course, User user) {
 		return Review.builder()
 			.course(course)
 			.user(user)
@@ -55,7 +56,7 @@ public class Review extends BaseEntity {
 			.build();
 	}
 
-	public void update(ReviewRequestDto dto) {
+	public void update(ReviewUpdateRequestDto dto) {
 		this.content = dto.content();
 		this.rating = dto.rating();
 	}

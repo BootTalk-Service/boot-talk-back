@@ -12,8 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.icandoit.boottalk.review.dto.ReviewRequestDto;
+import com.icandoit.boottalk.review.dto.ReviewCreateRequestDto;
 import com.icandoit.boottalk.review.dto.ReviewResponseDto;
+import com.icandoit.boottalk.review.dto.ReviewUpdateRequestDto;
 import com.icandoit.boottalk.review.service.ReviewService;
 
 import jakarta.validation.Valid;
@@ -28,7 +29,7 @@ public class ReviewController {
 
 	// 리뷰 등록
 	@PostMapping
-	public ResponseEntity<ReviewResponseDto> create(@RequestBody @Valid ReviewRequestDto request) {
+	public ResponseEntity<ReviewResponseDto> create(@RequestBody @Valid ReviewCreateRequestDto request) {
 		Long userId = 1L; // test
 		return ResponseEntity.ok(reviewService.create(request, userId));
 	}
@@ -52,7 +53,7 @@ public class ReviewController {
 	// 내 리뷰 수정
 	@PutMapping("/my/{reviewId}")
 	public ResponseEntity<ReviewResponseDto> update(@PathVariable Long reviewId,
-		@RequestBody @Valid ReviewRequestDto request) {
+		@RequestBody @Valid ReviewUpdateRequestDto request) {
 		Long userId = 1L; // test
 		return ResponseEntity.ok(reviewService.update(request, reviewId, userId));
 

@@ -19,7 +19,7 @@ public record ReviewResponseDto(
 			review.getReviewId(),
 			review.getCourse().getTrainingProgramId(),
 			review.getCourse().getCourseName(),
-			review.getUser().getName(),
+			review.getUser().getUserName(),
 			review.getContent(),
 			review.getRating(),
 			review.getCreatedAt(),

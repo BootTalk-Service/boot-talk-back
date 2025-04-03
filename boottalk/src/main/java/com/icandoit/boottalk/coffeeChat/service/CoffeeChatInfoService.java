@@ -33,12 +33,12 @@ public class CoffeeChatInfoService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        if (coffeeChatInfoRepository.existsByUserId(userId)) {
+        if (coffeeChatInfoRepository.existsByUser_UserId(userId)) {
             throw new CustomException(ErrorCode.COFFEE_CHAT_ALREADY_EXISTS);
         }
         CoffeeChatInfo coffeeChatInfo = CoffeeChatInfo.of(
             user,
-            user.getName(),
+            user.getUserName(),
             requestDto.userType(),
             requestDto.jobType(),
             requestDto.introduction()
