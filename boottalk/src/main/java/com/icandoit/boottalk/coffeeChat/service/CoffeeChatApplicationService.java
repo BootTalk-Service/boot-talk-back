@@ -114,7 +114,7 @@ public class CoffeeChatApplicationService {
 
     private void validateCoffeeChatApplication(Long userId, Long applierId, Long coffeeChatInfoId) {
         // 해당 사용자가 작성한 커피챗 신청자인지 확인
-        if (userId != applierId) {
+        if (!userId.equals(applierId)) {
             throw new CustomException(ErrorCode.NOT_COFFEE_CHAT_APPLICATION_OWNER);
         }
 
