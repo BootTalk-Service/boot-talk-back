@@ -95,13 +95,11 @@ public class CoffeeChatTimeService {
             .toList();
     }
 
-    private List<CoffeeChatTime> getCoffeeChatTimesOrThrow(Long userId) {
+    private List<CoffeeChatTime> getMentoCoffeeChatTimesOrThrow(Long mentoId) {
 
-        List<CoffeeChatTime> coffeeChatTimes = coffeeChatTimeRepository.findAllWithCoffeeChatInfoByUserId(
-            userId);
-        if (coffeeChatTimes.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_COFFEE_CHAT_NOT_FOUND);
-        }
-        return coffeeChatTimes;
+        return Optional.ofNullable(
+                coffeeChatTimeRepository.findAllWithCoffeeChatInfoByUserId(mentoId))
+            .filter(list -> !list.isEmpty())
+            .orElseThrow(() -> new CustomException(ErrorCode.USER_COFFEE_CHAT_NOT_FOUND));
     }
 }
