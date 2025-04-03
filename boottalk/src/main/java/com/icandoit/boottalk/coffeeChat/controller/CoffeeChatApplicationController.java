@@ -1,10 +1,14 @@
 package com.icandoit.boottalk.coffeeChat.controller;
 
+import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationCreateDto;
+import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationResponseDto;
+import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationUpdateDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoApprovedDto;
+import com.icandoit.boottalk.coffeeChat.service.CoffeeChatApplicationService;
 import com.icandoit.boottalk.common.dto.PagedResponseDto;
+import jakarta.validation.Valid;
 import java.util.List;
-
-import org.springframework.data.domain.Page;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,14 +19,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationCreateDto;
-import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationResponseDto;
-import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationUpdateDto;
-import com.icandoit.boottalk.coffeeChat.service.CoffeeChatApplicationService;
-
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/coffee-chats/applications")
@@ -51,7 +47,8 @@ public class CoffeeChatApplicationController {
 
     // 나의 수락된 커피챗 목록 조회
     @GetMapping("/approved")
-    public ResponseEntity<PagedResponseDto<CoffeeChatInfoApprovedDto>> getApprovedCoffeeChats(Pageable pageable) {
+    public ResponseEntity<PagedResponseDto<CoffeeChatInfoApprovedDto>> getApprovedCoffeeChats(
+        Pageable pageable) {
         Long userId = 1L;
         return ResponseEntity.ok(coffeeChatAppService.getApprovedCoffeeChats(userId, pageable));
     }
@@ -63,7 +60,8 @@ public class CoffeeChatApplicationController {
         @Valid @RequestBody CoffeeChatApplicationUpdateDto request) {
         // TODO : 사용자 인증 사용 시 수정
         Long userId = 1L;
-        return ResponseEntity.ok(coffeeChatAppService.updateCoffeeChatApp(userId, coffeeChatAppId, request));
+        return ResponseEntity.ok(
+            coffeeChatAppService.updateCoffeeChatApp(userId, coffeeChatAppId, request));
     }
 
     // 커피챗 신청 삭제
