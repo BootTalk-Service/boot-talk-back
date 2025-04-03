@@ -1,4 +1,4 @@
-package com.icandoit.boottalk.config;
+package com.icandoit.boottalk.common.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
