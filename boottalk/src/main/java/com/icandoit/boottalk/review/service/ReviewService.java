@@ -31,6 +31,7 @@ public class ReviewService {
 
 	@Transactional
 	public ReviewResponseDto create(ReviewRequestDto request, Long userId) {
+		// TODO : 리뷰 작성시 해당 코스에 평점 반영하는 로직 필요
 		String trainingProgramId = request.trainingProgramId();
 
 		validateCreateReview(trainingProgramId, userId);
@@ -69,6 +70,7 @@ public class ReviewService {
 	
 	@Transactional
 	public ReviewResponseDto update(ReviewRequestDto request, Long reviewId, Long userId) {
+		// TODO : 리뷰 수정시 해당 코스의 평점 업데이트 하는 로직 추가
 		Review review = getReview(reviewId);
 
 		validateCourse(review.getCourse().getTrainingProgramId());
@@ -81,7 +83,7 @@ public class ReviewService {
 
 	@Transactional
 	public void delete(Long reviewId, Long userId) {
-
+		// TODO : 리뷰 삭제시 해당 코스의 평점 업데이트하는 로직 추가
 		Review review = getReview(reviewId);
 		validateCourse(review.getCourse().getTrainingProgramId());
 		validateReview(review.getUser().getUserId(), userId);

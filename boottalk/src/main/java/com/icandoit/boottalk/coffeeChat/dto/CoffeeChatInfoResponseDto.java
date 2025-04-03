@@ -21,7 +21,7 @@ public record CoffeeChatInfoResponseDto(
         return new CoffeeChatInfoResponseDto(
             coffeeChatInfo.getCoffeeChatInfoId(),
             coffeeChatInfo.getUser().getUserId(),
-            coffeeChatInfo.getUser().getName(),
+            coffeeChatInfo.getUser().getUserName(),
             coffeeChatInfo.getUserType(),
             coffeeChatInfo.getJobType(),
             coffeeChatInfo.getIntroduction(),
