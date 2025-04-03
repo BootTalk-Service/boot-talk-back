@@ -11,6 +11,7 @@ public enum ErrorCode {
     INSUFFICIENT_POINT(400, "잔여 포인트가 부족합니다."),
 
     /* 401 UNAUTHORIZED */
+    INVALID_TOKEN(401, "유효한 토큰이 아닙니다."),
 
     EXCEEDS_MAX_LENGTH(400,"최대 길이를 초과했습니다." ),
     /* 403 FORBIDDEN */
@@ -32,7 +33,8 @@ public enum ErrorCode {
     COFFEE_CHAT_ALREADY_EXISTS(409, "이미 생성된 커피챗이 있습니다."),
 
     /* 500 INTERNAL_SERVER_ERROR */
-    INTERNAL_SERVER_ERROR(500, "서버 오류가 발생했습니다.");
+    INTERNAL_SERVER_ERROR(500, "서버 오류가 발생했습니다."),
+    TOKEN_PARSING_ERROR(500, "토큰 파싱 과정에서 오류가 발생했습니다.");
 
     private final Integer httpStatus;
     private final String message;
