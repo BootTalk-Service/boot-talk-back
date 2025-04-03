@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CoffeeChatInfoRepository extends JpaRepository<CoffeeChatInfo, Long> {
 
-    Optional<CoffeeChatInfo> findByUser_UserId(Long userId);
+    Optional<CoffeeChatInfo> findByMento_UserId(Long userId);
 
-    boolean existsByUser_UserId(Long userId);
+    boolean existsByMento_UserId(Long userId);
 }

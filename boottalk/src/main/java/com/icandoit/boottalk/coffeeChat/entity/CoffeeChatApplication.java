@@ -38,7 +38,7 @@ public class CoffeeChatApplication extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User applier;
+    private User mentee;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coffee_chat_info_id", nullable = false)
@@ -59,7 +59,7 @@ public class CoffeeChatApplication extends BaseEntity {
 
     public static CoffeeChatApplication of(User user, CoffeeChatInfo coffeeChatInfo, CoffeeChatApplicationCreateDto dto) {
         return CoffeeChatApplication.builder()
-            .applier(user)
+            .mentee(user)
             .coffeeChatInfo(coffeeChatInfo)
             .content(dto.content())
             .coffeeChatStartTime(dto.coffeeChatStartTime())

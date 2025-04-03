@@ -1,13 +1,13 @@
 package com.icandoit.boottalk.coffeeChat.dto;
 
 import com.icandoit.boottalk.coffeeChat.entity.enums.JobType;
-import com.icandoit.boottalk.coffeeChat.entity.enums.UserType;
+import com.icandoit.boottalk.coffeeChat.entity.enums.MentoType;
 
 public record CoffeeChatListDto(
     Long coffeeChatInfoId,
-    Long userId,
-    String userName,
-    UserType userType,
+    Long mentoUserId,
+    String mentoName,
+    MentoType mentoType,
     JobType jobType,
     String introduction
 ) {

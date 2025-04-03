@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface CoffeeChatApplicationRepository extends JpaRepository<CoffeeChatApplication, Long> {
 
-	List<CoffeeChatApplication> findByApplier_UserId(Long userId);
+	List<CoffeeChatApplication> findByMentee_UserId(Long userId);
 
 	@Query("SELECT ca FROM CoffeeChatApplication ca WHERE ca.applier.userId = :userId AND ca.status = 'CONFIRMED'")
 	Page<CoffeeChatInfoResponseDto> findConfirmedChatsByUserId(Long userId, Pageable pageable);

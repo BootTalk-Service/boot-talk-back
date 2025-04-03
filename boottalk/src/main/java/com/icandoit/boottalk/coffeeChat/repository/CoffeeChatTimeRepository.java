@@ -8,6 +8,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface CoffeeChatTimeRepository extends JpaRepository<CoffeeChatTime, Long> {
 
-    @Query("SELECT ct FROM CoffeeChatTime ct JOIN FETCH ct.coffeeChatInfo WHERE ct.coffeeChatInfo.user.userId = :userId")
+    @Query("SELECT ct FROM CoffeeChatTime ct JOIN FETCH ct.coffeeChatInfo WHERE ct.coffeeChatInfo.mento.userId = :userId")
     List<CoffeeChatTime> findAllWithCoffeeChatInfoByUserId(@Param("userId") Long userId);
 }
