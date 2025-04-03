@@ -43,7 +43,6 @@ public class ReviewConcurrencyTest {
 	private final String trainingProgramId = "CONCURRENT-TPID";
 	private Long userId = 999L;
 
-	// 💡 저장된 엔티티 ID 추적
 	private Long trainingCenterId;
 	private Long courseId;
 
