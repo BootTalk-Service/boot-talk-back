@@ -53,7 +53,7 @@ public class CoffeeChatApplicationService {
         List<CoffeeChatApplication> coffeeChatApps = coffeeChatAppRepository.findByApplier_UserId(userId);
 
         return coffeeChatApps.stream()
-            .map(coffeeChatApp -> CoffeeChatApplicationResponseDto.from(coffeeChatApp))
+            .map(CoffeeChatApplicationResponseDto::from)
             .collect(Collectors.toList());
     }
 
