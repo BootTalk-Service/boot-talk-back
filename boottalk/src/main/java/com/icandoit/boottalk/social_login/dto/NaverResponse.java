@@ -3,6 +3,7 @@ package com.icandoit.boottalk.social_login.dto;
 import java.util.Map;
 
 import lombok.Builder;
+import lombok.Getter;
 
 @Builder
 public record NaverResponse(
@@ -13,13 +14,13 @@ public record NaverResponse(
 	String profileImage
 ) {
 	public static NaverResponse from(Map<String,Object> attributes) {
-		return NaverResponse.builder()
-			.provider("naver")
-			.providerId(attributes.get("id").toString())
-			.email(attributes.get("email").toString())
-			.name(attributes.get("name").toString())
-			.profileImage(attributes.get("profile_image").toString())
-			.build();
+		return new NaverResponse(
+			"naver",
+			attributes.get("id").toString(),
+			attributes.get("email").toString(),
+			attributes.get("name").toString(),
+			attributes.get("profile_image").toString()
+		);
 	}
 
 }
