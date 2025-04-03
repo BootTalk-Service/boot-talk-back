@@ -1,7 +1,7 @@
 package com.icandoit.boottalk.coffeeChat.service;
 
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeDto;
-import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeRequestDto;
+import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeListDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeResponseDto;
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatInfo;
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatTime;
@@ -9,7 +9,6 @@ import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatInfoRepository;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatTimeRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
-import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -25,11 +24,11 @@ public class CoffeeChatTimeService {
     private final CoffeeChatTimeRepository coffeeChatTimeRepository;
 
     @Transactional
-    public List<CoffeeChatTimeResponseDto> createCoffeeChatTimes(Long userId,
-        @Valid CoffeeChatTimeRequestDto requestDto) {
+    public List<CoffeeChatTimeResponseDto> createCoffeeChatTimes(Long mentoId,
+        CoffeeChatTimeListDto requestDto) {
 
         // todo: 유저조회
-        CoffeeChatInfo coffeeChatInfo = coffeeChatInfoRepository.findByMento_UserId(userId)
+        CoffeeChatInfo coffeeChatInfo = coffeeChatInfoRepository.findByMento_UserId(mentoId)
             .orElseThrow(() -> new CustomException(
                 ErrorCode.USER_COFFEE_CHAT_NOT_FOUND));
 
@@ -48,12 +47,12 @@ public class CoffeeChatTimeService {
         coffeeChatTimeRepository.saveAll(coffeeChatTimes);
         return coffeeChatTimes.stream()
             .map(CoffeeChatTimeResponseDto::from)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<CoffeeChatTimeResponseDto> getMyCoffeeChatTimes(Long userId) {
-        List<CoffeeChatTime> coffeeChatTimes = getCoffeeChatTimesOrThrow(userId);
+    public List<CoffeeChatTimeResponseDto> getMyCoffeeChatTimes(Long mentoId) {
+        List<CoffeeChatTime> coffeeChatTimes = getMentoCoffeeChatTimesOrThrow(mentoId);
 
         return coffeeChatTimes.stream()
             .map(CoffeeChatTimeResponseDto::from)
