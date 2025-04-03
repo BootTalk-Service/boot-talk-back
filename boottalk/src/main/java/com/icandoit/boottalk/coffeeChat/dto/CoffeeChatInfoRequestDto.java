@@ -1,15 +1,17 @@
 package com.icandoit.boottalk.coffeeChat.dto;
 
 import com.icandoit.boottalk.coffeeChat.entity.enums.JobType;
-import com.icandoit.boottalk.coffeeChat.entity.enums.UserType;
+import com.icandoit.boottalk.coffeeChat.entity.enums.MentoType;
+
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record CoffeeChatInfoRequestDto(
-    @NotBlank(message = "userType은 필수 입력값입니다.")
-    UserType userType,
+    @NotNull(message = "mentoType은 필수 입력값입니다.")
+    MentoType mentoType,
 
-    @NotBlank(message = "jobType은 필수 입력값입니다.")
+    @NotNull(message = "jobType은 필수 입력값입니다.")
     JobType jobType,
 
     @NotBlank(message = "소개글은 필수 입력값입니다.")

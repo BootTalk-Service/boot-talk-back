@@ -4,7 +4,7 @@ import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoRequestDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoResponseDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatListDto;
 import com.icandoit.boottalk.coffeeChat.entity.enums.JobType;
-import com.icandoit.boottalk.coffeeChat.entity.enums.UserType;
+import com.icandoit.boottalk.coffeeChat.entity.enums.MentoType;
 import com.icandoit.boottalk.coffeeChat.service.CoffeeChatInfoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -50,14 +50,14 @@ public class CoffeeChatInfoController {
     @GetMapping("/search")
     public ResponseEntity<Page<CoffeeChatListDto>> getCoffeeChats(
         @RequestParam(required = false) JobType jobType,
-        @RequestParam(required = false) UserType userType,
+        @RequestParam(required = false) MentoType mentoType,
         @PageableDefault(
             sort = "CREATED_AT",
             direction = Sort.Direction.DESC
         ) Pageable pageable
     ) {
         return ResponseEntity.ok(
-            coffeeChatInfoService.getFilteredCoffeeChatResults(jobType, userType, pageable)
+            coffeeChatInfoService.getFilteredCoffeeChatResults(jobType, mentoType, pageable)
         );
     }
 
