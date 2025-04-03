@@ -37,7 +37,15 @@ public class JwtFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
 
-		// 테스트를 위한 필터 적용 해제
+		// swagger 접근 시 필터 적용 X
+		String requestURI = request.getRequestURI();
+
+		if (requestURI.startsWith("/swagger-ui/")
+			|| requestURI.startsWith("/v3/api-docs"))
+		{
+			filterChain.doFilter(request, response);
+			return;
+		}
 
 
 		// 처음 로그인하고 나서 리다이렉트 된 url에서는 토큰이 헤더에 담겨져 있지 않고 쿠키에 담겨 있음.
@@ -45,11 +53,7 @@ public class JwtFilter extends OncePerRequestFilter {
 		String token = null;
 
 		// 먼저 헤더에서 토큰 확인
-		try {
-			token = tokenFromHeader(request);
-		} catch (CustomException e) {
-			log.warn(e.getMessage(), e);
-		}
+		token = tokenFromHeader(request);
 
 		// 리다이렉션 후에는 헤더에 토큰이 없기 때문에 쿠키에서 가져와 응답 헤더에 옮기고 그 후 쿠키에 있는 토큰값 삭제
 		if (token == null) {
@@ -98,7 +102,12 @@ public class JwtFilter extends OncePerRequestFilter {
 		String bearerToken = request.getHeader(TOKEN_HEADER);
 		log.info("bearer token {}", bearerToken);
 
-		if (!StringUtils.hasText(bearerToken) || !bearerToken.startsWith(TOKEN_PREFIX)) {
+		if (!StringUtils.hasText(bearerToken)) {
+			return null;
+		}
+
+		// 토큰 형식이 잘못된 경우 예외 발생
+		if (!bearerToken.startsWith(TOKEN_PREFIX)) {
 			throw new CustomException(INVALID_TOKEN);
 		}
 
