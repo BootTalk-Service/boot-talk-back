@@ -13,7 +13,6 @@ import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatQueryRepository;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.hibernate.usertype.UserType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
