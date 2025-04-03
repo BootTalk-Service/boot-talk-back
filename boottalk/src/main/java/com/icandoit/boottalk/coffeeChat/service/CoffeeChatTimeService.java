@@ -29,7 +29,7 @@ public class CoffeeChatTimeService {
         @Valid CoffeeChatTimeRequestDto requestDto) {
 
         // todo: 유저조회
-        CoffeeChatInfo coffeeChatInfo = coffeeChatInfoRepository.findByUser_UserId(userId)
+        CoffeeChatInfo coffeeChatInfo = coffeeChatInfoRepository.findByMento_UserId(userId)
             .orElseThrow(() -> new CustomException(
                 ErrorCode.USER_COFFEE_CHAT_NOT_FOUND));
 
