@@ -5,7 +5,7 @@ import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoResponseDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatListDto;
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatInfo;
 import com.icandoit.boottalk.coffeeChat.entity.enums.JobType;
-import com.icandoit.boottalk.coffeeChat.entity.enums.UserType;
+import com.icandoit.boottalk.coffeeChat.entity.enums.MentoType;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatInfoRepository;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatQueryRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
@@ -33,13 +33,13 @@ public class CoffeeChatInfoService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        if (coffeeChatInfoRepository.existsByUser_UserId(userId)) {
+        if (coffeeChatInfoRepository.existsByMento_UserId(userId)) {
             throw new CustomException(ErrorCode.COFFEE_CHAT_ALREADY_EXISTS);
         }
         CoffeeChatInfo coffeeChatInfo = CoffeeChatInfo.of(
             user,
             user.getUserName(),
-            requestDto.userType(),
+            requestDto.mentoType(),
             requestDto.jobType(),
             requestDto.introduction()
         );
@@ -56,10 +56,10 @@ public class CoffeeChatInfoService {
     @Transactional(readOnly = true) 
     public Page<CoffeeChatListDto> getFilteredCoffeeChatResults(
         @Nullable JobType jobType,
-        @Nullable UserType userType,
+        @Nullable MentoType mentoType,
         Pageable pageable
     ) {
-        return coffeeChatQueryRepository.getFilteredCoffeeChatResults(jobType, userType, pageable);
+        return coffeeChatQueryRepository.getFilteredCoffeeChatResults(jobType, mentoType, pageable);
     }
 
 
@@ -80,7 +80,7 @@ public class CoffeeChatInfoService {
     }
 
     private CoffeeChatInfo getCoffeeChatInfoByUserId(Long userId) {
-        return coffeeChatInfoRepository.findByUser_UserId(userId)
+        return coffeeChatInfoRepository.findByMento_UserId(userId)
             .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 }

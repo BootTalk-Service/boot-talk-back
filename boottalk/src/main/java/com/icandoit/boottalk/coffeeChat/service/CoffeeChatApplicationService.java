@@ -47,7 +47,7 @@ public class CoffeeChatApplicationService {
 	@Transactional(readOnly = true)
     public List<CoffeeChatApplicationResponseDto> getMyCoffeeChatApps(Long userId) {
 
-        List<CoffeeChatApplication> coffeeChatApps = coffeeChatAppRepository.findByApplier_UserId(userId);
+        List<CoffeeChatApplication> coffeeChatApps = coffeeChatAppRepository.findByMentee_UserId(userId);
 
         return coffeeChatApps.stream()
             .map(coffeeChatApp -> CoffeeChatApplicationResponseDto.from(coffeeChatApp))
@@ -61,7 +61,7 @@ public class CoffeeChatApplicationService {
 
         validateCoffeeChatApplication(
             userId,
-            coffeeChatApp.getApplier().getUserId(),
+            coffeeChatApp.getMentee().getUserId(),
             coffeeChatApp.getCoffeeChatInfo().getCoffeeChatInfoId()
         );
 
@@ -80,7 +80,7 @@ public class CoffeeChatApplicationService {
         CoffeeChatApplication coffeeChatApp = getCoffeeChatApplication(coffeeChatAppId);
         validateCoffeeChatApplication(
             userId,
-            coffeeChatApp.getApplier().getUserId(),
+            coffeeChatApp.getMentee().getUserId(),
             coffeeChatApp.getCoffeeChatInfo().getCoffeeChatInfoId()
         );
 
@@ -103,9 +103,9 @@ public class CoffeeChatApplicationService {
             .orElseThrow(() -> new CustomException(ErrorCode.COFFEE_CHAT_APPLICATION_NOT_FOUND));
     }
 
-    private void validateCoffeeChatApplication(Long userId, Long applierId, Long coffeeChatInfoId) {
+    private void validateCoffeeChatApplication(Long userId, Long menteeId, Long coffeeChatInfoId) {
         // 해당 사용자가 작성한 커피챗 신청자인지 확인
-        if (userId != applierId) {
+        if (!userId.equals(menteeId)) {
             throw new CustomException(ErrorCode.NOT_COFFEE_CHAT_APPLICATION_OWNER);
         }
 

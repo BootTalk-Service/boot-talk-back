@@ -8,5 +8,5 @@ import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatApplication;
 
 public interface CoffeeChatApplicationRepository extends JpaRepository<CoffeeChatApplication, Long> {
 
-	List<CoffeeChatApplication> findByApplier_UserId(Long userId);
+	List<CoffeeChatApplication> findByMentee_UserId(Long userId);
 }
