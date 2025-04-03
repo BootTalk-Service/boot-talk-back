@@ -4,8 +4,9 @@ import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
 import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
-import com.icandoit.boottalk.review.dto.ReviewRequestDto;
+import com.icandoit.boottalk.review.dto.ReviewCreateRequestDto;
 import com.icandoit.boottalk.review.dto.ReviewResponseDto;
+import com.icandoit.boottalk.review.dto.ReviewUpdateRequestDto;
 import com.icandoit.boottalk.review.entity.Review;
 import com.icandoit.boottalk.review.repository.ReviewRepository;
 import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
@@ -30,7 +31,7 @@ public class ReviewService {
 	private final CourseRepository courseRepository;
 
 	@Transactional
-	public ReviewResponseDto create(ReviewRequestDto request, Long userId) {
+	public ReviewResponseDto create(ReviewCreateRequestDto request, Long userId) {
 		// TODO : 리뷰 작성시 해당 코스에 평점 반영하는 로직 필요
 		String trainingProgramId = request.trainingProgramId();
 
@@ -69,7 +70,7 @@ public class ReviewService {
 	}
 	
 	@Transactional
-	public ReviewResponseDto update(ReviewRequestDto request, Long reviewId, Long userId) {
+	public ReviewResponseDto update(ReviewUpdateRequestDto request, Long reviewId, Long userId) {
 		// TODO : 리뷰 수정시 해당 코스의 평점 업데이트 하는 로직 추가
 		Review review = getReview(reviewId);
 
