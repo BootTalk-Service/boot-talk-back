@@ -40,7 +40,7 @@ public class CoffeeChatApplicationService {
 
         // TODO: 포인트 차감
 
-        return CoffeeChatApplicationResponseDto.fromDetail(coffeeChatApp);
+        return CoffeeChatApplicationResponseDto.from(coffeeChatApp);
 
     }
 
@@ -50,14 +50,8 @@ public class CoffeeChatApplicationService {
         List<CoffeeChatApplication> coffeeChatApps = coffeeChatAppRepository.findByApplier_UserId(userId);
 
         return coffeeChatApps.stream()
-            .map(coffeeChatApp -> CoffeeChatApplicationResponseDto.fromListAll(coffeeChatApp))
+            .map(coffeeChatApp -> CoffeeChatApplicationResponseDto.from(coffeeChatApp))
             .collect(Collectors.toList());
-    }
-
-	@Transactional(readOnly = true)
-    public CoffeeChatApplicationResponseDto getCoffeeChatApp(Long coffeeChatAppId) {
-        return CoffeeChatApplicationResponseDto.fromDetail(
-            getCoffeeChatApplication(coffeeChatAppId));
     }
 
     @Transactional
@@ -78,7 +72,7 @@ public class CoffeeChatApplicationService {
 
         coffeeChatApp.setContent(request.content());
 
-        return CoffeeChatApplicationResponseDto.fromDetail(coffeeChatApp);
+        return CoffeeChatApplicationResponseDto.from(coffeeChatApp);
     }
 
     @Transactional

@@ -40,8 +40,14 @@ public class BootcampService {
 	}
 
 	// 부트캠프 목록 페이징
+	// TODO : 평균 평점도 같이 리턴해야 함 - 기본조건 진행중인 부트캠프여야 할 예정
+	// TODO : 필터 : 지역(시로 구분), 기간별(최신순, 오래된 순) - 개강 날짜, 직무별, 평점(점수대 별로 0 ~ 1, 1 ~ 2, 2 ~ 3, 3 이상)
 	@Transactional(readOnly = true)
 	public Page<Bootcamp> findAll(Pageable pageable) {
 		return bootcampRepository.findAll(pageable);
 	}
+
+	// TODO : 해당 부트캠프의 리뷰 전체 조회
+
+
 }
