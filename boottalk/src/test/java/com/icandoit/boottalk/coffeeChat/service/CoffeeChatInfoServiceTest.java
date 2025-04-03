@@ -32,7 +32,7 @@ class CoffeeChatInfoServiceTest {
     private CoffeeChatQueryRepository coffeeChatQueryRepository;
 
     @InjectMocks
-    private CoffeeChatInfoService coffeeChatInfoService;
+    private CoffeeChatQueryService coffeeChatQueryService;
 
     private List<CoffeeChatListDto> coffeeChatList;
     private Page<CoffeeChatListDto> coffeeChatPage;
@@ -41,7 +41,8 @@ class CoffeeChatInfoServiceTest {
     @BeforeEach
     void setUp() {
         coffeeChatList = Arrays.asList(
-            new CoffeeChatListDto(1L, 1L, "test1", UserType.PROFESSIONAL, JobType.BACKEND, "백엔드 현업자 test1입니다."),
+            new CoffeeChatListDto(1L, 1L, "test1", UserType.PROFESSIONAL, JobType.BACKEND,
+                "백엔드 현업자 test1입니다."),
             new CoffeeChatListDto(2L, 2L, "test2", UserType.GRADUATE, JobType.FRONTEND,
                 "프론트엔드 코스 수료자 test2 입니다.")
         );
@@ -57,7 +58,7 @@ class CoffeeChatInfoServiceTest {
             pageable)).thenReturn(coffeeChatPage);
 
         // when
-        Page<CoffeeChatListDto> result = coffeeChatInfoService.getFilteredCoffeeChatResults(null,
+        Page<CoffeeChatListDto> result = coffeeChatQueryService.getFilteredCoffeeChatResults(null,
             null, pageable);
 
         // then
@@ -82,7 +83,8 @@ class CoffeeChatInfoServiceTest {
         when(coffeeChatQueryRepository.getFilteredCoffeeChatResults(jobType, null, pageable))
             .thenReturn(filteredPage);
 
-        Page<CoffeeChatListDto> result = coffeeChatInfoService.getFilteredCoffeeChatResults(jobType,
+        Page<CoffeeChatListDto> result = coffeeChatQueryService.getFilteredCoffeeChatResults(
+            jobType,
             null, pageable);
 
         assertNotNull(result);
@@ -107,7 +109,7 @@ class CoffeeChatInfoServiceTest {
             .thenReturn(filteredPage);
 
         // when
-        Page<CoffeeChatListDto> result = coffeeChatInfoService.getFilteredCoffeeChatResults(null,
+        Page<CoffeeChatListDto> result = coffeeChatQueryService.getFilteredCoffeeChatResults(null,
             userType, pageable);
 
         // then

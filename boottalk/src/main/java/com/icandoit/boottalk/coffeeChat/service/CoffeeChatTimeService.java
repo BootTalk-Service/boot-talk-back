@@ -46,7 +46,6 @@ public class CoffeeChatTimeService {
         }
 
         coffeeChatTimeRepository.saveAll(coffeeChatTimes);
-
         return coffeeChatTimes.stream()
             .map(CoffeeChatTimeResponseDto::from)
             .collect(Collectors.toList());
@@ -54,15 +53,20 @@ public class CoffeeChatTimeService {
 
     @Transactional(readOnly = true)
     public List<CoffeeChatTimeResponseDto> getMyCoffeeChatTimes(Long userId) {
-        List<CoffeeChatTime> coffeeChatTimes = coffeeChatTimeRepository.findAllWithCoffeeChatInfoByUserId(
-            userId);
-
-        if (coffeeChatTimes.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_COFFEE_CHAT_NOT_FOUND);
-        }
+        List<CoffeeChatTime> coffeeChatTimes = getCoffeeChatTimesOrThrow(userId);
 
         return coffeeChatTimes.stream()
             .map(CoffeeChatTimeResponseDto::from)
             .collect(Collectors.toList());
+    }
+
+    private List<CoffeeChatTime> getCoffeeChatTimesOrThrow(Long userId) {
+
+        List<CoffeeChatTime> coffeeChatTimes = coffeeChatTimeRepository.findAllWithCoffeeChatInfoByUserId(
+            userId);
+        if (coffeeChatTimes.isEmpty()) {
+            throw new CustomException(ErrorCode.USER_COFFEE_CHAT_NOT_FOUND);
+        }
+        return coffeeChatTimes;
     }
 }

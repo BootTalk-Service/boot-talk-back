@@ -1,7 +1,10 @@
 package com.icandoit.boottalk.coffeeChat.controller;
 
+import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoResponseDto;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,6 +46,13 @@ public class CoffeeChatApplicationController {
         // TODO : 사용자 인증 사용 시 수정
         Long userId = 1L;
         return ResponseEntity.ok(coffeeChatAppService.getMyCoffeeChatApps(userId));
+    }
+
+    @GetMapping("/confirmed")
+    public ResponseEntity<Page<CoffeeChatInfoResponseDto>> getConfirmedCoffeeChats(Pageable pageable) {
+
+        Long userId = 1L;
+        return ResponseEntity.ok(coffeeChatAppService.getConfirmedCoffeeChats(userId,pageable));
     }
 
     // 커피챗 신청 수정

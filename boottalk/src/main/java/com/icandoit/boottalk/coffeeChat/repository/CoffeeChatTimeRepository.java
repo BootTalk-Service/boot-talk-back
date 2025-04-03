@@ -10,5 +10,4 @@ public interface CoffeeChatTimeRepository extends JpaRepository<CoffeeChatTime, 
 
     @Query("SELECT ct FROM CoffeeChatTime ct JOIN FETCH ct.coffeeChatInfo WHERE ct.coffeeChatInfo.user.userId = :userId")
     List<CoffeeChatTime> findAllWithCoffeeChatInfoByUserId(@Param("userId") Long userId);
-
 }

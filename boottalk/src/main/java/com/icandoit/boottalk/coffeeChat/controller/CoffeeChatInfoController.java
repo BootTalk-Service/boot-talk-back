@@ -6,6 +6,7 @@ import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatListDto;
 import com.icandoit.boottalk.coffeeChat.entity.enums.JobType;
 import com.icandoit.boottalk.coffeeChat.entity.enums.UserType;
 import com.icandoit.boottalk.coffeeChat.service.CoffeeChatInfoService;
+import com.icandoit.boottalk.coffeeChat.service.CoffeeChatQueryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CoffeeChatInfoController {
 
     private final CoffeeChatInfoService coffeeChatInfoService;
+    private final CoffeeChatQueryService coffeeChatQueryService;
 
 
     @PostMapping("/user-info")
@@ -57,7 +59,7 @@ public class CoffeeChatInfoController {
         ) Pageable pageable
     ) {
         return ResponseEntity.ok(
-            coffeeChatInfoService.getFilteredCoffeeChatResults(jobType, userType, pageable)
+            coffeeChatQueryService.getFilteredCoffeeChatResults(jobType, userType, pageable)
         );
     }
 
