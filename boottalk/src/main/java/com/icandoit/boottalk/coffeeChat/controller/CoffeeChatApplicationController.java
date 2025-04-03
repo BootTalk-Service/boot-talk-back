@@ -1,6 +1,6 @@
 package com.icandoit.boottalk.coffeeChat.controller;
 
-import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoResponseDto;
+import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoApprovedDto;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -48,8 +48,9 @@ public class CoffeeChatApplicationController {
         return ResponseEntity.ok(coffeeChatAppService.getMyCoffeeChatApps(userId));
     }
 
-    @GetMapping("/confirmed")
-    public ResponseEntity<Page<CoffeeChatInfoResponseDto>> getConfirmedCoffeeChats(Pageable pageable) {
+    // 나의 수락된 커피챗 목록 조회
+    @GetMapping("/approved")
+    public ResponseEntity<Page<CoffeeChatInfoApprovedDto>> getConfirmedCoffeeChats(Pageable pageable) {
 
         Long userId = 1L;
         return ResponseEntity.ok(coffeeChatAppService.getConfirmedCoffeeChats(userId,pageable));

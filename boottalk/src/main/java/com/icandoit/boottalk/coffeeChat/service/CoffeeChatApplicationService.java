@@ -1,6 +1,6 @@
 package com.icandoit.boottalk.coffeeChat.service;
 
-import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoResponseDto;
+import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoApprovedDto;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -58,9 +58,9 @@ public class CoffeeChatApplicationService {
     }
 
     @Transactional(readOnly = true)
-    public Page<CoffeeChatInfoResponseDto> getConfirmedCoffeeChats(Long userId, Pageable pageable) {
-
-        return coffeeChatAppRepository.findConfirmedChatsByUserId(userId, pageable);
+    public Page<CoffeeChatInfoApprovedDto> getConfirmedCoffeeChats(Long userId, Pageable pageable) {
+        return coffeeChatAppRepository.findConfirmedChatsByUserId(userId, pageable)
+            .map(CoffeeChatInfoApprovedDto::from);
     }
 
     @Transactional
