@@ -8,8 +8,8 @@ import com.icandoit.boottalk.coffeeChat.entity.enums.StatusType;
 public record CoffeeChatApplicationResponseDto(
     Long coffeeChatAppId,
     Long coffeeChatInfoId,
-    Long applierUserId,
-    String applierName,
+    Long menteeUserId,
+    String menteeName,
     StatusType status,
     String content,
     LocalDateTime coffeeChatStartTime,
@@ -21,8 +21,8 @@ public record CoffeeChatApplicationResponseDto(
         return new CoffeeChatApplicationResponseDto(
             coffeeChatApp.getCoffeeChatAppId(),
             coffeeChatApp.getCoffeeChatInfo().getCoffeeChatInfoId(),
-            coffeeChatApp.getApplier().getUserId(),
-            coffeeChatApp.getApplier().getUserName(),
+            coffeeChatApp.getMentee().getUserId(),
+            coffeeChatApp.getMentee().getUserName(),
             coffeeChatApp.getStatus(),
             coffeeChatApp.getContent(),
             coffeeChatApp.getCoffeeChatStartTime(),
