@@ -26,7 +26,7 @@ public class CoffeeChatReceivedController {
     private final CoffeeChatReceivedService coffeeChatReceivedService;
 
     // 수신된 커피챗 신청 목록 조회 (멘티가 나에게 신청한 커피챗 신청 목록 조회)
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<List<CoffeeChatApplicationResponseDto>> getReceivedCoffeeChatApplications(
     ) {
         // TODO : 사용자 인증 사용 시 수정

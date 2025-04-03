@@ -52,7 +52,7 @@ public class CoffeeChatApplicationService {
 
         return coffeeChatApps.stream()
             .map(coffeeChatApp -> CoffeeChatApplicationResponseDto.from(coffeeChatApp))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     @Transactional
