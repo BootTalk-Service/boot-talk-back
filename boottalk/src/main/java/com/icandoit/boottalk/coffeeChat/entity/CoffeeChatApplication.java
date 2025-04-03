@@ -72,4 +72,8 @@ public class CoffeeChatApplication extends BaseEntity {
         this.content = content;
     }
 
+    public void setStatus(StatusType status) {
+        this.status = status;
+    }
+
 }
