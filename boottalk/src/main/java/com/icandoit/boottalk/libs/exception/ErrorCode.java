@@ -26,6 +26,7 @@ public enum ErrorCode {
     COFFEE_CHAT_NOT_FOUND(404,"커피챗을 찾을 수 없습니다."),
     USER_COFFEE_CHAT_NOT_FOUND(404,"유저의 해당하는 커피챗을 찾을 수 없습니다."),
     COFFEE_CHAT_APPLICATION_NOT_FOUND(404,"커피챗 신청 내역을 찾을 수 없습니다."),
+    COURSE_NOT_FOUND(404, "코스를 찾을 수 없습니다."),
 
     /* 409 CONFLICT */
     DUPLICATE_REVIEW(409,"해당 부트캠프에 이미 리뷰를 작성하였습니다."),
