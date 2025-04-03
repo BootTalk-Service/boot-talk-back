@@ -2,7 +2,7 @@ package com.icandoit.boottalk.coffeeChat.service;
 
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatListDto;
 import com.icandoit.boottalk.coffeeChat.entity.enums.JobType;
-import com.icandoit.boottalk.coffeeChat.entity.enums.MentoType;
+import com.icandoit.boottalk.coffeeChat.entity.enums.MentorType;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatQueryRepository;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ public class CoffeeChatQueryService {
     @Transactional(readOnly = true)
     public Page<CoffeeChatListDto> getFilteredCoffeeChatResults(
         @Nullable JobType jobType,
-        @Nullable MentoType userType,
+        @Nullable MentorType userType,
         Pageable pageable
     ) {
         return coffeeChatQueryRepository.getFilteredCoffeeChatResults(jobType, userType, pageable);

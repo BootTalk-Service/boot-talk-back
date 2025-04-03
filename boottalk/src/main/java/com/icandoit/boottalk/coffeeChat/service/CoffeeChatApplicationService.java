@@ -58,12 +58,6 @@ public class CoffeeChatApplicationService {
             .collect(Collectors.toList());
     }
 
-//    @Transactional(readOnly = true)
-//    public Page<CoffeeChatInfoApprovedDto> getApprovedCoffeeChats(Long userId, Pageable pageable) {
-//        return coffeeChatAppRepository.findApprovedChatsByUserId(userId, pageable)
-//            .map(CoffeeChatInfoApprovedDto::from);
-//    }
-
     @Transactional(readOnly = true)
     public PagedResponseDto<CoffeeChatInfoApprovedDto> getApprovedCoffeeChats(Long userId, Pageable pageable) {
         Page<CoffeeChatInfoApprovedDto> page = coffeeChatAppRepository.findApprovedChatsByUserId(userId, pageable)

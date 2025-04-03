@@ -2,7 +2,7 @@ package com.icandoit.boottalk.coffeeChat.controller;
 
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatListDto;
 import com.icandoit.boottalk.coffeeChat.entity.enums.JobType;
-import com.icandoit.boottalk.coffeeChat.entity.enums.MentoType;
+import com.icandoit.boottalk.coffeeChat.entity.enums.MentorType;
 import com.icandoit.boottalk.coffeeChat.service.CoffeeChatQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,14 +24,14 @@ public class CoffeeChatQueryController {
     @GetMapping("/search")
     public ResponseEntity<Page<CoffeeChatListDto>> getCoffeeChats(
         @RequestParam(required = false) JobType jobType,
-        @RequestParam(required = false) MentoType mentoType,
+        @RequestParam(required = false) MentorType mentorType,
         @PageableDefault(
             sort = "CREATED_AT",
             direction = Sort.Direction.DESC
         ) Pageable pageable
     ) {
         return ResponseEntity.ok(
-            coffeeChatQueryService.getFilteredCoffeeChatResults(jobType, mentoType, pageable)
+            coffeeChatQueryService.getFilteredCoffeeChatResults(jobType, mentorType, pageable)
         );
     }
 }

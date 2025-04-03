@@ -24,11 +24,11 @@ public class CoffeeChatTimeService {
     private final CoffeeChatTimeRepository coffeeChatTimeRepository;
 
     @Transactional
-    public List<CoffeeChatTimeResponseDto> createCoffeeChatTimes(Long mentoId,
+    public List<CoffeeChatTimeResponseDto> createCoffeeChatTimes(Long userId,
         CoffeeChatTimeListDto requestDto) {
 
         // todo: 유저조회
-        CoffeeChatInfo coffeeChatInfo = coffeeChatInfoRepository.findByMento_UserId(mentoId)
+        CoffeeChatInfo coffeeChatInfo = coffeeChatInfoRepository.findBymentor_UserId(userId)
             .orElseThrow(() -> new CustomException(
                 ErrorCode.USER_COFFEE_CHAT_NOT_FOUND));
 
@@ -51,8 +51,8 @@ public class CoffeeChatTimeService {
     }
 
     @Transactional(readOnly = true)
-    public List<CoffeeChatTimeResponseDto> getMyCoffeeChatTimes(Long mentoId) {
-        List<CoffeeChatTime> coffeeChatTimes = getMentoCoffeeChatTimesOrThrow(mentoId);
+    public List<CoffeeChatTimeResponseDto> getMyCoffeeChatTimes(Long userId) {
+        List<CoffeeChatTime> coffeeChatTimes = getmentorCoffeeChatTimesOrThrow(userId);
 
         return coffeeChatTimes.stream()
             .map(CoffeeChatTimeResponseDto::from)
@@ -60,10 +60,10 @@ public class CoffeeChatTimeService {
     }
 
     @Transactional
-    public List<CoffeeChatTimeResponseDto> updateCoffeeChatTimes(Long mentoId,
+    public List<CoffeeChatTimeResponseDto> updateCoffeeChatTimes(Long userId,
         CoffeeChatTimeListDto requestDto) {
         // 기존 멘토의 커피챗 시간 조회 (없으면 예외 발생)
-        List<CoffeeChatTime> existingTimeSlots = getMentoCoffeeChatTimesOrThrow(mentoId);
+        List<CoffeeChatTime> existingTimeSlots = getmentorCoffeeChatTimesOrThrow(userId);
 
         // 새로운 시간 리스트를 CoffeeChatTime 엔티티 리스트로 변환
         CoffeeChatInfo coffeeChatInfo = existingTimeSlots.get(0).getCoffeeChatInfo();
@@ -89,15 +89,15 @@ public class CoffeeChatTimeService {
         coffeeChatTimeRepository.deleteAll(toDelete);
         coffeeChatTimeRepository.saveAll(toAdd);
 
-        return coffeeChatTimeRepository.findAllWithCoffeeChatInfoByUserId(mentoId).stream()
+        return coffeeChatTimeRepository.findAllWithCoffeeChatInfoByUserId(userId).stream()
             .map(CoffeeChatTimeResponseDto::from)
             .toList();
     }
 
-    private List<CoffeeChatTime> getMentoCoffeeChatTimesOrThrow(Long mentoId) {
+    private List<CoffeeChatTime> getmentorCoffeeChatTimesOrThrow(Long userId) {
 
         return Optional.ofNullable(
-                coffeeChatTimeRepository.findAllWithCoffeeChatInfoByUserId(mentoId))
+                coffeeChatTimeRepository.findAllWithCoffeeChatInfoByUserId(userId))
             .filter(list -> !list.isEmpty())
             .orElseThrow(() -> new CustomException(ErrorCode.USER_COFFEE_CHAT_NOT_FOUND));
     }
