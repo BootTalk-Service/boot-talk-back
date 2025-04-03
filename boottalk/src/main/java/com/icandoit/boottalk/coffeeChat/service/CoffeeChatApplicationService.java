@@ -1,6 +1,7 @@
 package com.icandoit.boottalk.coffeeChat.service;
 
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoApprovedDto;
+import com.icandoit.boottalk.common.dto.PagedResponseDto;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -57,11 +58,20 @@ public class CoffeeChatApplicationService {
             .collect(Collectors.toList());
     }
 
+//    @Transactional(readOnly = true)
+//    public Page<CoffeeChatInfoApprovedDto> getApprovedCoffeeChats(Long userId, Pageable pageable) {
+//        return coffeeChatAppRepository.findApprovedChatsByUserId(userId, pageable)
+//            .map(CoffeeChatInfoApprovedDto::from);
+//    }
+
     @Transactional(readOnly = true)
-    public Page<CoffeeChatInfoApprovedDto> getConfirmedCoffeeChats(Long userId, Pageable pageable) {
-        return coffeeChatAppRepository.findConfirmedChatsByUserId(userId, pageable)
+    public PagedResponseDto<CoffeeChatInfoApprovedDto> getApprovedCoffeeChats(Long userId, Pageable pageable) {
+        Page<CoffeeChatInfoApprovedDto> page = coffeeChatAppRepository.findApprovedChatsByUserId(userId, pageable)
             .map(CoffeeChatInfoApprovedDto::from);
+
+        return PagedResponseDto.from(page);
     }
+
 
     @Transactional
     public CoffeeChatApplicationResponseDto updateCoffeeChatApp(

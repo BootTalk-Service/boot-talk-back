@@ -18,5 +18,5 @@ public interface CoffeeChatApplicationRepository extends JpaRepository<CoffeeCha
     WHERE (ca.mentee.userId = :userId OR ca.coffeeChatInfo.mento.userId = :userId)
     AND ca.status = 'APPROVED'
 """)
-	Page<CoffeeChatApplication> findConfirmedChatsByUserId(@Param("userId") Long userId, Pageable pageable);
+	Page<CoffeeChatApplication> findApprovedChatsByUserId(@Param("userId") Long userId, Pageable pageable);
 }
