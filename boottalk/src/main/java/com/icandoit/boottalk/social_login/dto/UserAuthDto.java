@@ -7,15 +7,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Getter
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class UserAuthDto {
 
-	private Long serviceUserId;
-	private String resourceUserId;
-	private UserRole role;
+@Builder
+public record UserAuthDto(
+	Long serviceUserId,
+	String resourceUserId,
+	UserRole role
+) {
 
 	public static UserAuthDto from(User user, UserRole role) {
 		return UserAuthDto.builder()

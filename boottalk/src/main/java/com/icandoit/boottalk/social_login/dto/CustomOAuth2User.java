@@ -8,10 +8,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import lombok.AllArgsConstructor;
-import lombok.ToString;
 
 @AllArgsConstructor
-@ToString
 public class CustomOAuth2User implements OAuth2User {
 
 	private final UserAuthDto userAuthDto;
@@ -30,7 +28,7 @@ public class CustomOAuth2User implements OAuth2User {
 
 			@Override
 			public String getAuthority() {
-				return userAuthDto.getRole().name();
+				return userAuthDto.role().name();
 			}
 		});
 
@@ -40,12 +38,12 @@ public class CustomOAuth2User implements OAuth2User {
 	@Override
 	public String getName() {
 
-		return userAuthDto.getResourceUserId();
+		return userAuthDto.resourceUserId();
 	}
 
 	public Long getServiceUserId() {
 
-		return userAuthDto.getServiceUserId();
+		return userAuthDto.serviceUserId();
 	}
 
 }
