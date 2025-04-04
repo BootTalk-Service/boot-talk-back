@@ -2,7 +2,6 @@ package com.icandoit.boottalk.libs.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 
 @Getter
 @RequiredArgsConstructor
@@ -12,8 +11,8 @@ public enum ErrorCode {
     INVALID_DAY_FORMAT(400, "유효하지 않은 요일 형식입니다."),
     INVALID_TIME_FORMAT(400, "유효하지 않은 시간 형식입니다."),
     INSUFFICIENT_POINT(400, "잔여 포인트가 부족합니다."),
-    EXCEEDS_MAX_LENGTH(400,"최대 길이를 초과했습니다." ),
-    COFFEE_CHAT_STATUS_NOT_PENDING (400, "대기 중 상태가 아니므로 상태를 변경할 수 없습니다."),
+    EXCEEDS_MAX_LENGTH(400, "최대 길이를 초과했습니다."),
+    COFFEE_CHAT_STATUS_NOT_PENDING(400, "대기 중 상태가 아니므로 상태를 변경할 수 없습니다."),
 
     /* 401 UNAUTHORIZED */
     INVALID_TOKEN(401, "유효한 토큰이 아닙니다."),
@@ -26,16 +25,16 @@ public enum ErrorCode {
 
     /* 404 NOT_FOUND */
     NOT_FOUND(404, "요청한 리소스를 찾을 수 없습니다."),
-    USER_NOT_FOUND(404,"유저를 찾을 수 없습니다."),
-    BOOTCAMP_NOT_FOUND(404,"부트캠프를 찾을 수 없습니다."),
-    REVIEW_NOT_FOUND(404,"리뷰를 찾을 수 없습니다."),
-    COFFEE_CHAT_NOT_FOUND(404,"커피챗을 찾을 수 없습니다."),
-    USER_COFFEE_CHAT_NOT_FOUND(404,"유저의 해당하는 커피챗을 찾을 수 없습니다."),
-    COFFEE_CHAT_APPLICATION_NOT_FOUND(404,"커피챗 신청 내역을 찾을 수 없습니다."),
+    USER_NOT_FOUND(404, "유저를 찾을 수 없습니다."),
+    BOOTCAMP_NOT_FOUND(404, "부트캠프를 찾을 수 없습니다."),
+    REVIEW_NOT_FOUND(404, "리뷰를 찾을 수 없습니다."),
+    COFFEE_CHAT_NOT_FOUND(404, "커피챗을 찾을 수 없습니다."),
+    USER_COFFEE_CHAT_NOT_FOUND(404, "유저의 해당하는 커피챗을 찾을 수 없습니다."),
+    COFFEE_CHAT_APPLICATION_NOT_FOUND(404, "커피챗 신청 내역을 찾을 수 없습니다."),
     COURSE_NOT_FOUND(404, "코스를 찾을 수 없습니다."),
 
     /* 409 CONFLICT */
-    DUPLICATE_REVIEW(409,"해당 부트캠프에 이미 리뷰를 작성하였습니다."),
+    DUPLICATE_REVIEW(409, "해당 부트캠프에 이미 리뷰를 작성하였습니다."),
     NOT_PENDING_STATUS(409, "커피챗 신청이 '대기 중' 상태일 때만 수정할 수 있습니다."),
     COFFEE_CHAT_ALREADY_EXISTS(409, "이미 생성된 커피챗이 있습니다."),
     ALREADY_CREATED_COFFEE_CHAT_TIME(409, "해당 유저의 커피챗 시간이 등록되어 있습니다."),
