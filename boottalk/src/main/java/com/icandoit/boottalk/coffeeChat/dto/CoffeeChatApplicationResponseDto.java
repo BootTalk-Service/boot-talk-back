@@ -10,7 +10,7 @@ public record CoffeeChatApplicationResponseDto(
     Long coffeeChatInfoId,
     Long menteeUserId,
     String menteeName,
-    String mentoName,
+    String mentorName,
     StatusType status,
     String content,
     LocalDateTime coffeeChatStartTime,
