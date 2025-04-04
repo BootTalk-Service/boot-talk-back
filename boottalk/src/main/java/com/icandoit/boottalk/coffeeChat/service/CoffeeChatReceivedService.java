@@ -48,7 +48,7 @@ public class CoffeeChatReceivedService {
 
         CoffeeChatApplication coffeeChatApp = coffeeChatAppService.getCoffeeChatApplication(coffeeChatAppId);
 
-        Long mentoId = coffeeChatApp.getCoffeeChatInfo().getMento().getUserId();
+        Long mentoId = coffeeChatApp.getCoffeeChatInfo().getMentor().getUserId();
 
         validateCoffeeChatOwner(mentoId, userId);
         validatePendingStatus(coffeeChatApp.getStatus());

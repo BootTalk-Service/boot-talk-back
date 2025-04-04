@@ -20,3 +20,12 @@ spring:
     jdbc:
       initialize-schema: always # 테이블이 만들어진 이후에넌 never 로 변경하는 것이 좋음
 
+  security:
+    oauth2:
+      registration:
+        naver:
+          client-id: "ri7TwT1zZMlrY3i2D8nO"
+          client-secret: "heiQ7arFX7"
+
+  jwt:
+    secret: "vmfhaltmskdlstkfkdgodyroqkfwkdbalroqkfwkdbalaaaaaaaaaaaaaaaabbbbb"
