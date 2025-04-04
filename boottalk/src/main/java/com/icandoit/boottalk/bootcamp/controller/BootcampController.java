@@ -1,7 +1,5 @@
 package com.icandoit.boottalk.bootcamp.controller;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,8 +12,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.icandoit.boottalk.bootcamp.dto.BootcampResponseDto;
-import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
+import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.service.BootcampService;
+import com.icandoit.boottalk.common.dto.PagedResponseDto;
 import com.icandoit.boottalk.review.dto.ReviewResponseDto;
 import com.icandoit.boottalk.review.service.ReviewService;
 
@@ -29,19 +28,49 @@ public class BootcampController {
 	private final BootcampService bootcampService;
 	private final ReviewService reviewService;
 
-	// 부트캠프 목록 조회
+	// 지역별(시), 카테고리별(BootcampCategory), 평균 평점 별(없음, 1, 2, 3, 4 이상), 기간별 (4주 미만, 4 ~ 12주, 12 주 이상)
+	// 전체 조회 or 필터 기반 조회 (키워드 없음)
 	@GetMapping
-	public ResponseEntity<List<BootcampResponseDto>> getAllBootcamps(
-		@RequestParam(defaultValue = "0") int page,
-		@RequestParam(defaultValue = "10") int size
+	public ResponseEntity<PagedResponseDto<BootcampResponseDto>> getBootcamps(
+		@RequestParam(required = false) String region,
+		@RequestParam(required = false) String category,
+		@RequestParam(required = false) Integer minRating,
+		@RequestParam(required = false) Integer duration,
+		Pageable pageable
 	) {
-		// TODO : 페이징 처리 수정, 테스트 코드 작성, 필터 조회
-		// TODO : Response 에 총 리뷰 수와 평균 평점 추가
-		Pageable pageable = PageRequest.of(page, size);
-		Page<Bootcamp> bootcampPage = bootcampService.findAll(pageable);
-		List<BootcampResponseDto> bootcampResponseDtoList = BootcampResponseDto.from(bootcampPage.getContent());
+		BootcampCategoryType categoryEnum = null;
 
-		return ResponseEntity.ok(bootcampResponseDtoList);
+		if (category != null) {
+			categoryEnum = BootcampCategoryType.fromKoreanName(category);
+		}
+
+		Page<BootcampResponseDto> result = bootcampService.searchBootcamps(
+			region, categoryEnum, minRating, duration, null, null, pageable
+		);
+		return ResponseEntity.ok(PagedResponseDto.from(result));
+	}
+
+	// 검색 기반 조회 (키워드 + 필터 + 정렬 포함)
+	@GetMapping("/search")
+	public ResponseEntity<PagedResponseDto<BootcampResponseDto>> searchBootcamps(
+		@RequestParam(required = false) String region,
+		@RequestParam(required = false) BootcampCategoryType category,
+		@RequestParam(required = false) Integer minRating,
+		@RequestParam(required = false) Integer duration,
+		@RequestParam(required = false) String keyword,
+		@RequestParam(defaultValue = "latest") String sort,
+		Pageable pageable
+	) {
+		BootcampCategoryType categoryEnum = null;
+
+		if (category != null) {
+			categoryEnum = BootcampCategoryType.fromKoreanName(category.name());
+		}
+
+		Page<BootcampResponseDto> result = bootcampService.searchBootcamps(
+			region, categoryEnum, minRating, duration, keyword, sort, pageable
+		);
+		return ResponseEntity.ok(PagedResponseDto.from(result));
 	}
 
 	// 단일 부트캠프 조회
@@ -52,13 +81,14 @@ public class BootcampController {
 
 	// 특정 부트캠프의 훈련 과정 (Course) 에 작성된 리뷰를 페이징으로 조회
 	@GetMapping("/{bootcampId}/reviews")
-	public ResponseEntity<Page<ReviewResponseDto>> getCourseReviews(
+	public ResponseEntity<PagedResponseDto<ReviewResponseDto>> getCourseReviews(
 		@PathVariable Long bootcampId,
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size
 	) {
 		Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-		return ResponseEntity.ok(reviewService.getReviewsBootcampId(bootcampId, pageable));
+		Page<ReviewResponseDto> result = reviewService.getReviewsBootcampId(bootcampId, pageable);
+
+		return ResponseEntity.ok(PagedResponseDto.from(result));
 	}
-	// TODO : 검색 조회 (엔드 포인트 /search 진행 예정)
 }

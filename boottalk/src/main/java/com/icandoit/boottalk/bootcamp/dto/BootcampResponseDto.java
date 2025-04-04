@@ -17,7 +17,9 @@ public record BootcampResponseDto(
 	int bootcampDegree,
 	int bootcampCapacity,
 	LocalDate bootcampStartDate,
-	LocalDate bootcampEndDate
+	LocalDate bootcampEndDate,
+	Double courseAverageRating,
+	Integer courseReviewCount
 ) {
 	public static BootcampResponseDto from(Bootcamp bootcamp) {
 		return new BootcampResponseDto(
@@ -31,7 +33,9 @@ public record BootcampResponseDto(
 			bootcamp.getBootcampDegree(),
 			bootcamp.getBootcampCapacity(),
 			bootcamp.getBootcampStartDate(),
-			bootcamp.getBootcampEndDate()
+			bootcamp.getBootcampEndDate(),
+			bootcamp.getCourse().getAverageRating(),
+			bootcamp.getCourse().getReviewCount()
 		);
 	}
 
@@ -41,4 +45,3 @@ public record BootcampResponseDto(
 			.collect(Collectors.toList());
 	}
 }
-
