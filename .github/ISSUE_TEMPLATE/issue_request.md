@@ -1,8 +1,8 @@
 ---
-name: Feature Request
+name: issue Request
 about: 새로운 기능 추가, 개선, 리팩토링 등 기능 관련 요청
-title: "[Feature] 간단한 제목 작성"
-labels: feature
+title: "[issue] 간단한 제목 작성"
+labels: issue
 assignees: ''
 
 ---
