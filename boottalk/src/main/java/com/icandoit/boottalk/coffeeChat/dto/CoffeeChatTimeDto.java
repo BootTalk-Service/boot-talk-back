@@ -6,8 +6,7 @@ import java.time.LocalTime;
 
 public record CoffeeChatTimeDto(
     @NotNull DayOfWeek dayOfWeek,
-    @NotNull LocalTime startTime,
-    @NotNull LocalTime endTime
+    @NotNull LocalTime startTime
 ) {
 
 }
