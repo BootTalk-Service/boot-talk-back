@@ -4,7 +4,7 @@ import java.sql.Timestamp;
 
 import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
 import com.icandoit.boottalk.libs.entity.BaseEntity;
-import com.icandoit.boottalk.user.domain.form.SignUpForm;
+
 import com.icandoit.boottalk.user.domain.form.UpdateForm;
 
 import jakarta.persistence.Column;
@@ -48,22 +48,10 @@ public class User extends BaseEntity {
 	@Setter
 	private Timestamp deletedAt;
 
-	public static User of(SignUpForm form) {
-		return User.builder()
-			.userName(form.getUserName())
-			.email(form.getEmail())
-			.profileImage(form.getProfileImage())
-			.resourceUserId(form.getResourceUserId())
-			.desiredCareer(form.getDesiredCareer())
-			.deletedAt(null)
-			.build();
-	}
 
 	public User updateOf(UpdateForm form) {
-		this.email = form.getEmail();
-		this.profileImage = form.getProfileImage();
-		this.desiredCareer = form.getDesiredCareer();
+		this.profileImage = form.profileImage();
+		this.desiredCareer = form.desiredCareer();
 		return this;
 	}
-
 }
