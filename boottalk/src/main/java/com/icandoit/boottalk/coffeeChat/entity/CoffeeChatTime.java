@@ -12,8 +12,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.LocalTime;
-import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,6 +27,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "coffee_chat_time")
 public class CoffeeChatTime {
+    private static final Duration DURATION = Duration.ofMinutes(30);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -57,19 +58,8 @@ public class CoffeeChatTime {
         this.coffeeChatInfo = coffeeChatInfo;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        CoffeeChatTime that = (CoffeeChatTime) o;
-        return dayOfWeek == that.dayOfWeek &&
-            Objects.equals(startTime, that.startTime) &&
-            Objects.equals(endTime, that.endTime) &&
-            Objects.equals(coffeeChatInfo, that.coffeeChatInfo);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(coffeeChatInfo, dayOfWeek, startTime, endTime);
+    // 정책 : endTime : startTime + 30min
+    public LocalTime getEndTime() {
+        return startTime.plus(DURATION);
     }
 }
