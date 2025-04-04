@@ -76,7 +76,8 @@ public class CoffeeChatTimeService {
         CoffeeChatInfo coffeeChatInfo = coffeeChatInfoRepository.findBymentor_UserId(userId)
             .orElseThrow(() -> new CustomException(ErrorCode.USER_COFFEE_CHAT_NOT_FOUND));
 
-        List<CoffeeChatTime> existingTimes = coffeeChatTimeRepository.findAllWithCoffeeChatInfoByUserId(userId);
+        List<CoffeeChatTime> existingTimes = coffeeChatTimeRepository.findAllWithCoffeeChatInfoByUserId(
+            userId);
 
         // 변환된 새 요청 리스트
         List<CoffeeChatTimeDto> newDtos = CoffeeChatTimeConverter.toDtoList(requestDto);
@@ -92,24 +93,31 @@ public class CoffeeChatTimeService {
 
         // 삭제 대상: 기존엔 있었는데, 새 요청에는 없는 것
         List<CoffeeChatTime> toDelete = existingTimes.stream()
-            .filter(time -> !newKeys.contains(generateKey(time.getDayOfWeek(), time.getStartTime())))
+            .filter(
+                time -> !newKeys.contains(generateKey(time.getDayOfWeek(), time.getStartTime())))
             .toList();
 
         // 추가 대상: 새 요청에는 있는데 기존에는 없는 것
         List<CoffeeChatTime> toAdd = newDtos.stream()
             .filter(dto -> !existingKeys.contains(generateKey(dto.dayOfWeek(), dto.startTime())))
             .map(dto -> {
-                CoffeeChatTime time = CoffeeChatTime.of(coffeeChatInfo, dto.dayOfWeek(), dto.startTime());
+                CoffeeChatTime time = CoffeeChatTime.of(coffeeChatInfo, dto.dayOfWeek(),
+                    dto.startTime());
                 coffeeChatInfo.addAvailableTime(time);
                 return time;
             })
             .toList();
 
-        coffeeChatTimeRepository.deleteAll(toDelete);
-        coffeeChatTimeRepository.saveAll(toAdd);
+        if (!toDelete.isEmpty()) {
+            coffeeChatTimeRepository.deleteAll(toDelete);
+        }
+        if (!toAdd.isEmpty()) {
+            coffeeChatTimeRepository.saveAll(toAdd);
+        }
 
         // 최종 조회된 전체 시간 목록 반환
-        List<CoffeeChatTime> finalList = coffeeChatTimeRepository.findAllWithCoffeeChatInfoByUserId(userId);
+        List<CoffeeChatTime> finalList = coffeeChatTimeRepository.findAllWithCoffeeChatInfoByUserId(
+            userId);
         return finalList.stream().map(CoffeeChatTimeResponseDto::from).toList();
     }
 
