@@ -40,7 +40,8 @@ public class SecurityConfiguration {
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
 				// 경로에 대한 접근 권한 설정
-				.requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+				// TODO  : 추후에 접근 가능한 페이지 설정
+				.requestMatchers("/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 				.anyRequest().authenticated())
 			.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
 			//oauth2 로그인 설정
