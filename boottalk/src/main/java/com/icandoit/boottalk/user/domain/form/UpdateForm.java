@@ -7,12 +7,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
+
 @Builder
-public class UpdateForm {
-  private String email;
-  private String profileImage;
-  private BootcampCategoryType desiredCareer;
+public record UpdateForm(
+    String profileImage,
+    BootcampCategoryType desiredCareer
+) {
 }
