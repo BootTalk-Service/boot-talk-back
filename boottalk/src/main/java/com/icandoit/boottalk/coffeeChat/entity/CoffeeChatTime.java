@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -59,5 +60,21 @@ public class CoffeeChatTime {
 
     void setCoffeeChatInfo(CoffeeChatInfo coffeeChatInfo) {
         this.coffeeChatInfo = coffeeChatInfo;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CoffeeChatTime that = (CoffeeChatTime) o;
+        return dayOfWeek == that.dayOfWeek &&
+            Objects.equals(startTime, that.startTime) &&
+            Objects.equals(endTime, that.endTime) &&
+            Objects.equals(coffeeChatInfo, that.coffeeChatInfo);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(coffeeChatInfo, dayOfWeek, startTime, endTime);
     }
 }
