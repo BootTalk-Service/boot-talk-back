@@ -2,16 +2,16 @@ package com.icandoit.boottalk.coffeeChat.dto;
 
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatInfo;
 import com.icandoit.boottalk.coffeeChat.entity.enums.JobType;
-import com.icandoit.boottalk.coffeeChat.entity.enums.MentoType;
+import com.icandoit.boottalk.coffeeChat.entity.enums.MentorType;
 
 import java.time.LocalDateTime;
 
 
 public record CoffeeChatInfoResponseDto(
     Long coffeeChatInfoId,
-    Long mentoUserId,
-    String mentoName,
-    MentoType mentoType,
+    Long mentorUserId,
+    String mentorName,
+    MentorType mentorType,
     JobType jobType,
     String introduction,
     LocalDateTime createdAt,
@@ -21,9 +21,9 @@ public record CoffeeChatInfoResponseDto(
     public static CoffeeChatInfoResponseDto from(CoffeeChatInfo coffeeChatInfo) {
         return new CoffeeChatInfoResponseDto(
             coffeeChatInfo.getCoffeeChatInfoId(),
-            coffeeChatInfo.getMento().getUserId(),
-            coffeeChatInfo.getMento().getUserName(),
-            coffeeChatInfo.getMentoType(),
+            coffeeChatInfo.getMentor().getUserId(),
+            coffeeChatInfo.getMentor().getUserName(),
+            coffeeChatInfo.getMentorType(),
             coffeeChatInfo.getJobType(),
             coffeeChatInfo.getIntroduction(),
             coffeeChatInfo.getCreatedAt(),

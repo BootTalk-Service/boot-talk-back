@@ -1,8 +1,12 @@
 package com.icandoit.boottalk.coffeeChat.service;
 
+import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoApprovedDto;
+import com.icandoit.boottalk.common.dto.PagedResponseDto;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,9 +55,19 @@ public class CoffeeChatApplicationService {
         List<CoffeeChatApplication> coffeeChatApps = coffeeChatAppRepository.findByMentee_UserId(userId);
 
         return coffeeChatApps.stream()
-            .map(coffeeChatApp -> CoffeeChatApplicationResponseDto.from(coffeeChatApp))
+            .map(CoffeeChatApplicationResponseDto::from)
             .toList();
+
     }
+
+    @Transactional(readOnly = true)
+    public PagedResponseDto<CoffeeChatInfoApprovedDto> getApprovedCoffeeChats(Long userId, Pageable pageable) {
+        Page<CoffeeChatInfoApprovedDto> page = coffeeChatAppRepository.findApprovedChatsByUserId(userId, pageable)
+            .map(CoffeeChatInfoApprovedDto::from);
+
+        return PagedResponseDto.from(page);
+    }
+
 
     @Transactional
     public CoffeeChatApplicationResponseDto updateCoffeeChatApp(

@@ -2,7 +2,7 @@ package com.icandoit.boottalk.coffeeChat.entity;
 
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoRequestDto;
 import com.icandoit.boottalk.coffeeChat.entity.enums.JobType;
-import com.icandoit.boottalk.coffeeChat.entity.enums.MentoType;
+import com.icandoit.boottalk.coffeeChat.entity.enums.MentorType;
 import com.icandoit.boottalk.libs.entity.BaseEntity;
 import com.icandoit.boottalk.user.domain.entity.User;
 import jakarta.persistence.CascadeType;
@@ -41,14 +41,14 @@ public class CoffeeChatInfo extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User mento;
+    private User mentor;
 
     @Column(nullable = false, updatable = false)
-    private String mentoName;
+    private String mentorName;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private MentoType mentoType;
+    private MentorType mentorType;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -60,19 +60,19 @@ public class CoffeeChatInfo extends BaseEntity {
     @OneToMany(mappedBy = "coffeeChatInfo", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CoffeeChatTime> availableTimes = new ArrayList<>();
 
-    public static CoffeeChatInfo of(User mento, String mentoName, MentoType mentoType, JobType jobType,
+    public static CoffeeChatInfo of(User mentor, String mentorName, MentorType mentorType, JobType jobType,
         String introduction) {
         return CoffeeChatInfo.builder()
-            .mento(mento)
-            .mentoName(mentoName)
-            .mentoType(mentoType)
+            .mentor(mentor)
+            .mentorName(mentorName)
+            .mentorType(mentorType)
             .jobType(jobType)
             .introduction(introduction)
             .build();
     }
 
     public void update(CoffeeChatInfoRequestDto requestDto) {
-        this.mentoType = requestDto.mentoType();
+        this.mentorType = requestDto.mentorType();
         this.jobType = requestDto.jobType();
         this.introduction = requestDto.introduction();
     }
