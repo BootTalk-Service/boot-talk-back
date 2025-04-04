@@ -1,17 +1,25 @@
 package com.icandoit.boottalk.review.service;
 
+import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
+import com.icandoit.boottalk.bootcamp.entity.Course;
+import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
-import com.icandoit.boottalk.review.dto.ReviewRequestDto;
+import com.icandoit.boottalk.review.dto.ReviewCreateRequestDto;
 import com.icandoit.boottalk.review.dto.ReviewResponseDto;
+import com.icandoit.boottalk.review.dto.ReviewUpdateRequestDto;
 import com.icandoit.boottalk.review.entity.Review;
 import com.icandoit.boottalk.review.repository.ReviewRepository;
 import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
+import com.icandoit.boottalk.user.domain.entity.User;
 import com.icandoit.boottalk.user.domain.repository.UserRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,24 +30,27 @@ public class ReviewService {
 	private final BootcampRepository bootcampRepository;
 	private final UserRepository userRepository;
 	private final ReviewRepository reviewRepository;
-
+	private final CourseRepository courseRepository;
 
 	@Transactional
-	public ReviewResponseDto create(ReviewRequestDto request, Long userId) {
-		Long bootcampId = request.bootcampId();
+	public ReviewResponseDto create(ReviewCreateRequestDto request, Long userId) {
+		String trainingProgramId = request.trainingProgramId();
 
-		validateCreateReview(bootcampId, userId);
-		validateBootCamp(bootcampId);
+		validateCreateReview(trainingProgramId, userId);
 
-		Review review = Review.of(
-			request,
-			bootcampRepository.findById(bootcampId).get(),
-			userRepository.findById(userId).get()
-		);
+		// 비관적 락으로 course 를 조회
+		Course course = getCourseWithLock(trainingProgramId);
+
+		User user = userRepository.getReferenceById(userId);
+
+		Review review = Review.of(request, course, user);
+
+		// course 점수 업데이트
+		updateCourseReviewStats(course, request.rating(), 1);
+
 		reviewRepository.save(review);
 
 		// TODO: 포인트 적립 추가
-
 		return ReviewResponseDto.from(review);
 	}
 
@@ -49,7 +60,7 @@ public class ReviewService {
 		List<Review> reviews = reviewRepository.findAll();
 
 		return reviews.stream()
-			.map(review -> ReviewResponseDto.from(review))
+			.map(ReviewResponseDto::from)
 			.collect(Collectors.toList());
 	}
 
@@ -59,16 +70,22 @@ public class ReviewService {
 		List<Review> reviews = reviewRepository.findByUser_UserId(userId);
 
 		return reviews.stream()
-			.map(review -> ReviewResponseDto.from(review))
+			.map(ReviewResponseDto::from)
 			.collect(Collectors.toList());
 	}
 	
 	@Transactional
-	public ReviewResponseDto update(ReviewRequestDto request, Long reviewId, Long userId) {
+	public ReviewResponseDto update(ReviewUpdateRequestDto request, Long reviewId, Long userId) {
 
 		Review review = getReview(reviewId);
-		validateBootCamp(review.getBootcamp().getBootcampId());
+
 		validateReview(review.getUser().getUserId(), userId);
+
+		// 비관적 락으로 코드 조회
+		Course course = getCourseWithLock(review.getCourse().getTrainingProgramId());
+
+		// 기존 평점 제거 후 새 평점 반영
+		updateCourseReviewStats(course, request.rating() - review.getRating(), 0);
 
 		review.update(request);
 
@@ -77,15 +94,26 @@ public class ReviewService {
 
 	@Transactional
 	public void delete(Long reviewId, Long userId) {
-
 		Review review = getReview(reviewId);
-		validateBootCamp(review.getBootcamp().getBootcampId());
+
 		validateReview(review.getUser().getUserId(), userId);
 
-		// TODO: 리뷰를 삭제하면 이미 리뷰 작성으로 적립받은 포인트는 어떻게 되는 것인지?
+		Course course = getCourseWithLock(review.getCourse().getTrainingProgramId());
 
+		updateCourseReviewStats(course, -review.getRating(), -1);
+
+		// TODO: 리뷰를 삭제하면 이미 리뷰 작성으로 적립받은 포인트는 어떻게 되는 것인지?
 		reviewRepository.delete(review);
 
+	}
+
+	// 부트캠프 ID 로부터 Course 를 조회한 후, 해당 Course 에 작성된 리뷰를 페이징 처리하여 반환
+	@Transactional(readOnly = true)
+	public Page<ReviewResponseDto> getReviewsBootcampId(Long bootcampId, Pageable pageable) {
+		Bootcamp bootcamp = getBootcamp(bootcampId);
+
+		return reviewRepository.findByCourse(bootcamp.getCourse(), pageable)
+			.map(ReviewResponseDto::from);
 	}
 
 	private Review getReview(Long id) {
@@ -93,8 +121,8 @@ public class ReviewService {
 			orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
 	}
 
-	private void validateCreateReview(Long bootcampId, Long userId) {
-		if (reviewRepository.existsByBootcamp_BootcampIdAndUser_UserId(bootcampId, userId)) {
+	private void validateCreateReview(String trainingProgramId, Long userId) {
+		if (reviewRepository.existsByCourse_TrainingProgramIdAndUser_UserId(trainingProgramId, userId)) {
 			throw new CustomException(ErrorCode.DUPLICATE_REVIEW);
 		}
 	}
@@ -105,10 +133,28 @@ public class ReviewService {
 		}
 	}
 
-	private void validateBootCamp(Long id) {
-		if (!bootcampRepository.existsById(id)) {
-			throw new CustomException(ErrorCode.BOOTCAMP_NOT_FOUND);
+	private void validateCourse(String trainingProgramId) {
+		if (courseRepository.findByTrainingProgramId(trainingProgramId).isEmpty()) {
+			throw new CustomException(ErrorCode.COURSE_NOT_FOUND);
 		}
+	}
+
+	private Bootcamp getBootcamp(Long id) {
+		return bootcampRepository.findById(id)
+			.orElseThrow(() -> new CustomException(ErrorCode.BOOTCAMP_NOT_FOUND));
+	}
+
+	// 비관적 락을 사용해 course 조회
+	private Course getCourseWithLock(String trainingProgramId) {
+		return courseRepository.findWithLockByTrainingProgramId(trainingProgramId)
+			.orElseThrow(() -> new CustomException(ErrorCode.COURSE_NOT_FOUND));
+	}
+
+	// 리뷰 평점값을 course 에 업데이트
+	private void updateCourseReviewStats(Course course, int deltaScore, int deltaCount) {
+		int newTotalScore = course.getTotalScore() + deltaScore;
+		int newReviewCount = course.getReviewCount() + deltaCount;
+		course.updateReviewStats(newTotalScore, newReviewCount);
 	}
 
 }

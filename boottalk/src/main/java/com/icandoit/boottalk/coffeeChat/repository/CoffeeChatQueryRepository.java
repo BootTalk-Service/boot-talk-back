@@ -3,7 +3,7 @@ package com.icandoit.boottalk.coffeeChat.repository;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatListDto;
 import com.icandoit.boottalk.coffeeChat.entity.QCoffeeChatInfo;
 import com.icandoit.boottalk.coffeeChat.entity.enums.JobType;
-import com.icandoit.boottalk.coffeeChat.entity.enums.UserType;
+import com.icandoit.boottalk.coffeeChat.entity.enums.MentoType;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -24,7 +24,7 @@ public class CoffeeChatQueryRepository {
 
     public Page<CoffeeChatListDto> getFilteredCoffeeChatResults(
         @Nullable JobType jobType,
-        @Nullable UserType userType,
+        @Nullable MentoType mentoType,
         Pageable pageable
     ) {
         QCoffeeChatInfo coffeeChatInfo = QCoffeeChatInfo.coffeeChatInfo;
@@ -33,16 +33,16 @@ public class CoffeeChatQueryRepository {
             .select(Projections.constructor(
                 CoffeeChatListDto.class,
                 coffeeChatInfo.coffeeChatInfoId,
-                coffeeChatInfo.user.userId,
-                coffeeChatInfo.userName,
-                coffeeChatInfo.userType,
+                coffeeChatInfo.mento.userId,
+                coffeeChatInfo.mentoName,
+                coffeeChatInfo.mentoType,
                 coffeeChatInfo.jobType,
                 coffeeChatInfo.introduction
             ))
             .from(coffeeChatInfo)
             .where(
                 jobTypeEq(jobType),
-                userTypeEq(userType)
+                mentoTypeEq(mentoType)
             )
             .orderBy(coffeeChatInfo.createdAt.desc())
             .offset(pageable.getOffset())
@@ -55,7 +55,7 @@ public class CoffeeChatQueryRepository {
             .from(coffeeChatInfo)
             .where(
                 jobTypeEq(jobType),
-                userTypeEq(userType)
+                mentoTypeEq(mentoType)
             );
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
@@ -65,7 +65,7 @@ public class CoffeeChatQueryRepository {
         return jobType != null ? QCoffeeChatInfo.coffeeChatInfo.jobType.eq(jobType) : null;
     }
 
-    private BooleanExpression userTypeEq(UserType userType) {
-        return userType != null ? QCoffeeChatInfo.coffeeChatInfo.userType.eq(userType) : null;
+    private BooleanExpression mentoTypeEq(MentoType mentoType) {
+        return mentoType != null ? QCoffeeChatInfo.coffeeChatInfo.mentoType.eq(mentoType) : null;
     }
 }

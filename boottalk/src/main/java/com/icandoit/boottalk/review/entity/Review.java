@@ -1,12 +1,14 @@
 package com.icandoit.boottalk.review.entity;
 
-import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
+import com.icandoit.boottalk.bootcamp.entity.Course;
 import com.icandoit.boottalk.libs.entity.BaseEntity;
-import com.icandoit.boottalk.review.dto.ReviewRequestDto;
+import com.icandoit.boottalk.review.dto.ReviewCreateRequestDto;
+import com.icandoit.boottalk.review.dto.ReviewUpdateRequestDto;
 import com.icandoit.boottalk.user.domain.entity.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,30 +33,30 @@ public class Review extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long reviewId;
 
-	@ManyToOne
-	@JoinColumn(name = "bootcamp_id", nullable = false)
-	private Bootcamp bootcamp;
-
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "course_id", nullable = false)
+	private Course course;
+
 	@Column(nullable = false)
 	private String content;
+
 	@Column(nullable = false)
 	private int rating;
 
-	public static Review of(ReviewRequestDto dto, Bootcamp bootcamp, User user) {
+	public static Review of(ReviewCreateRequestDto dto, Course course, User user) {
 		return Review.builder()
-			.reviewId(dto.reviewId())
-			.bootcamp(bootcamp)
+			.course(course)
 			.user(user)
 			.content(dto.content())
 			.rating(dto.rating())
 			.build();
 	}
 
-	public void update(ReviewRequestDto dto) {
+	public void update(ReviewUpdateRequestDto dto) {
 		this.content = dto.content();
 		this.rating = dto.rating();
 	}
