@@ -64,8 +64,8 @@ public class CoffeeChatInfoService {
         coffeeChatInfoRepository.delete(coffeeChatInfo);
     }
 
-    private CoffeeChatInfo getCoffeeChatInfoByUserId(Long userId) {
+    protected CoffeeChatInfo getCoffeeChatInfoByUserId(Long userId) {
         return coffeeChatInfoRepository.findBymentor_UserId(userId)
-            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(ErrorCode.USER_COFFEE_CHAT_NOT_FOUND));
     }
 }
