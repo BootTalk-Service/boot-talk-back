@@ -39,7 +39,7 @@ public class CustomUserService extends DefaultOAuth2UserService {
 		NaverResponse naverResponse = NaverResponse.from((Map<String, Object>) oAuth2User.getAttributes().get("response"));
 
 		// 기존 회원과 신규회원 구분할 id
-		String resourceUserId = naverResponse.getProvider() + " " + naverResponse.getProviderId();
+		String resourceUserId = naverResponse.provider() + " " + naverResponse.providerId();
 
 		// 삭제일자가 없는 기존회원 정보 가져오기
 		User user = userRepository.findByResourceUserIdAndDeletedAtIsNull(resourceUserId).orElse(null);
@@ -48,8 +48,8 @@ public class CustomUserService extends DefaultOAuth2UserService {
 		if (user == null) {
 			return new CustomOAuth2User(UserAuthDto.from(
 				userRepository.save(User.builder()
-					.userName(naverResponse.getName())
-					.email(naverResponse.getEmail())
+					.userName(naverResponse.name())
+					.email(naverResponse.email())
 					.resourceUserId(resourceUserId)
 					.build())
 				, NEW_USER

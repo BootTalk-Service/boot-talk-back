@@ -36,7 +36,7 @@ public class JwtFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
 
-
+		// swagger 접근 시 필터 적용 X
 		String requestURI = request.getRequestURI();
 
 		if (requestURI.startsWith("/swagger-ui/")
