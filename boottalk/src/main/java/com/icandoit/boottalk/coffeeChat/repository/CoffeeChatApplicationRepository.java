@@ -12,6 +12,8 @@ public interface CoffeeChatApplicationRepository extends JpaRepository<CoffeeCha
 
 	List<CoffeeChatApplication> findByMentee_UserId(Long userId);
 
+	List<CoffeeChatApplication> findByCoffeeChatInfo_CoffeeChatInfoId(Long userId);
+
 	// Param으로 받은 userId에 따라 멘토 or 멘티의 예약된 커피챗 리스트 조회
 	@Query("""
     SELECT ca FROM CoffeeChatApplication ca

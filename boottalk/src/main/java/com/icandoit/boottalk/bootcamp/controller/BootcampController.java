@@ -36,6 +36,7 @@ public class BootcampController {
 		@RequestParam(defaultValue = "10") int size
 	) {
 		// TODO : 페이징 처리 수정, 테스트 코드 작성, 필터 조회
+		// TODO : Response 에 총 리뷰 수와 평균 평점 추가
 		Pageable pageable = PageRequest.of(page, size);
 		Page<Bootcamp> bootcampPage = bootcampService.findAll(pageable);
 		List<BootcampResponseDto> bootcampResponseDtoList = BootcampResponseDto.from(bootcampPage.getContent());

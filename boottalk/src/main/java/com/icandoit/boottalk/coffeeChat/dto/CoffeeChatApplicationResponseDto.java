@@ -24,7 +24,7 @@ public record CoffeeChatApplicationResponseDto(
             coffeeChatApp.getCoffeeChatInfo().getCoffeeChatInfoId(),
             coffeeChatApp.getMentee().getUserId(),
             coffeeChatApp.getMentee().getUserName(),
-            coffeeChatApp.getCoffeeChatInfo().getMentoName(),
+            coffeeChatApp.getCoffeeChatInfo().getMentorName(),
             coffeeChatApp.getStatus(),
             coffeeChatApp.getContent(),
             coffeeChatApp.getCoffeeChatStartTime(),
