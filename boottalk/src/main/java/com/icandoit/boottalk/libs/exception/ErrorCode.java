@@ -13,6 +13,7 @@ public enum ErrorCode {
     COFFEE_CHAT_STATUS_NOT_PENDING (400, "대기 중 상태가 아니므로 상태를 변경할 수 없습니다."),
 
     /* 401 UNAUTHORIZED */
+    INVALID_TOKEN(401, "유효한 토큰이 아닙니다."),
 
     /* 403 FORBIDDEN */
     FORBIDDEN(403, "권한이 없습니다."),
@@ -38,7 +39,8 @@ public enum ErrorCode {
     COFFEE_CHAT_ALREADY_EXISTS(409, "이미 생성된 커피챗이 있습니다."),
 
     /* 500 INTERNAL_SERVER_ERROR */
-    INTERNAL_SERVER_ERROR(500, "서버 오류가 발생했습니다.");
+    INTERNAL_SERVER_ERROR(500, "서버 오류가 발생했습니다."),
+    TOKEN_PARSING_ERROR(500, "토큰 파싱 과정에서 오류가 발생했습니다.");
 
     private final Integer httpStatus;
     private final String message;

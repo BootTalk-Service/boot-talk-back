@@ -42,7 +42,6 @@ public class User extends BaseEntity {
 	@Column(nullable = false)
 	private String resourceUserId;
 
-	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private BootcampCategoryType desiredCareer;
 
