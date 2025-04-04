@@ -10,6 +10,7 @@ public enum ErrorCode {
     /* 400 BAD_REQUEST */
     INSUFFICIENT_POINT(400, "잔여 포인트가 부족합니다."),
     EXCEEDS_MAX_LENGTH(400,"최대 길이를 초과했습니다." ),
+    COFFEE_CHAT_STATUS_NOT_PENDING (400, "대기 중 상태가 아니므로 상태를 변경할 수 없습니다."),
 
     /* 401 UNAUTHORIZED */
 
@@ -17,6 +18,7 @@ public enum ErrorCode {
     FORBIDDEN(403, "권한이 없습니다."),
     NOT_REVIEW_OWNER(403, "사용자가 작성한 리뷰가 아닙니다."),
     NOT_COFFEE_CHAT_APPLICATION_OWNER(403, "사용자가 작성한 커피챗 신청 내역이 아닙니다."),
+    NOT_COFFEE_CHAT_INFO_OWNER(403, "사용자가 작성한 커피챗 정보가 아닙니다."),
 
     /* 404 NOT_FOUND */
     NOT_FOUND(404, "요청한 리소스를 찾을 수 없습니다."),
