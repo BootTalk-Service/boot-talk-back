@@ -72,17 +72,14 @@ public class CoffeeChatTimeService {
                 timeDto.startTime(), timeDto.endTime()))
             .toList();
 
-        // 기존과 비교 후 존재하지 않을 경우 toDelete 리스트에 추가
+        // 삭제할 시간 찾기 (기존 데이터 중에서 새로운 데이터에 없는 항목)
         List<CoffeeChatTime> toDelete = existingTimeSlots.stream()
-            .filter(
-                existing -> newTimeSlots.stream()
-                    .noneMatch(newSlot -> newSlot.equals(existing)))
+            .filter(existing -> !newTimeSlots.contains(existing))
             .toList();
 
-        // 기존과 비교 후 새롭게 추가된 시간을 toAdd 리스트에 추가
+        // 추가할 시간 찾기 (새로운 데이터 중에서 기존 데이터에 없는 항목)
         List<CoffeeChatTime> toAdd = newTimeSlots.stream()
-            .filter(newSlot -> existingTimeSlots.stream()
-                .noneMatch(existing -> existing.equals(newSlot)))
+            .filter(newSlot -> !existingTimeSlots.contains(newSlot))
             .toList();
 
         // 기존 시간 삭제 및 새로운 시간 추가
