@@ -22,14 +22,13 @@ public class UserTestController {
 
 	private final UserTestService userTestService;
 	private final JwtProvider jwtProvider;
-	private final String TOKEN_PREFIX = "Bearer ";
 
 	//테스트 회원 가입
 	@PostMapping("/signup")
 	public ResponseEntity<String> signUp(@RequestBody TestSignUpForm form) {
 		CustomOAuth2User authUser = userTestService.signUp(form);
 
-		return ResponseEntity.ok(TOKEN_PREFIX +
+		return ResponseEntity.ok(
 			jwtProvider.createToken(authUser.getServiceUserId(), authUser.getName(), UserRole.USER.name()));
 	}
 
@@ -39,7 +38,7 @@ public class UserTestController {
 	public ResponseEntity<String> login(@RequestParam String username) {
 		CustomOAuth2User authUser = userTestService.login(username);
 
-		return ResponseEntity.ok(TOKEN_PREFIX +
+		return ResponseEntity.ok(
 			jwtProvider.createToken(authUser.getServiceUserId(), authUser.getName(), UserRole.USER.name()));
 
 	}
