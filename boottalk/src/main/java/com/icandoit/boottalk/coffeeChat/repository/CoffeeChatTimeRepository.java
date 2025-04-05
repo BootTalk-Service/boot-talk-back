@@ -1,5 +1,6 @@
 package com.icandoit.boottalk.coffeeChat.repository;
 
+import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatInfo;
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,4 +11,6 @@ public interface CoffeeChatTimeRepository extends JpaRepository<CoffeeChatTime, 
 
     @Query("SELECT ct FROM CoffeeChatTime ct JOIN FETCH ct.coffeeChatInfo WHERE ct.coffeeChatInfo.mentor.userId = :mentorId")
     List<CoffeeChatTime> findAllWithCoffeeChatInfoByUserId(@Param("mentorId") Long mentorId);
+
+    boolean existsByCoffeeChatInfo(CoffeeChatInfo coffeeChatInfo);
 }

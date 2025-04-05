@@ -43,20 +43,15 @@ public class CoffeeChatTime {
     @Column(nullable = false)
     private LocalTime startTime;
 
-    @Column(nullable = false)
-    private LocalTime endTime;
-
     // 생성 메서드
     public static CoffeeChatTime of(CoffeeChatInfo coffeeChatInfo, DayOfWeek dayOfWeek,
-        LocalTime startTime, LocalTime endTime) {
+        LocalTime startTime) {
         return CoffeeChatTime.builder()
             .coffeeChatInfo(coffeeChatInfo)
             .dayOfWeek(dayOfWeek)
             .startTime(startTime)
-            .endTime(endTime)
             .build();
     }
-
 
     void setCoffeeChatInfo(CoffeeChatInfo coffeeChatInfo) {
         this.coffeeChatInfo = coffeeChatInfo;

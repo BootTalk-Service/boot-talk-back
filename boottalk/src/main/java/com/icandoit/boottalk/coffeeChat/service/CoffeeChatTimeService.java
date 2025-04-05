@@ -2,14 +2,15 @@ package com.icandoit.boottalk.coffeeChat.service;
 
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeListDto;
+import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeMapDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeResponseDto;
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatInfo;
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatTime;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatInfoRepository;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatTimeRepository;
+import com.icandoit.boottalk.coffeeChat.service.converter.CoffeeChatTimeConverter;
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -25,31 +26,36 @@ public class CoffeeChatTimeService {
 
     @Transactional
     public List<CoffeeChatTimeResponseDto> createCoffeeChatTimes(Long userId,
-        CoffeeChatTimeListDto requestDto) {
+        CoffeeChatTimeMapDto requestDto) {
 
-        // todo: 유저조회
         CoffeeChatInfo coffeeChatInfo = coffeeChatInfoRepository.findBymentor_UserId(userId)
-            .orElseThrow(() -> new CustomException(
-                ErrorCode.USER_COFFEE_CHAT_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(ErrorCode.USER_COFFEE_CHAT_NOT_FOUND));
 
-        List<CoffeeChatTime> coffeeChatTimes = new ArrayList<>();
-        for (CoffeeChatTimeDto timeDto : requestDto.availableTimes()) {
-            CoffeeChatTime time = CoffeeChatTime.of(
-                coffeeChatInfo,
-                timeDto.dayOfWeek(),
-                timeDto.startTime(),
-                timeDto.endTime()
-            );
-            coffeeChatInfo.addAvailableTime(time);
-            coffeeChatTimes.add(time);
+        // 이미 시간이 존재한다면 예외처리
+        if (coffeeChatTimeRepository.existsByCoffeeChatInfo(coffeeChatInfo)) {
+            throw new CustomException(ErrorCode.ALREADY_CREATED_COFFEE_CHAT_TIME);
         }
 
-        coffeeChatTimeRepository.saveAll(coffeeChatTimes);
-        return coffeeChatTimes.stream()
+        // 시 : 분 파싱
+        List<CoffeeChatTimeDto> timeDtos = CoffeeChatTimeConverter.toDtoList(requestDto);
+
+        List<CoffeeChatTime> chatTimes = timeDtos.stream()
+            .map(dto -> {
+                CoffeeChatTime time = CoffeeChatTime.of(coffeeChatInfo, dto.dayOfWeek(),
+                    dto.startTime());
+                coffeeChatInfo.addAvailableTime(time);
+                return time;
+            })
+            .toList();
+
+        coffeeChatTimeRepository.saveAll(chatTimes);
+
+        return chatTimes.stream()
             .map(CoffeeChatTimeResponseDto::from)
             .toList();
     }
 
+    // 자신의 멘토 가능 시간 조회
     @Transactional(readOnly = true)
     public List<CoffeeChatTimeResponseDto> getMyCoffeeChatTimes(Long userId) {
         List<CoffeeChatTime> coffeeChatTimes = getmentorCoffeeChatTimesOrThrow(userId);
@@ -69,7 +75,7 @@ public class CoffeeChatTimeService {
         CoffeeChatInfo coffeeChatInfo = existingTimeSlots.get(0).getCoffeeChatInfo();
         List<CoffeeChatTime> newTimeSlots = requestDto.availableTimes().stream()
             .map(timeDto -> CoffeeChatTime.of(coffeeChatInfo, timeDto.dayOfWeek(),
-                timeDto.startTime(), timeDto.endTime()))
+                timeDto.startTime()))
             .toList();
 
         // 삭제할 시간 찾기 (기존 데이터 중에서 새로운 데이터에 없는 항목)
