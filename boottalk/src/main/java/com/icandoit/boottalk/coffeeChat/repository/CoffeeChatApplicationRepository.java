@@ -10,9 +10,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface CoffeeChatApplicationRepository extends JpaRepository<CoffeeChatApplication, Long> {
 
-	List<CoffeeChatApplication> findByMentee_UserId(Long userId);
+	Page<CoffeeChatApplication> findByMentee_UserId(Long userId, Pageable pageable);
 
-	List<CoffeeChatApplication> findByCoffeeChatInfo_CoffeeChatInfoId(Long userId);
+	Page<CoffeeChatApplication> findByCoffeeChatInfo_CoffeeChatInfoId(Long userId, Pageable pageable);
 
 	// Param으로 받은 userId에 따라 멘토 or 멘티의 예약된 커피챗 리스트 조회
 	@Query("""
