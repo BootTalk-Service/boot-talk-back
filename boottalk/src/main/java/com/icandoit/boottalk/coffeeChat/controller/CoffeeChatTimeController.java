@@ -1,6 +1,5 @@
 package com.icandoit.boottalk.coffeeChat.controller;
 
-import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeListDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeMapDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeResponseDto;
 import com.icandoit.boottalk.coffeeChat.service.CoffeeChatTimeService;
@@ -39,7 +38,7 @@ public class CoffeeChatTimeController {
 
     @PutMapping("/my")
     public ResponseEntity<List<CoffeeChatTimeResponseDto>> updateCoffeeChatTimes(
-        @RequestBody @Valid CoffeeChatTimeListDto requestDto) {
+        @RequestBody @Valid CoffeeChatTimeMapDto requestDto) {
         Long userId = 1L;
         return ResponseEntity.ok(coffeeChatTimeService.updateCoffeeChatTimes(userId, requestDto));
     }
