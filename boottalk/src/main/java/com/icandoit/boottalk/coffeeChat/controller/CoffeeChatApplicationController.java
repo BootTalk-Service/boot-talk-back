@@ -1,15 +1,8 @@
 package com.icandoit.boottalk.coffeeChat.controller;
 
-import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationCreateDto;
-import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationResponseDto;
-import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationUpdateDto;
-import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoApprovedDto;
-import com.icandoit.boottalk.coffeeChat.service.CoffeeChatApplicationService;
-import com.icandoit.boottalk.common.dto.PagedResponseDto;
-import jakarta.validation.Valid;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +12,16 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationCreateDto;
+import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationResponseDto;
+import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationUpdateDto;
+import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoApprovedDto;
+import com.icandoit.boottalk.coffeeChat.service.CoffeeChatApplicationService;
+import com.icandoit.boottalk.common.dto.PagedResponseDto;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/coffee-chats/applications")
@@ -39,10 +42,12 @@ public class CoffeeChatApplicationController {
 
     // 나의 커피챗 신청 목록 조회
     @GetMapping
-    public ResponseEntity<List<CoffeeChatApplicationResponseDto>> getMyCoffeeChatApps() {
+    public ResponseEntity<PagedResponseDto<CoffeeChatApplicationResponseDto>> getMyCoffeeChatApps(
+        @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
+        Pageable pageable) {
         // TODO : 사용자 인증 사용 시 수정
         Long userId = 1L;
-        return ResponseEntity.ok(coffeeChatAppService.getMyCoffeeChatApps(userId));
+        return ResponseEntity.ok(coffeeChatAppService.getMyCoffeeChatApps(userId, pageable));
     }
 
     // 나의 수락된 커피챗 목록 조회

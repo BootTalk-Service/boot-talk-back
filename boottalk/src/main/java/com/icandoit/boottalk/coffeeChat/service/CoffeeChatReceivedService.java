@@ -3,6 +3,8 @@ package com.icandoit.boottalk.coffeeChat.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +15,7 @@ import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatApplication;
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatInfo;
 import com.icandoit.boottalk.coffeeChat.entity.enums.StatusType;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatApplicationRepository;
+import com.icandoit.boottalk.common.dto.PagedResponseDto;
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
 
@@ -28,18 +31,17 @@ public class CoffeeChatReceivedService {
     private final CoffeeChatApplicationService coffeeChatAppService;
 
     // 나에게 신청한 커피챗 신정 목록 조회
-    @Transactional(readOnly = true)
-    public List<CoffeeChatApplicationResponseDto> getReceivedCoffeeChatApplications(Long userId) {
+    public PagedResponseDto<CoffeeChatApplicationResponseDto> getReceivedCoffeeChatApplications(
+        Long userId, Pageable pageable) {
 
         // 커피챗 정보 조회
         CoffeeChatInfo coffeeChatInfo = coffeeChatInfoService.getCoffeeChatInfoByUserId(userId);
 
-        List<CoffeeChatApplication> coffeeChatApplications =
-            coffeeChatAppRepository.findByCoffeeChatInfo_CoffeeChatInfoId(coffeeChatInfo.getCoffeeChatInfoId());
+        Page<CoffeeChatApplicationResponseDto> page =
+            coffeeChatAppRepository.findByCoffeeChatInfo_CoffeeChatInfoId(coffeeChatInfo.getCoffeeChatInfoId(), pageable)
+                .map(CoffeeChatApplicationResponseDto::from);
 
-        return coffeeChatApplications.stream()
-            .map(coffeeChatApplication -> CoffeeChatApplicationResponseDto.from(coffeeChatApplication))
-            .collect(Collectors.toList());
+        return PagedResponseDto.from(page);
     }
 
     @Transactional

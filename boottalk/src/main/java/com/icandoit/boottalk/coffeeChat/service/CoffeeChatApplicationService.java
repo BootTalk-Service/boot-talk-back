@@ -50,14 +50,11 @@ public class CoffeeChatApplicationService {
     }
 
 	@Transactional(readOnly = true)
-    public List<CoffeeChatApplicationResponseDto> getMyCoffeeChatApps(Long userId) {
+    public PagedResponseDto<CoffeeChatApplicationResponseDto> getMyCoffeeChatApps(Long userId, Pageable pageable) {
+        Page<CoffeeChatApplicationResponseDto> page = coffeeChatAppRepository.findByMentee_UserId(userId, pageable)
+            .map(CoffeeChatApplicationResponseDto::from);
 
-        List<CoffeeChatApplication> coffeeChatApps = coffeeChatAppRepository.findByMentee_UserId(userId);
-
-        return coffeeChatApps.stream()
-            .map(CoffeeChatApplicationResponseDto::from)
-            .toList();
-
+        return PagedResponseDto.from(page);
     }
 
     @Transactional(readOnly = true)

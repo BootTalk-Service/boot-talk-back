@@ -2,6 +2,9 @@ package com.icandoit.boottalk.coffeeChat.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +17,7 @@ import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationResponseDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatAppChangeStatusDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatAppStatusResponseDto;
 import com.icandoit.boottalk.coffeeChat.service.CoffeeChatReceivedService;
+import com.icandoit.boottalk.common.dto.PagedResponseDto;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,11 +31,12 @@ public class CoffeeChatReceivedController {
 
     // 수신된 커피챗 신청 목록 조회 (멘티가 나에게 신청한 커피챗 신청 목록 조회)
     @GetMapping
-    public ResponseEntity<List<CoffeeChatApplicationResponseDto>> getReceivedCoffeeChatApplications(
-    ) {
+    public ResponseEntity<PagedResponseDto<CoffeeChatApplicationResponseDto>> getReceivedCoffeeChatApplications(
+        @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable) {
         // TODO : 사용자 인증 사용 시 수정
         Long userId = 1L;
-        return ResponseEntity.ok(coffeeChatReceivedService.getReceivedCoffeeChatApplications(userId));
+        return ResponseEntity.ok(coffeeChatReceivedService.getReceivedCoffeeChatApplications(userId, pageable));
     }
 
     // 커피챗 신청 상태 변경 (멘티가 나에게 신청한 커피챗 신청에 대한 상태 변경 처리 요청)
