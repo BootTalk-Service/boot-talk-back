@@ -1,5 +1,5 @@
 package com.icandoit.boottalk.coffeeChat.entity.enums;
 
-public enum MentoType {
+public enum MentorType {
     GRADUATE, PROFESSIONAL, GENERAL
 }

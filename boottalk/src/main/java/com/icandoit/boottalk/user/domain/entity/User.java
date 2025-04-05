@@ -29,7 +29,7 @@ public class User extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long userId;
+	private Long userId;
 
 	@Column(nullable = false, updatable = false)
 	private String userName;
@@ -42,7 +42,6 @@ public class User extends BaseEntity {
 	@Column(nullable = false)
 	private String resourceUserId;
 
-	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private BootcampCategoryType desiredCareer;
 
