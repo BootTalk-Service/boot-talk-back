@@ -48,7 +48,7 @@ public class CreatePointHistoryService {
 				.build()));
 	}
 
-	private Integer getCurrentPoint(long userId) {
+	public int getCurrentPoint(long userId) {
 
 		PointHistory pointHistory = pointHistoryRepository.findTopByUserIdOrderByPointHistoryIdDesc(userId)
 			.orElse(null);
