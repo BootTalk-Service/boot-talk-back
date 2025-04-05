@@ -4,6 +4,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +20,7 @@ import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationUpdateDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoApprovedDto;
 import com.icandoit.boottalk.coffeeChat.service.CoffeeChatApplicationService;
 import com.icandoit.boottalk.common.dto.PagedResponseDto;
+import com.icandoit.boottalk.social_login.dto.CustomOAuth2User;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,48 +35,52 @@ public class CoffeeChatApplicationController {
     // 커피챗 신청 등록
     @PostMapping
     public ResponseEntity<CoffeeChatApplicationResponseDto> createCoffeeChatApp(
+        @AuthenticationPrincipal CustomOAuth2User user,
         @Valid @RequestBody CoffeeChatApplicationCreateDto request
     ) {
-        // TODO : 사용자 인증 사용 시 수정
-        Long userId = 1L;
-        return ResponseEntity.ok(coffeeChatAppService.createCoffeeChatApp(userId, request));
+        return ResponseEntity.ok(coffeeChatAppService.createCoffeeChatApp(
+            user.getServiceUserId(), request));
     }
 
     // 나의 커피챗 신청 목록 조회
     @GetMapping
     public ResponseEntity<PagedResponseDto<CoffeeChatApplicationResponseDto>> getMyCoffeeChatApps(
+        @AuthenticationPrincipal CustomOAuth2User user,
         @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
-        Pageable pageable) {
-        // TODO : 사용자 인증 사용 시 수정
-        Long userId = 1L;
-        return ResponseEntity.ok(coffeeChatAppService.getMyCoffeeChatApps(userId, pageable));
+        Pageable pageable
+    ) {
+        return ResponseEntity.ok(coffeeChatAppService.getMyCoffeeChatApps(
+            user.getServiceUserId(), pageable));
     }
 
     // 나의 수락된 커피챗 목록 조회
     @GetMapping("/approved")
     public ResponseEntity<PagedResponseDto<CoffeeChatInfoApprovedDto>> getApprovedCoffeeChats(
-        Pageable pageable) {
-        Long userId = 1L;
-        return ResponseEntity.ok(coffeeChatAppService.getApprovedCoffeeChats(userId, pageable));
+        @AuthenticationPrincipal CustomOAuth2User user,
+        Pageable pageable
+    ) {
+        return ResponseEntity.ok(coffeeChatAppService.getApprovedCoffeeChats(
+            user.getServiceUserId(), pageable));
     }
 
     // 커피챗 신청 수정
     @PutMapping("/{coffeeChatAppId}")
     public ResponseEntity<CoffeeChatApplicationResponseDto> updateCoffeeChatApp(
+        @AuthenticationPrincipal CustomOAuth2User user,
         @PathVariable Long coffeeChatAppId,
-        @Valid @RequestBody CoffeeChatApplicationUpdateDto request) {
-        // TODO : 사용자 인증 사용 시 수정
-        Long userId = 1L;
-        return ResponseEntity.ok(
-            coffeeChatAppService.updateCoffeeChatApp(userId, coffeeChatAppId, request));
+        @Valid @RequestBody CoffeeChatApplicationUpdateDto request
+    ) {
+        return ResponseEntity.ok(coffeeChatAppService.updateCoffeeChatApp(
+            user.getServiceUserId(), coffeeChatAppId, request));
     }
 
     // 커피챗 신청 삭제
     @DeleteMapping("/{coffeeChatAppId}")
-    public ResponseEntity<Void> deleteCoffeeChatApp(@PathVariable Long coffeeChatAppId) {
-        // TODO : 사용자 인증 사용 시 수정
-        Long userId = 1L;
-        coffeeChatAppService.deleteCoffeeChatApp(userId, coffeeChatAppId);
+    public ResponseEntity<Void> deleteCoffeeChatApp(
+        @AuthenticationPrincipal CustomOAuth2User user,
+        @PathVariable Long coffeeChatAppId
+    ) {
+        coffeeChatAppService.deleteCoffeeChatApp(user.getServiceUserId(), coffeeChatAppId);
         return ResponseEntity.ok().build();
     }
 
