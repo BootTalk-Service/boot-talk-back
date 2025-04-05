@@ -97,7 +97,7 @@ public class ReviewConcurrencyTest {
 			final int rating = 5;
 			executor.submit(() -> {
 				try {
-					reviewService.create(
+					reviewService.createReview(
 						new ReviewCreateRequestDto(trainingProgramId, "좋아요", rating),
 						userId
 					);

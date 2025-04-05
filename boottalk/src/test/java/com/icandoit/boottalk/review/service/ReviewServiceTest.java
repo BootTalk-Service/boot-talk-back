@@ -117,7 +117,7 @@ class ReviewServiceTest {
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
 		//when
-		reviewService.create(request, userId);
+		reviewService.createReview(request, userId);
 
 		//then
 		assertEquals(3, course.getTotalScore());
@@ -147,7 +147,7 @@ class ReviewServiceTest {
 		when(reviewRepository.findById(1L)).thenReturn(Optional.of(review));
 		when(courseRepository.findWithLockByTrainingProgramId(trainingProgramId)).thenReturn(Optional.of(course));
 
-		reviewService.update(request, 1L, userId);
+		reviewService.updateReview(request, 1L, userId);
 
 		assertEquals(5, course.getTotalScore());
 		assertEquals(1, course.getReviewCount());
@@ -168,7 +168,7 @@ class ReviewServiceTest {
 		when(reviewRepository.findById(1L)).thenReturn(Optional.of(review));
 		when(courseRepository.findWithLockByTrainingProgramId(trainingProgramId)).thenReturn(Optional.of(course));
 
-		reviewService.delete(1L, userId);
+		reviewService.deleteReview(1L, userId);
 
 		assertEquals(0, course.getTotalScore());
 		assertEquals(0, course.getReviewCount());

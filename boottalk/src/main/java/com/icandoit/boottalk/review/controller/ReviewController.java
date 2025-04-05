@@ -33,14 +33,14 @@ public class ReviewController {
 
 	// 리뷰 등록
 	@PostMapping
-	public ResponseEntity<ReviewResponseDto> create(@RequestBody @Valid ReviewCreateRequestDto request) {
+	public ResponseEntity<ReviewResponseDto> createReview(@RequestBody @Valid ReviewCreateRequestDto request) {
 		Long userId = 1L; // test
-		return ResponseEntity.ok(reviewService.create(request, userId));
+		return ResponseEntity.ok(reviewService.createReview(request, userId));
 	}
 
 	// 전체 리뷰 목록 (정렬, 카테고리 필터링 포함)
 	@GetMapping
-	public ResponseEntity<PagedResponseDto<ReviewResponseDto>> listAll(
+	public ResponseEntity<PagedResponseDto<ReviewResponseDto>> getAllReviews(
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size,
 		@RequestParam(defaultValue = "latest") String sort,
@@ -51,38 +51,38 @@ public class ReviewController {
 			Sort.by("createdAt").descending();
 
 		Pageable pageable = PageRequest.of(page, size, sortOption);
-		Page<ReviewResponseDto> reviewPage = reviewService.listAll(pageable, category);
+		Page<ReviewResponseDto> reviewPage = reviewService.getAllReviews(pageable, category);
 
 		return ResponseEntity.ok(PagedResponseDto.from(reviewPage));
 	}
 
 	// 내 리뷰 목록
 	@GetMapping("/my")
-	public ResponseEntity<PagedResponseDto<ReviewResponseDto>> listMy(
+	public ResponseEntity<PagedResponseDto<ReviewResponseDto>> getMyReviews(
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size
 	) {
 		Long userId = 1L; // 테스트용
 		Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-		Page<ReviewResponseDto> reviewPage = reviewService.listMy(userId, pageable);
+		Page<ReviewResponseDto> reviewPage = reviewService.getMyReviews(userId, pageable);
 
 		return ResponseEntity.ok(PagedResponseDto.from(reviewPage));
 	}
 
 	// 내 리뷰 수정
 	@PutMapping("/my/{reviewId}")
-	public ResponseEntity<ReviewResponseDto> update(@PathVariable Long reviewId,
+	public ResponseEntity<ReviewResponseDto> updateReview(@PathVariable Long reviewId,
 		@RequestBody @Valid ReviewUpdateRequestDto request) {
 		Long userId = 1L; // test
-		return ResponseEntity.ok(reviewService.update(request, reviewId, userId));
+		return ResponseEntity.ok(reviewService.updateReview(request, reviewId, userId));
 
 	}
 
 	// 내 리뷰 삭제
 	@DeleteMapping("/my/{reviewId}")
-	public ResponseEntity<Void> delete(@PathVariable Long reviewId) {
+	public ResponseEntity<Void> deleteReview(@PathVariable Long reviewId) {
 		Long userId = 1L; // test
-		reviewService.delete(reviewId, userId);
+		reviewService.deleteReview(reviewId, userId);
 		return ResponseEntity.ok().build();
 	}
 }
