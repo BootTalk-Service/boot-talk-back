@@ -1,5 +1,6 @@
 package com.icandoit.boottalk.review.service;
 
+import static com.icandoit.boottalk.libs.exception.ErrorCode.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
@@ -23,6 +24,7 @@ import com.icandoit.boottalk.bootcamp.entity.Course;
 import com.icandoit.boottalk.bootcamp.entity.TrainingCenter;
 import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
 import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
+import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.review.dto.ReviewCreateRequestDto;
 import com.icandoit.boottalk.review.dto.ReviewResponseDto;
 import com.icandoit.boottalk.review.dto.ReviewUpdateRequestDto;
@@ -54,7 +56,49 @@ class ReviewServiceTest {
 	}
 
 	@Test
-	@DisplayName("부트캠프 ID로 해당 코스의 리뷰 리스트를 페이징으로 조회 성공")
+	@DisplayName("리뷰 생성 성공 - Course 평점 및 리뷰 수 증가 확인")
+	void createReviewUpdatesCourseStats() {
+		//given
+		String trainingProgramId = "TPID-123";
+		Long userId = 1L;
+
+		Course course = Course.of(trainingProgramId, "TestCourse", null);
+		User user = User.builder().userId(userId).userName("testUser").build();
+
+		ReviewCreateRequestDto request = new ReviewCreateRequestDto(trainingProgramId, "this is review", 3);
+
+		when(courseRepository.findWithLockByTrainingProgramId(trainingProgramId)).thenReturn(Optional.of(course));
+		when(userRepository.getReferenceById(userId)).thenReturn(user);
+
+		//when
+		reviewService.createReview(request, userId);
+
+		//then
+		assertEquals(3, course.getTotalScore());
+		assertEquals(1, course.getReviewCount());
+	}
+
+	@Test
+	@DisplayName("리뷰 생성 실패 - 중복 작성 시 예외 발생")
+	void createReviewFailsOnDuplicate() {
+		// given
+		String trainingProgramId = "TP123";
+		Long userId = 1L;
+
+		given(reviewRepository.existsByCourse_TrainingProgramIdAndUser_UserId(trainingProgramId, userId))
+			.willReturn(true);
+
+		ReviewCreateRequestDto request = new ReviewCreateRequestDto(trainingProgramId, "중복 리뷰", 4);
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> reviewService.createReview(request, userId));
+
+		assertEquals(DUPLICATE_REVIEW, exception.getErrorCode());
+	}
+
+	@Test
+	@DisplayName("리뷰 조회 성공 - 부트캠프 ID로 해당 코스의 리뷰 리스트를 페이징으로 조회 성공")
 	void getReviewsBootcampId_Success() {
 	    //given
 		Long bootcampId = 1L;
@@ -102,30 +146,23 @@ class ReviewServiceTest {
 	}
 
 	@Test
-	@DisplayName("리뷰 생성 시 Course 평점 및 리뷰 수 증가 확인")
-	void createReviewUpdatesCourseStats() {
-		//given
-		String trainingProgramId = "TPID-123";
-		Long userId = 1L;
+	@DisplayName("리뷰 조회 실패 - 부트캠프 없음")
+	void getReviewsBootcampIdFailsWhenBootcampNotFound() {
+		// given
+		Long bootcampId = 999L;
+		Pageable pageable = PageRequest.of(0, 10);
 
-		Course course = Course.of(trainingProgramId, "TestCourse", null);
-		User user = User.builder().userId(userId).userName("testUser").build();
+		when(bootcampRepository.findById(bootcampId)).thenReturn(Optional.empty());
 
-		ReviewCreateRequestDto request = new ReviewCreateRequestDto(trainingProgramId, "this is review", 3);
+		// when & then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> reviewService.getReviewsBootcampId(bootcampId, pageable));
 
-		when(courseRepository.findWithLockByTrainingProgramId(trainingProgramId)).thenReturn(Optional.of(course));
-		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-
-		//when
-		reviewService.create(request, userId);
-
-		//then
-		assertEquals(3, course.getTotalScore());
-		assertEquals(1, course.getReviewCount());
+		assertEquals(BOOTCAMP_NOT_FOUND, exception.getErrorCode());
 	}
 
 	@Test
-	@DisplayName("리뷰 수정 시 Course 평점 반영 확인")
+	@DisplayName("리뷰 수정 성공 - Course 평점 반영 확인")
 	void updateReviewUpdatesCourseStats() {
 		String trainingProgramId = "TP123";
 		Long userId = 1L;
@@ -147,14 +184,51 @@ class ReviewServiceTest {
 		when(reviewRepository.findById(1L)).thenReturn(Optional.of(review));
 		when(courseRepository.findWithLockByTrainingProgramId(trainingProgramId)).thenReturn(Optional.of(course));
 
-		reviewService.update(request, 1L, userId);
+		reviewService.updateReview(request, 1L, userId);
 
 		assertEquals(5, course.getTotalScore());
 		assertEquals(1, course.getReviewCount());
 	}
 
 	@Test
-	@DisplayName("리뷰 삭제 시 Course 평점 및 리뷰 수 감소 확인")
+	@DisplayName("리뷰 수정 실패 - 유저 불일치")
+	void updateReviewFailsWhenNotOwner() {
+		// given
+		Long reviewId = 1L;
+		Long ownerId = 1L;
+		Long anotherUserId = 2L;
+
+		Course course = Course.of("TP123", "course", null);
+		User user = User.builder().userId(ownerId).build();
+		Review review = Review.builder().reviewId(reviewId).user(user).course(course).rating(3).build();
+
+		when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> reviewService.updateReview(new ReviewUpdateRequestDto("new content", 5), reviewId, anotherUserId));
+
+		assertEquals(NOT_REVIEW_OWNER, exception.getErrorCode());
+	}
+
+	@Test
+	@DisplayName("리뷰 수정 실패 - 리뷰 없음")
+	void updateReviewFailsWhenReviewNotFound() {
+		// given
+		Long reviewId = 1L;
+		Long userId = 1L;
+
+		when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> reviewService.updateReview(new ReviewUpdateRequestDto("updated", 5), reviewId, userId));
+
+		assertEquals(REVIEW_NOT_FOUND, exception.getErrorCode());
+	}
+
+	@Test
+	@DisplayName("리뷰 삭제 성공 - Course 평점 및 리뷰 수 감소 확인")
 	void deleteReviewUpdatesCourseStats() {
 		String trainingProgramId = "TP123";
 		Long userId = 1L;
@@ -168,10 +242,47 @@ class ReviewServiceTest {
 		when(reviewRepository.findById(1L)).thenReturn(Optional.of(review));
 		when(courseRepository.findWithLockByTrainingProgramId(trainingProgramId)).thenReturn(Optional.of(course));
 
-		reviewService.delete(1L, userId);
+		reviewService.deleteReview(1L, userId);
 
 		assertEquals(0, course.getTotalScore());
 		assertEquals(0, course.getReviewCount());
 		verify(reviewRepository).delete(review);
+	}
+
+	@Test
+	@DisplayName("리뷰 삭제 실패 - 리뷰 없음")
+	void deleteReviewFailsWhenNotFound() {
+		// given
+		Long reviewId = 1L;
+		Long userId = 1L;
+
+		when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> reviewService.deleteReview(reviewId, userId));
+
+		assertEquals(REVIEW_NOT_FOUND, exception.getErrorCode());
+	}
+
+	@Test
+	@DisplayName("리뷰 삭제 실패 - 유저가 리뷰 작성자가 아님")
+	void deleteReviewFailsWhenNotOwner() {
+		// given
+		Long reviewId = 1L;
+		Long reviewOwnerId = 1L;
+		Long anotherUserId = 2L;
+
+		Course course = Course.of("TP123", "CourseName", null);
+		User owner = User.builder().userId(reviewOwnerId).build();
+		Review review = Review.builder().reviewId(reviewId).user(owner).course(course).rating(4).build();
+
+		when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> reviewService.deleteReview(reviewId, anotherUserId));
+
+		assertEquals(NOT_REVIEW_OWNER, exception.getErrorCode());
 	}
 }
