@@ -122,7 +122,7 @@ public class BootcampQueryRepository {
 
 	// 정렬 기준 처리
 	private OrderSpecifier<?> getSortOrder(String sort, NumberExpression<Double> averageRatingExpr, QCourse course, QBootcamp bootcamp) {
-		String safeSort = (sort == null || sort.isBlank()) ? "latest" : sort;
+		String safeSort = (sort == null || sort.isBlank()) ? "latest" : sort.toLowerCase();
 		return switch (safeSort) {
 			case "rating" -> averageRatingExpr.desc();         // 평점 높은 순
 			case "popular" -> course.reviewCount.desc();       // 리뷰 많은 순
