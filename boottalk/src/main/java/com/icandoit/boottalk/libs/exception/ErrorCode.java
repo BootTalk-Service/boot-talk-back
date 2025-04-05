@@ -13,6 +13,7 @@ public enum ErrorCode {
     INSUFFICIENT_POINT(400, "잔여 포인트가 부족합니다."),
     EXCEEDS_MAX_LENGTH(400, "최대 길이를 초과했습니다."),
     COFFEE_CHAT_STATUS_NOT_PENDING(400, "대기 중 상태가 아니므로 상태를 변경할 수 없습니다."),
+    INSUFFICIENT_POINT_FOR_CHAT(400, "커피챗을 신청 할 포인트가 부족합니다."),
 
     /* 401 UNAUTHORIZED */
     INVALID_TOKEN(401, "유효한 토큰이 아닙니다."),
