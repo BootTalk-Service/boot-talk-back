@@ -25,6 +25,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 
 @Entity
@@ -33,6 +34,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "coffee_chat_info")
+@Slf4j
 public class CoffeeChatInfo extends BaseEntity {
 
     @Id
@@ -57,10 +59,12 @@ public class CoffeeChatInfo extends BaseEntity {
     @Column(nullable = false)
     private String introduction;
 
+    @Builder.Default
     @OneToMany(mappedBy = "coffeeChatInfo", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CoffeeChatTime> availableTimes = new ArrayList<>();
 
-    public static CoffeeChatInfo of(User mentor, String mentorName, MentorType mentorType, JobType jobType,
+    public static CoffeeChatInfo of(User mentor, String mentorName, MentorType mentorType,
+        JobType jobType,
         String introduction) {
         return CoffeeChatInfo.builder()
             .mentor(mentor)

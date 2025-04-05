@@ -1,27 +1,30 @@
 package com.icandoit.boottalk.review.service;
 
-import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
-import com.icandoit.boottalk.bootcamp.entity.Course;
-import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
-import com.icandoit.boottalk.libs.exception.CustomException;
-import com.icandoit.boottalk.libs.exception.ErrorCode;
-import com.icandoit.boottalk.review.dto.ReviewCreateRequestDto;
-import com.icandoit.boottalk.review.dto.ReviewResponseDto;
-import com.icandoit.boottalk.review.dto.ReviewUpdateRequestDto;
-import com.icandoit.boottalk.review.entity.Review;
-import com.icandoit.boottalk.review.repository.ReviewRepository;
-import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
-import com.icandoit.boottalk.user.domain.entity.User;
-import com.icandoit.boottalk.user.domain.repository.UserRepository;
-
-import java.util.List;
-import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
+import static com.icandoit.boottalk.bootcamp.exception.BootcampErrorCode.*;
+import static com.icandoit.boottalk.libs.exception.ErrorCode.BOOTCAMP_NOT_FOUND;
+import static com.icandoit.boottalk.libs.exception.ErrorCode.*;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
+import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
+import com.icandoit.boottalk.bootcamp.entity.Course;
+import com.icandoit.boottalk.bootcamp.exception.BootcampCustomException;
+import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
+import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
+import com.icandoit.boottalk.libs.exception.CustomException;
+import com.icandoit.boottalk.review.dto.ReviewCreateRequestDto;
+import com.icandoit.boottalk.review.dto.ReviewResponseDto;
+import com.icandoit.boottalk.review.dto.ReviewUpdateRequestDto;
+import com.icandoit.boottalk.review.entity.Review;
+import com.icandoit.boottalk.review.repository.ReviewRepository;
+import com.icandoit.boottalk.user.domain.entity.User;
+import com.icandoit.boottalk.user.domain.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +36,7 @@ public class ReviewService {
 	private final CourseRepository courseRepository;
 
 	@Transactional
-	public ReviewResponseDto create(ReviewCreateRequestDto request, Long userId) {
+	public ReviewResponseDto createReview(ReviewCreateRequestDto request, Long userId) {
 		String trainingProgramId = request.trainingProgramId();
 
 		validateCreateReview(trainingProgramId, userId);
@@ -54,28 +57,27 @@ public class ReviewService {
 		return ReviewResponseDto.from(review);
 	}
 
-	@Transactional(readOnly = true)
-	public List<ReviewResponseDto> listAll() {
+	public Page<ReviewResponseDto> getAllReviews(Pageable pageable, String category) {
+		if (category != null && !category.isBlank()) {
+			if (!BootcampCategoryType.isValidKoreanName(category)) {
+				throw new BootcampCustomException(INVALID_CATEGORY_NAME);
+			}
+			BootcampCategoryType categoryType = BootcampCategoryType.fromKoreanName(category);
+			return reviewRepository.findByBootcampCategory(categoryType, pageable)
+				.map(ReviewResponseDto::from);
+		}
 
-		List<Review> reviews = reviewRepository.findAll();
-
-		return reviews.stream()
-			.map(ReviewResponseDto::from)
-			.collect(Collectors.toList());
+		return reviewRepository.findAll(pageable)
+			.map(ReviewResponseDto::from);
 	}
 
-	@Transactional(readOnly = true)
-	public List<ReviewResponseDto> listMy(Long userId) {
-
-		List<Review> reviews = reviewRepository.findByUser_UserId(userId);
-
-		return reviews.stream()
-			.map(ReviewResponseDto::from)
-			.collect(Collectors.toList());
+	public Page<ReviewResponseDto> getMyReviews(Long userId, Pageable pageable) {
+		return reviewRepository.findByUser_UserId(userId, pageable)
+			.map(ReviewResponseDto::from);
 	}
 	
 	@Transactional
-	public ReviewResponseDto update(ReviewUpdateRequestDto request, Long reviewId, Long userId) {
+	public ReviewResponseDto updateReview(ReviewUpdateRequestDto request, Long reviewId, Long userId) {
 
 		Review review = getReview(reviewId);
 
@@ -93,7 +95,7 @@ public class ReviewService {
 	}
 
 	@Transactional
-	public void delete(Long reviewId, Long userId) {
+	public void deleteReview(Long reviewId, Long userId) {
 		Review review = getReview(reviewId);
 
 		validateReview(review.getUser().getUserId(), userId);
@@ -108,7 +110,6 @@ public class ReviewService {
 	}
 
 	// 부트캠프 ID 로부터 Course 를 조회한 후, 해당 Course 에 작성된 리뷰를 페이징 처리하여 반환
-	@Transactional(readOnly = true)
 	public Page<ReviewResponseDto> getReviewsBootcampId(Long bootcampId, Pageable pageable) {
 		Bootcamp bootcamp = getBootcamp(bootcampId);
 
@@ -118,36 +119,30 @@ public class ReviewService {
 
 	private Review getReview(Long id) {
 		return reviewRepository.findById(id).
-			orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
+			orElseThrow(() -> new CustomException(REVIEW_NOT_FOUND));
 	}
 
 	private void validateCreateReview(String trainingProgramId, Long userId) {
 		if (reviewRepository.existsByCourse_TrainingProgramIdAndUser_UserId(trainingProgramId, userId)) {
-			throw new CustomException(ErrorCode.DUPLICATE_REVIEW);
+			throw new CustomException(DUPLICATE_REVIEW);
 		}
 	}
 
 	private void validateReview(Long reviewUserId, Long userId) {
-		if (reviewUserId != userId) {
-			throw new CustomException(ErrorCode.NOT_REVIEW_OWNER);
-		}
-	}
-
-	private void validateCourse(String trainingProgramId) {
-		if (courseRepository.findByTrainingProgramId(trainingProgramId).isEmpty()) {
-			throw new CustomException(ErrorCode.COURSE_NOT_FOUND);
+		if (!reviewUserId.equals(userId)) {
+			throw new CustomException(NOT_REVIEW_OWNER);
 		}
 	}
 
 	private Bootcamp getBootcamp(Long id) {
 		return bootcampRepository.findById(id)
-			.orElseThrow(() -> new CustomException(ErrorCode.BOOTCAMP_NOT_FOUND));
+			.orElseThrow(() -> new CustomException(BOOTCAMP_NOT_FOUND));
 	}
 
 	// 비관적 락을 사용해 course 조회
 	private Course getCourseWithLock(String trainingProgramId) {
 		return courseRepository.findWithLockByTrainingProgramId(trainingProgramId)
-			.orElseThrow(() -> new CustomException(ErrorCode.COURSE_NOT_FOUND));
+			.orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
 	}
 
 	// 리뷰 평점값을 course 에 업데이트

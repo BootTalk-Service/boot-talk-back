@@ -1,6 +1,6 @@
 package com.icandoit.boottalk.coffeeChat.controller;
 
-import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeListDto;
+import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeMapDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeResponseDto;
 import com.icandoit.boottalk.coffeeChat.service.CoffeeChatTimeService;
 import jakarta.validation.Valid;
@@ -23,7 +23,7 @@ public class CoffeeChatTimeController {
 
     @PostMapping("/available-times")
     public ResponseEntity<List<CoffeeChatTimeResponseDto>> createCoffeeChatTimes(
-        @RequestBody @Valid CoffeeChatTimeListDto requestDto) {
+        @RequestBody @Valid CoffeeChatTimeMapDto requestDto) {
         // todo : 사용자 인증 사용 시 수정
         Long userId = 1L;
         return ResponseEntity.ok(coffeeChatTimeService.createCoffeeChatTimes(userId, requestDto));
@@ -38,7 +38,7 @@ public class CoffeeChatTimeController {
 
     @PutMapping("/my")
     public ResponseEntity<List<CoffeeChatTimeResponseDto>> updateCoffeeChatTimes(
-        @RequestBody @Valid CoffeeChatTimeListDto requestDto) {
+        @RequestBody @Valid CoffeeChatTimeMapDto requestDto) {
         Long userId = 1L;
         return ResponseEntity.ok(coffeeChatTimeService.updateCoffeeChatTimes(userId, requestDto));
     }
