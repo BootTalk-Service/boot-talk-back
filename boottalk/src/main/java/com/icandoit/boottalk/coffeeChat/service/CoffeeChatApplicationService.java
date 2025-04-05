@@ -35,7 +35,12 @@ public class CoffeeChatApplicationService {
 
     @Transactional
     public CoffeeChatApplicationResponseDto createCoffeeChatApp(Long userId, CoffeeChatApplicationCreateDto request) {
-        // TODO: 동일한 유저가 동일한 커피챗에 중복 신청 불가능하게 수정
+
+        if (coffeeChatAppRepository.existsByMentee_UserIdAndCoffeeChatInfo_CoffeeChatInfoId(
+            userId, request.coffeeChatInfoId())) {
+            throw new CustomException(ErrorCode.COFFEE_CHAT_APPLICATION_ALREADY_EXISTS);
+        }
+
         // TODO: 커피챗 신청 성공 시, 해당 시간대의 커피챗에 다른 사용자가 신청 요청하지 못하도록 동시성 제어 필요
 
         User user = getUser(userId);
