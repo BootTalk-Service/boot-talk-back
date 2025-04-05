@@ -1,6 +1,7 @@
 package com.icandoit.boottalk.user.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.icandoit.boottalk.social_login.dto.CustomOAuth2User;
 import com.icandoit.boottalk.user.domain.dto.UserDto;
 import com.icandoit.boottalk.user.domain.form.UpdateForm;
 import com.icandoit.boottalk.user.service.ManageService;
@@ -23,22 +25,22 @@ public class ManageController {
 	private final ManageService manageService;
 
 	@GetMapping
-	public ResponseEntity<UserDto> getUser(@RequestParam Long userId) {
+	public ResponseEntity<UserDto> getUser(@AuthenticationPrincipal CustomOAuth2User user) {
 
-		return ResponseEntity.ok(manageService.getUser(userId));
+		return ResponseEntity.ok(manageService.getUser(user.getServiceUserId()));
 	}
 
 	@PutMapping
-	public ResponseEntity<UserDto> updateUser(@RequestParam Long userId,
+	public ResponseEntity<UserDto> updateUser(@AuthenticationPrincipal CustomOAuth2User user,
 		@RequestBody UpdateForm form) {
 
-		return ResponseEntity.ok(manageService.updateUser(userId, form));
+		return ResponseEntity.ok(manageService.updateUser(user.getServiceUserId(), form));
 	}
 
 	@DeleteMapping
-	public ResponseEntity<String> deleteUser(@RequestParam Long userId) {
+	public ResponseEntity<String> deleteUser(@AuthenticationPrincipal CustomOAuth2User user) {
 
-		manageService.deleteUser(userId);
+		manageService.deleteUser(user.getServiceUserId());
 
 		return ResponseEntity.ok("회원 탈퇴되었습니다.");
 	}
