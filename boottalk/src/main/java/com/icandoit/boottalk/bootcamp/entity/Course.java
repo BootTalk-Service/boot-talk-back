@@ -56,4 +56,11 @@ public class Course extends BaseEntity {
 			.reviewCount(0)
 			.build();
 	}
+
+	public Double getAverageRating() {
+		if (reviewCount == 0) {
+			return 0.0;
+		}
+		return Math.round((double) totalScore / reviewCount * 10) / 10.0; // 소수점 한 자리 반올림
+	}
 }
