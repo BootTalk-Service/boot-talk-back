@@ -3,6 +3,7 @@ package com.icandoit.boottalk.point_history.service;
 import static com.icandoit.boottalk.libs.exception.ErrorCode.*;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.point_history.domain.dto.PointHistoryDto;
@@ -19,7 +20,7 @@ public class CreatePointHistoryService {
 
 	private final PointHistoryRepository pointHistoryRepository;
 
-
+	@Transactional
 	public PointHistoryDto createPointHistory(EventType eventType, long userId, int changedPoint) {
 
 		int currentPoint = getCurrentPoint(userId);
