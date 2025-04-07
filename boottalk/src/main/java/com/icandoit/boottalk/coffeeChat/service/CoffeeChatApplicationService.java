@@ -66,15 +66,7 @@ public class CoffeeChatApplicationService {
 
         // 멘토 타입에 따른 커피챗 포인트 차감. 포인트 부족 시 커피챗 신청 실패 처리
         MentorType mentorType = coffeeChatInfo.getMentorType();
-        int currentPoint = createPointHistoryService.getCurrentPoint(userId);
         int deductionPoint = getPointCostByMentorType (mentorType);
-
-        log.info("userId: {}, mentorType: {}, currentPoint: {}, deductionPoint: {}",
-            userId, mentorType, currentPoint, deductionPoint);
-
-        if (currentPoint < deductionPoint) {
-            throw new CustomException(ErrorCode.INSUFFICIENT_POINT_FOR_CHAT);
-        }
 
 
         createPointHistoryService.createPointHistory(EventType.COFFEE_CHAT_APPLY, userId, deductionPoint);
