@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationCreateDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationResponseDto;
@@ -60,12 +62,16 @@ public class CoffeeChatApplicationConcurrencyTest {
     void setUp() {
         menteeList = new ArrayList<>();
 
-        mentor = userRepository.save(User.builder()
-            .userName("테스트 멘토")
-            .email("mentor@example.com")
-            .resourceUserId("mentor")
-            .desiredCareer(BootcampCategoryType.APPLICATION_SW_ENGINEERING)
-            .build());
+        String mentorName = "test_mentor";
+        mentor = userRepository.findByUserName(mentorName)
+            .orElseGet(() -> userRepository.save(
+                User.builder()
+                    .userName(mentorName)
+                    .email(mentorName)
+                    .resourceUserId(mentorName)
+                    .desiredCareer(BootcampCategoryType.APPLICATION_SW_ENGINEERING)
+                    .build()
+            ));
 
         chatInfo = coffeeChatInfoRepository.save(CoffeeChatInfo.of(
             mentor,
@@ -75,21 +81,29 @@ public class CoffeeChatApplicationConcurrencyTest {
             "현업자 백엔드 멘토입니다."
         ));
 
-        for (int i = 0; i < THREAD_COUNT; i++){
+        for (int i = 0; i < THREAD_COUNT; i++) {
             String menteeName = "test_mentee" + (i + 1);
-            User mentee = userRepository.save(User.builder()
-                .userName(menteeName)
-                .email(menteeName)
-                .resourceUserId(menteeName)
-                .desiredCareer(BootcampCategoryType.APPLICATION_SW_ENGINEERING)
-                .build());
 
-            // 초기 포인트 적립
-            createPointHistoryService.createPointHistory(EventType.SIGN_UP, mentee.getUserId(), 5);
+            // 유저가 이미 있는지 확인
+            User mentee = userRepository.findByUserName(menteeName)
+                .orElseGet(() -> {
+                    // 없으면 새로 생성
+                    User newUser = userRepository.save(
+                        User.builder()
+                            .userName(menteeName)
+                            .email(menteeName)
+                            .resourceUserId(menteeName)
+                            .desiredCareer(BootcampCategoryType.APPLICATION_SW_ENGINEERING)
+                            .build());
+
+                    // 초기 포인트 적립
+                    createPointHistoryService.createPointHistory(EventType.SIGN_UP, newUser.getUserId(), 5);
+
+                    return newUser;
+                });
 
             menteeList.add(mentee);
         }
-
 
     }
 
