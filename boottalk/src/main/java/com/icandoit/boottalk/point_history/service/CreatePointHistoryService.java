@@ -13,17 +13,20 @@ import com.icandoit.boottalk.point_history.domain.type.EventType;
 import com.icandoit.boottalk.point_history.domain.type.PointType;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CreatePointHistoryService {
 
 	private final PointHistoryRepository pointHistoryRepository;
 
 	@Transactional
 	public PointHistoryDto createPointHistory(EventType eventType, long userId, int changedPoint) {
-
 		int currentPoint = getCurrentPoint(userId);
+
+        log.info("eventType:{}, userId: {}, currentPoint: {}, changedPoint: {}", eventType, userId, currentPoint, changedPoint);
 
 		//포인트 사용
 		if (eventType.getPointType() == PointType.USED) {
@@ -49,7 +52,7 @@ public class CreatePointHistoryService {
 				.build()));
 	}
 
-	public int getCurrentPoint(long userId) {
+	private int getCurrentPoint(long userId) {
 
 		PointHistory pointHistory = pointHistoryRepository.findTopByUserIdOrderByPointHistoryIdDesc(userId)
 			.orElse(null);

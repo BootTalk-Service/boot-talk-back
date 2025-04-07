@@ -74,13 +74,13 @@ public class CoffeeChatApplicationController {
             user.getServiceUserId(), coffeeChatAppId, request));
     }
 
-    // 커피챗 신청 삭제
+    // 커피챗 신청 취소
     @DeleteMapping("/{coffeeChatAppId}")
-    public ResponseEntity<Void> deleteCoffeeChatApp(
+    public ResponseEntity<Void> cancelCoffeeChatApp(
         @AuthenticationPrincipal CustomOAuth2User user,
         @PathVariable Long coffeeChatAppId
     ) {
-        coffeeChatAppService.deleteCoffeeChatApp(user.getServiceUserId(), coffeeChatAppId);
+        coffeeChatAppService.cancelCoffeeChatApp(user.getServiceUserId(), coffeeChatAppId);
         return ResponseEntity.ok().build();
     }
 
