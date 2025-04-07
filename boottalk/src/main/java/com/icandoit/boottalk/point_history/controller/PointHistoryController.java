@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.icandoit.boottalk.common.dto.PagedResponseDto;
 import com.icandoit.boottalk.point_history.domain.dto.PointHistoryDto;
 import com.icandoit.boottalk.point_history.domain.form.PointHistoryForm;
 import com.icandoit.boottalk.point_history.domain.type.EventType;
@@ -33,7 +34,7 @@ public class PointHistoryController {
 	private final CreatePointHistoryService createPointHistoryService;
 
 	@GetMapping
-	public ResponseEntity<PagedModel<PointHistoryDto>> getPointHistory(@AuthenticationPrincipal CustomOAuth2User user,
+	public ResponseEntity<PagedResponseDto<PointHistoryDto>> getPointHistory(@AuthenticationPrincipal CustomOAuth2User user,
 		@PageableDefault(page = 0, size = 10, sort = "pointHistoryId", direction = Direction.DESC)
 		Pageable pageable) {
 

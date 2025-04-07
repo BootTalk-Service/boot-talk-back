@@ -1,5 +1,6 @@
 package com.icandoit.boottalk.point_history.service;
 
+import com.icandoit.boottalk.common.dto.PagedResponseDto;
 import com.icandoit.boottalk.point_history.domain.dto.PointHistoryDto;
 import com.icandoit.boottalk.point_history.domain.entity.PointHistory;
 import com.icandoit.boottalk.point_history.domain.repository.PointHistoryRepository;
@@ -20,9 +21,8 @@ public class SearchPointHistoryService {
 	private final PointHistoryRepository pointHistoryRepository;
 
 	@Transactional(readOnly = true)
-	public PagedModel<PointHistoryDto> searchMyPointHistory(long userId, Pageable pageable) {
+	public PagedResponseDto<PointHistoryDto> searchMyPointHistory(long userId, Pageable pageable) {
 
-		return new PagedModel<>(pointHistoryRepository.findAllByUserId(userId, pageable)
-			.map(PointHistoryDto::from));
+		return PagedResponseDto.from(pointHistoryRepository.findAllByUserId(userId, pageable).map(PointHistoryDto::from));
 	}
 }
