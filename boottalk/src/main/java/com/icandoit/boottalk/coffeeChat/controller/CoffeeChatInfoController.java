@@ -22,7 +22,7 @@ public class CoffeeChatInfoController {
     private final CoffeeChatInfoService coffeeChatInfoService;
 
 
-    @PostMapping("/user-info")
+    @PostMapping
     public ResponseEntity<CoffeeChatInfoResponseDto> createCoffeeChatInfo(
         @RequestBody @Valid CoffeeChatInfoRequestDto requestDto
     ) {
@@ -31,21 +31,21 @@ public class CoffeeChatInfoController {
         return ResponseEntity.ok(coffeeChatInfoService.createCoffeeChatInfo(userId, requestDto));
     }
 
-    @GetMapping("/my")
+    @GetMapping
     public ResponseEntity<CoffeeChatInfoResponseDto> getMyCoffeeChatInfo() {
         // todo : 사용자 인증 사용 시 수정
         Long userId = 1L;
         return ResponseEntity.ok(coffeeChatInfoService.getMyCoffeeChatInfo(userId));
     }
 
-    @PutMapping("/my")
+    @PutMapping
     public ResponseEntity<CoffeeChatInfoResponseDto> updateCoffeeChatInfo(
         @RequestBody CoffeeChatInfoRequestDto requestDto) {
         Long userId = 1L;
         return ResponseEntity.ok(coffeeChatInfoService.updateMyCoffeeChatInfo(userId, requestDto));
     }
 
-    @DeleteMapping("/my")
+    @DeleteMapping
     public ResponseEntity<Void> deleteCoffeeChatInfo() {
         Long userId = 1L;
         coffeeChatInfoService.deleteMyCoffeeChatInfo(userId);

@@ -61,7 +61,7 @@ public class CoffeeChatTimeService {
 
     // 자신의 멘토 가능 시간 조회
     @Transactional(readOnly = true)
-    public List<CoffeeChatTimeResponseDto> getMyCoffeeChatTimes(Long userId) {
+    public List<CoffeeChatTimeResponseDto> getMentorAvailableChatTimes(Long userId) {
         List<CoffeeChatTime> coffeeChatTimes = getmentorCoffeeChatTimesOrThrow(userId);
 
         return coffeeChatTimes.stream()
