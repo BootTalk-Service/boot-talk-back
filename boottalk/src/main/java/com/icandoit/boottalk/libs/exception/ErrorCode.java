@@ -40,6 +40,7 @@ public enum ErrorCode {
     COFFEE_CHAT_ALREADY_EXISTS(409, "이미 생성된 커피챗이 있습니다."),
     ALREADY_CREATED_COFFEE_CHAT_TIME(409, "해당 유저의 커피챗 시간이 등록되어 있습니다."),
     COFFEE_CHAT_APPLICATION_ALREADY_EXISTS(409, "이미 해당 커피챗에 신청되었습니다."),
+    COFFEE_CHAT_APPLICATION_TIME_ALREADY_EXISTS(400, "이미 신청된 시간입니다."),
 
     /* 500 INTERNAL_SERVER_ERROR */
     INTERNAL_SERVER_ERROR(500, "서버 오류가 발생했습니다."),

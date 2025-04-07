@@ -45,13 +45,24 @@ public class CoffeeChatApplicationService {
     @Transactional
     public CoffeeChatApplicationResponseDto createCoffeeChatApp(Long userId, CoffeeChatApplicationCreateDto request) {
 
-        if (coffeeChatAppRepository.existsByMentee_UserIdAndCoffeeChatInfo_CoffeeChatInfoId(
-            userId, request.coffeeChatInfoId())) {
+        Long coffeChatInfoId = request.coffeeChatInfoId();
+        
+        if (coffeeChatAppRepository.existsByMentee_UserIdAndCoffeeChatInfo_CoffeeChatInfoId(userId, coffeChatInfoId)) {
             throw new CustomException(ErrorCode.COFFEE_CHAT_APPLICATION_ALREADY_EXISTS);
         }
+        
+        log.debug("커피챗 신청 Lock : userId: {}", userId);
+        // 커피챗 신청 시, 해당 시간대의 커피챗에 다른 사용자가 신청 요청하지 못하도록 동시성 제어
+        if (coffeeChatAppRepository.existsByCoffeeChatInfo_CoffeeChatInfoIdAndCoffeeChatStartTime(
+            coffeChatInfoId, request.coffeeChatStartTime())
+        ) {
+            throw new CustomException(ErrorCode.COFFEE_CHAT_APPLICATION_TIME_ALREADY_EXISTS);
+        }
+        log.debug("커피챗 신청 Lock 해제 : userId: {}", userId);
+
 
         User user = getUser(userId);
-        CoffeeChatInfo coffeeChatInfo = getCoffeeChatInfo(request.coffeeChatInfoId());
+        CoffeeChatInfo coffeeChatInfo = getCoffeeChatInfo(coffeChatInfoId);
 
         // 멘토 타입에 따른 커피챗 포인트 차감. 포인트 부족 시 커피챗 신청 실패 처리
         MentorType mentorType = coffeeChatInfo.getMentorType();
@@ -70,8 +81,6 @@ public class CoffeeChatApplicationService {
 
         CoffeeChatApplication coffeeChatApp = CoffeeChatApplication.of(user, coffeeChatInfo, request);
         coffeeChatAppRepository.save(coffeeChatApp);
-
-        // TODO: 커피챗 신청 성공 시, 해당 시간대의 커피챗에 다른 사용자가 신청 요청하지 못하도록 동시성 제어 필요
 
         return CoffeeChatApplicationResponseDto.from(coffeeChatApp);
 
