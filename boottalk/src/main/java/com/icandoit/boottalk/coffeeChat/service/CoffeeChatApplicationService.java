@@ -122,13 +122,16 @@ public class CoffeeChatApplicationService {
     }
 
     @Transactional
-    public void deleteCoffeeChatApp(Long userId, Long coffeeChatAppId) {
+    public void cancelCoffeeChatApp(Long userId, Long coffeeChatAppId) {
         CoffeeChatApplication coffeeChatApp = getCoffeeChatApplication(coffeeChatAppId);
 
         validateCoffeeChatApplicant(userId, coffeeChatApp.getMentee().getUserId());
         validateCoffeeChatInfo(coffeeChatApp.getCoffeeChatInfo().getCoffeeChatInfoId());
 
-        coffeeChatAppRepository.delete(coffeeChatApp);
+        coffeeChatApp.setStatus(StatusType.CANCELED);
+        // TODO: 신청 취소에 관한 세부 정책 적용 필요
+
+
     }
 
 
