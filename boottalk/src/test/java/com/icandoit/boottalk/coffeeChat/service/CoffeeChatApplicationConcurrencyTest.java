@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationCreateDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationResponseDto;
@@ -27,12 +26,17 @@ import com.icandoit.boottalk.coffeeChat.entity.enums.MentorType;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatApplicationRepository;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatInfoRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
+import com.icandoit.boottalk.point_history.domain.repository.PointHistoryRepository;
 import com.icandoit.boottalk.point_history.domain.type.EventType;
 import com.icandoit.boottalk.point_history.service.CreatePointHistoryService;
 import com.icandoit.boottalk.user.domain.entity.User;
 import com.icandoit.boottalk.user.domain.repository.UserRepository;
 
-
+/**
+ * *** 주의 ****
+ * 테스트 실행 후, @AfterEach를 통해 모든 데이터를 deleteALl()로 삭제합니다.
+ * 실제 데이터 손실을 방지하기 위해 반드시 **테스트 전용 DB**에서 실행하세요!!
+ */
 @SpringBootTest
 public class CoffeeChatApplicationConcurrencyTest {
 
@@ -50,6 +54,9 @@ public class CoffeeChatApplicationConcurrencyTest {
 
     @Autowired
     private CoffeeChatApplicationRepository coffeeChatApplicationRepository;
+
+    @Autowired
+    private PointHistoryRepository pointHistoryRepository;
 
     @Autowired
     private CreatePointHistoryService createPointHistoryService;
@@ -105,6 +112,14 @@ public class CoffeeChatApplicationConcurrencyTest {
             menteeList.add(mentee);
         }
 
+    }
+
+    @AfterEach
+    void cleanUp() {
+        coffeeChatApplicationRepository.deleteAll();
+        coffeeChatInfoRepository.deleteAll();
+        pointHistoryRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test
