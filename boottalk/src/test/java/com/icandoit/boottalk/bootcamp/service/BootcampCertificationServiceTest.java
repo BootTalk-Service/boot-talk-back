@@ -55,19 +55,25 @@ class BootcampCertificationServiceTest {
 
 		// given: 테스트용 Course 생성
 		// BootcampCategoryType 예시: SECURITY_ENGINEERING (실제 값으로 대체)
-		testCourse = Course.of("TP001", "클라우드 보안엔지니어(화이트해커) 양성",
-			BootcampCategoryType.SECURITY_ENGINEERING, null);
+		testCourse =
+			Course.builder()
+				.courseId(1L)
+				.trainingProgramId("TP001")
+				.courseName("클라우드 보안엔지니어(화이트해커) 양성")
+				.bootcampCategoryType(BootcampCategoryType.APPLICATION_SW_ENGINEERING)
+				.trainingCenter(null)
+				.build();
 
 		// given: 테스트용 CertificationCreationRequestDto 생성
 		// 주의: DTO 순서가 (courseName, fileUrl)임에 주의하여 생성
-		testRequest = new CertificationCreationRequestDto("클라우드 보안엔지니어(화이트해커) 양성", "string");
+		testRequest = new CertificationCreationRequestDto(1L, "string");
 	}
 
 	@Test
 	@DisplayName("인증 등록 성공 - 신규 등록 시")
 	public void testCreateCertification_Success() {
 		// given
-		given(courseRepository.findByCourseName(testRequest.courseName()))
+		given(courseRepository.findById(testRequest.courseId()))
 			.willReturn(Optional.of(testCourse));
 		given(userRepository.getReferenceById(testUser.getUserId()))
 			.willReturn(testUser);
@@ -87,7 +93,7 @@ class BootcampCertificationServiceTest {
 		// then
 		assertNotNull(response);
 		assertEquals(testRequest.fileUrl(), response.fileUrl());
-		assertEquals(testRequest.courseName(), response.courseName());
+		assertEquals(testRequest.courseId(), response.courseId());
 		assertEquals(CertificationStatus.PENDING.name(), response.status());
 	}
 
@@ -95,7 +101,7 @@ class BootcampCertificationServiceTest {
 	@DisplayName("인증 등록 실패 - 중복 등록 시")
 	public void testCreateCertification_Duplicate() {
 		// given
-		given(courseRepository.findByCourseName(testRequest.courseName()))
+		given(courseRepository.findById(testRequest.courseId()))
 			.willReturn(Optional.of(testCourse));
 		given(userRepository.getReferenceById(testUser.getUserId()))
 			.willReturn(testUser);
@@ -111,7 +117,7 @@ class BootcampCertificationServiceTest {
 
 		assertEquals(DUPLICATE_CERTIFICATION_EXIST, exception.getErrorCode());
 
-		verify(courseRepository, times(1)).findByCourseName(testRequest.courseName());
+		verify(courseRepository, times(1)).findById(testRequest.courseId());
 		verify(userRepository, times(1)).getReferenceById(testUser.getUserId());
 		verify(bootcampCertificationRepository, times(1))
 			.existsByUserAndCourseAndStatusIn(testUser, testCourse, blockedStatuses);
@@ -121,7 +127,7 @@ class BootcampCertificationServiceTest {
 	@DisplayName("인증 등록 실패 - 존재하지 않는 코스명")
 	public void testCreateCertification_CourseNotFound() {
 		// given
-		given(courseRepository.findByCourseName(testRequest.courseName()))
+		given(courseRepository.findById(testRequest.courseId()))
 			.willReturn(Optional.empty());
 
 		// when & then

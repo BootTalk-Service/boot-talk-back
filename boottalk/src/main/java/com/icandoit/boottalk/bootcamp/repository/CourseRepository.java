@@ -3,6 +3,7 @@ package com.icandoit.boottalk.bootcamp.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -23,5 +24,5 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 	// course name 으로 코드 조회
 	Optional<Course> findByCourseName(String courseName);
 
-	List<Course> findByCourseNameContainingIgnoreCase(String courseName);
+	List<Course> findByCourseNameContainingIgnoreCase(String query, Pageable pageable);
 }

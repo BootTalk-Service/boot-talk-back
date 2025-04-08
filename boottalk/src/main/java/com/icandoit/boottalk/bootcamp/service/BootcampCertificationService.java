@@ -30,7 +30,7 @@ public class BootcampCertificationService {
 	// 수료증 등록
 	@Transactional
 	public CertificationResponseDto createCertification(Long userId, CertificationCreationRequestDto request) {
-		Course course = courseRepository.findByCourseName(request.courseName())
+		Course course = courseRepository.findById(request.courseId())
 			.orElseThrow(() -> new CustomException(ErrorCode.COURSE_NOT_FOUND));
 
 		User user = userRepository.getReferenceById(userId);
