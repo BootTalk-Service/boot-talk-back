@@ -10,6 +10,7 @@ import com.icandoit.boottalk.stomp_chat.entity.ChatRoom;
 import com.icandoit.boottalk.stomp_chat.entity.enums.MessageType;
 import com.icandoit.boottalk.stomp_chat.repository.ChatRoomRepository;
 import com.icandoit.boottalk.stomp_chat.util.SystemMessageUtil;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -56,5 +57,11 @@ public class ChatRoomService {
         // 시스템 메시지 저장 및 전송
         messageService.saveAndSendMessage(systemMessage);
         return ChatRoomCreateResponse.from(chatRoom.getRoomUuid());
+    }
+
+    // 사용자가 속한 채팅방 조회
+    @Transactional(readOnly = true)
+    public List<ChatRoom> getUserChatRooms(Long userId) {
+        return chatRoomRepository.findActiveChatRoomsByUserId(userId);
     }
 }
