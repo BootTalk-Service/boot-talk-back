@@ -2,7 +2,7 @@ package com.icandoit.boottalk.user.domain.entity;
 
 import java.sql.Timestamp;
 
-import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
+import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.libs.entity.BaseEntity;
 
 import com.icandoit.boottalk.user.domain.form.UpdateForm;

@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
+import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.entity.Course;
 import com.icandoit.boottalk.bootcamp.entity.TrainingCenter;
 import com.icandoit.boottalk.bootcamp.repository.CourseRepository;

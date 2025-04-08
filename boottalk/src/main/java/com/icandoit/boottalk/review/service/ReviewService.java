@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
-import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
+import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.entity.Course;
 import com.icandoit.boottalk.bootcamp.exception.BootcampCustomException;
 import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;

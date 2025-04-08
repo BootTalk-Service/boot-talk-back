@@ -19,7 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
-import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
+import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.entity.Course;
 import com.icandoit.boottalk.bootcamp.entity.TrainingCenter;
 import com.icandoit.boottalk.bootcamp.exception.BootcampCustomException;

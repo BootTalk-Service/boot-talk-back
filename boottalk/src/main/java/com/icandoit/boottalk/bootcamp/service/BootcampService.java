@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.icandoit.boottalk.bootcamp.dto.BootcampResponseDto;
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
-import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
+import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.exception.BootcampCustomException;
 import com.icandoit.boottalk.bootcamp.repository.BootcampQueryRepository;
 import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;

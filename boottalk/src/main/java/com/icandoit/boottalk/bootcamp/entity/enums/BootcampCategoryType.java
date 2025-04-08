@@ -1,4 +1,4 @@
-package com.icandoit.boottalk.bootcamp.entity;
+package com.icandoit.boottalk.bootcamp.entity.enums;
 
 import java.util.HashMap;
 import java.util.Map;

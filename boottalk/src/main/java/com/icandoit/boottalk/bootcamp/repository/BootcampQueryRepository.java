@@ -8,7 +8,7 @@ import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
-import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
+import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.entity.QBootcamp;
 import com.icandoit.boottalk.bootcamp.entity.QCourse;
 import com.querydsl.core.types.OrderSpecifier;

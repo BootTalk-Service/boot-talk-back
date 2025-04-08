@@ -1,6 +1,6 @@
 package com.icandoit.boottalk.user.domain.dto;
 
-import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
+import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.user.domain.entity.User;
 
 import lombok.Builder;

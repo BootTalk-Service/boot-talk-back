@@ -10,9 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
+import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationCreateDto;
-import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatApplication;
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatInfo;
 import com.icandoit.boottalk.coffeeChat.entity.enums.JobType;
 import com.icandoit.boottalk.coffeeChat.entity.enums.MentorType;
