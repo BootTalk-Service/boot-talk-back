@@ -11,4 +11,12 @@ public class SystemMessageUtil {
         String formattedStartTime = startTime.format(FORMATTER);
         return String.format("채팅방이 예약되었습니다. 멘토링은 %s에 시작됩니다.", formattedStartTime);
     }
+
+    public static String MentorEnterMessage(String userName) {
+        return String.format("%s멘토님이 입장하셨습니다.", userName);
+    }
+
+    public static String MenteeEnterMessage(String userName) {
+        return String.format("%s님이 입장하셨습니다.", userName);
+    }
 }

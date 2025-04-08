@@ -10,6 +10,7 @@ import com.icandoit.boottalk.stomp_chat.entity.ChatRoom;
 import com.icandoit.boottalk.stomp_chat.entity.enums.MessageType;
 import com.icandoit.boottalk.stomp_chat.repository.ChatRoomRepository;
 import com.icandoit.boottalk.stomp_chat.util.SystemMessageUtil;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -63,5 +64,95 @@ public class ChatRoomService {
     @Transactional(readOnly = true)
     public List<ChatRoom> getUserChatRooms(Long userId) {
         return chatRoomRepository.findActiveChatRoomsByUserId(userId);
+    }
+
+    // 채팅방 입장
+    @Transactional
+    public boolean enterChatRoom(String roomUuid, Long userId) {
+
+        // 유효한 채팅방 상태 검증 및 조회
+        ChatRoom chatRoom = getValidChatRoom(roomUuid);
+
+        // 입장 권한 확인
+        validateChatRoomEntry(chatRoom, userId);
+
+        // 멘토인 경우
+        if (isMentor(chatRoom, userId)) {
+            handleMentorEntry(chatRoom);
+        }
+
+        // 멘티인 경우
+        if (isMentee(chatRoom, userId)) {
+            handleMenteeEntry(chatRoom);
+        }
+
+        chatRoomRepository.save(chatRoom);
+        return true;
+    }
+
+    private ChatRoom getValidChatRoom(String roomUuid) {
+        ChatRoom chatRoom = chatRoomRepository.findByRoomUuid(roomUuid)
+            .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+
+        if (!chatRoom.isActive()) {
+            throw new CustomException(ErrorCode.CHAT_ROOM_NOT_ACTIVE);
+        }
+
+        if (LocalDateTime.now().isAfter(chatRoom.getExpiresAt())) {
+            chatRoom.setActive(false);
+            chatRoomRepository.save(chatRoom);
+            throw new CustomException(ErrorCode.CHAT_ROOM_EXPIRED);
+        }
+
+        return chatRoom;
+    }
+
+    private void validateChatRoomEntry(ChatRoom chatRoom, Long userId) {
+        boolean isMentor = isMentor(chatRoom, userId);
+        boolean isMentee = isMentee(chatRoom, userId);
+
+        if (!isMentor && !isMentee) {
+            throw new CustomException(ErrorCode.CHAT_ROOM_FORBIDDEN);
+        }
+    }
+
+    private boolean isMentor(ChatRoom chatRoom, Long userId) {
+        return chatRoom.getMentor().getUserId().equals(userId);
+    }
+
+    private boolean isMentee(ChatRoom chatRoom, Long userId) {
+        return chatRoom.getMentee().getUserId().equals(userId);
+    }
+
+    private void handleMentorEntry(ChatRoom chatRoom) {
+        if (!chatRoom.isMentorEntered()) {
+            chatRoom.setMentorEntered(true);
+
+            MessageRequestDto systemMessage = MessageRequestDto.from(
+                chatRoom.getRoomUuid(),
+                SYSTEM_SENDER_ID,
+                chatRoom.getMentee().getUserId(),
+                SystemMessageUtil.MentorEnterMessage(chatRoom.getMentor().getUserName()),
+                MessageType.SYSTEM
+            );
+
+            messageService.saveAndSendMessage(systemMessage);
+        }
+    }
+
+    private void handleMenteeEntry(ChatRoom chatRoom) {
+        if (!chatRoom.isMenteeEntered()) {
+            chatRoom.setMenteeEntered(true);
+
+            MessageRequestDto systemMessage = MessageRequestDto.from(
+                chatRoom.getRoomUuid(),
+                SYSTEM_SENDER_ID,
+                chatRoom.getMentor().getUserId(),
+                SystemMessageUtil.MenteeEnterMessage(chatRoom.getMentee().getUserName()),
+                MessageType.SYSTEM
+            );
+
+            messageService.saveAndSendMessage(systemMessage);
+        }
     }
 }

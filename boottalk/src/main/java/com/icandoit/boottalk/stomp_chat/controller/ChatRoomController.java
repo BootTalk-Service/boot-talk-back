@@ -35,4 +35,15 @@ public class ChatRoomController {
         List<ChatRoom> chatRooms = chatRoomService.getUserChatRooms(user.getServiceUserId());
         return ResponseEntity.ok(chatRooms);
     }
+
+    // 채팅방 입장
+    @PostMapping("/{roomUuid}/enter")
+    public ResponseEntity<Void> enterChatRoom(
+        @AuthenticationPrincipal CustomOAuth2User user,
+        @PathVariable String roomUuid
+    ) {
+
+        chatRoomService.enterChatRoom(roomUuid, user.getServiceUserId());
+        return ResponseEntity.ok().build();
+    }
 }
