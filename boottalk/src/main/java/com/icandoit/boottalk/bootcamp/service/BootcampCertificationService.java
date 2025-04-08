@@ -1,16 +1,23 @@
 package com.icandoit.boottalk.bootcamp.service;
 
-import java.io.IOException;
-
-import com.icandoit.boottalk.bootcamp.entity.BootcampCertification;
-import com.icandoit.boottalk.bootcamp.entity.enums.CertificationStatus;
-import com.icandoit.boottalk.bootcamp.repository.BootcampCertificationRepository;
-import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
-import com.icandoit.boottalk.common.service.S3Service;
-import com.icandoit.boottalk.user.domain.repository.UserRepository;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.icandoit.boottalk.bootcamp.dto.CertificationCreationRequestDto;
+import com.icandoit.boottalk.bootcamp.dto.CertificationResponseDto;
+import com.icandoit.boottalk.bootcamp.entity.BootcampCertification;
+import com.icandoit.boottalk.bootcamp.entity.Course;
+import com.icandoit.boottalk.bootcamp.entity.enums.CertificationStatus;
+import com.icandoit.boottalk.bootcamp.exception.BootcampCustomException;
+import com.icandoit.boottalk.bootcamp.exception.BootcampErrorCode;
+import com.icandoit.boottalk.bootcamp.repository.BootcampCertificationRepository;
+import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
+import com.icandoit.boottalk.libs.exception.CustomException;
+import com.icandoit.boottalk.libs.exception.ErrorCode;
+import com.icandoit.boottalk.user.domain.entity.User;
+import com.icandoit.boottalk.user.domain.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,24 +25,29 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BootcampCertificationService {
 
-	private final S3Service s3Service;
-	private final BootcampCertificationRepository bootcampCertificationRepository;
 	private final UserRepository userRepository;
 	private final CourseRepository courseRepository;
+	private final BootcampCertificationRepository bootcampCertificationRepository;
 
-	public BootcampCertification createCertification(MultipartFile file, Long userId, Long courseId) throws
-		IOException {
-		// 수료증 파일을 S3에 업로드하고 URL 받기
-		String fileUrl = s3Service.uploadFile(file, "certifications");
+	// 수료증 등록
+	@Transactional
+	public CertificationResponseDto createCertification(Long userId, CertificationCreationRequestDto request) {
+		Course course = courseRepository.findByCourseName(request.courseName())
+			.orElseThrow(() -> new CustomException(ErrorCode.COURSE_NOT_FOUND));
 
-		// BootcampCertification 객체 생성
-		BootcampCertification certification = BootcampCertification.builder()
-			.fileUrl(fileUrl)
-			.status(CertificationStatus.PENDING) // 초기 상태는 PENDING
-			.user(userRepository.getReferenceById(userId))
-			.course(courseRepository.getReferenceById(courseId))
-			.build();
+		User user = userRepository.getReferenceById(userId);
 
-		return bootcampCertificationRepository.save(certification);
+		// 해당 부트캠프에 승인됐거나 요청한 적이 있으면 에러 발생, 거절되었을때는 다시 신청 가능
+		List<CertificationStatus> blockedStatuses = List.of(CertificationStatus.PENDING, CertificationStatus.APPROVED);
+		if (bootcampCertificationRepository.existsByUserAndCourseAndStatusIn(user, course, blockedStatuses)) {
+			throw new BootcampCustomException(BootcampErrorCode.DUPLICATE_CERTIFICATION_EXIST);
+		}
+
+		BootcampCertification certification =
+			BootcampCertification.of(user, course, request.fileUrl());
+
+		BootcampCertification savedCertification = bootcampCertificationRepository.save(certification);
+
+		return CertificationResponseDto.from(savedCertification);
 	}
 }

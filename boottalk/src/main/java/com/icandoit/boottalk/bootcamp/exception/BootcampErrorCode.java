@@ -19,6 +19,9 @@ public enum BootcampErrorCode {
 	TRAINING_CENTER_NOT_FOUND(404, "요청한 훈련 기관을 찾을 수 없습니다."),
 	API_DATA_IS_EMPTY(404, "API 데이터가 비어 있습니다."),
 
+	/* 409 CONFLICT */
+	DUPLICATE_CERTIFICATION_EXIST(409, "동일한 인증이 이미 존재합니다."),
+
 	/* 500 INTERNAL_SERVER_ERROR*/
 	DATA_FETCH_ERROR(500, "데이터 요청 중 오류가 발생했습니다."),
 	DATA_PARSING_ERROR(500, "API 응답 데이터 파싱에 실패했습니다."),

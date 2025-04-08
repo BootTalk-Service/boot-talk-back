@@ -97,10 +97,10 @@ public class Employ24ApiService {
 		}
 
 		TrainingCenter center = saveOrGetTrainingCenter(dto, detail);
-
-		Course course = saveOrGetCourse(dto, center);
-
 		BootcampCategoryType category = BootcampCategoryType.fromKoreanName(categoryName);
+
+		Course course = saveOrGetCourse(dto, center, category);
+
 		Bootcamp bootcamp = createBootcampEntity(center, course, dto, category, detail);
 
 		bootcampRepository.save(bootcamp);
@@ -109,23 +109,27 @@ public class Employ24ApiService {
 
 	// TrainingCenter가 존재하지 않으면 저장, 있으면 조회해서 반환
 	private TrainingCenter saveOrGetTrainingCenter(BootcampListResponseDto dto, BootcampDetailResponseDto detail) {
+		String address1 = (detail.address1() != null) ? detail.address1() : "";
+		String address2 = (detail.address2() != null) ? detail.address2() : "";
+		String fullAddress = address1 + " " + address2;
+
 		return trainingCenterRepository.findByTrainingCenterName(dto.trainingCenterName())
 			.orElseGet(() -> trainingCenterRepository.save(
 				TrainingCenter.of(
 					dto.trainingCenterName(),
 					detail.trainingCenterEmail(),
-					detail.address1() + " " + detail.address2(),
+					fullAddress,
 					detail.trainingCenterUrl(),
 					detail.trainingCenterTelephoneNumber()
 				)
 			));
 	}
 
-	// Cource가 존재하지 않으면 저장, 있으면 조회해서 반환
-	private Course saveOrGetCourse(BootcampListResponseDto dto, TrainingCenter center) {
+	// Course 가 존재하지 않으면 저장, 있으면 조회해서 반환
+	private Course saveOrGetCourse(BootcampListResponseDto dto, TrainingCenter center, BootcampCategoryType category) {
 		return courseRepository.findByTrainingProgramId(dto.bootcampId())
 			.orElseGet(() -> courseRepository.save(
-				Course.of(dto.bootcampId(), dto.bootcampName(), center)
+				Course.of(dto.bootcampId(), dto.bootcampName(), category, center)
 			));
 	}
 
@@ -134,13 +138,16 @@ public class Employ24ApiService {
 		TrainingCenter center, Course course, BootcampListResponseDto dto,
 		BootcampCategoryType category, BootcampDetailResponseDto detail
 	) {
+		String bootcampRegion = (detail.address1() != null && !detail.address1().isEmpty())
+			? detail.address1() : "미입력";
+
 		return Bootcamp.of(
 			center,
 			course,
 			dto.bootcampName(),
 			category,
 			Integer.parseInt(dto.bootcampDegree()),
-			detail.address1(),
+			bootcampRegion,
 			Integer.parseInt(dto.maxCapacity()),
 			!(detail.bootcampCourseName().equals("K-디지털트레이닝") || dto.cost().equals("0")),
 			LocalDate.parse(dto.trainingStartDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd")),

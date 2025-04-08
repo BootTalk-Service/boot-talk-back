@@ -42,4 +42,13 @@ public class BootcampCertification extends BaseEntity {
 
 	@Enumerated(EnumType.STRING)
 	private CertificationStatus status;
+
+	public static BootcampCertification of(User user, Course course, String fileUrl) {
+		return BootcampCertification.builder()
+			.user(user)
+			.course(course)
+			.fileUrl(fileUrl)
+			.status(CertificationStatus.PENDING)
+			.build();
+	}
 }
