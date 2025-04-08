@@ -25,7 +25,7 @@ public class BootcampFetchScheduler {
 	private final Job bootcampFetchJob;
 	private final Employ24ApiService employ24ApiService;
 
-	@Scheduled(cron = "0 30 18 * * *") // 매일 자정
+	//@Scheduled(cron = "0 30 18 * * *") // 매일 자정
 	public void runBootcampFetchJob() {
 		try {
 			log.info("Bootcamp Fetch Batch 실행 시작 : {}", LocalDateTime.now());
