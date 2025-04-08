@@ -1,5 +1,7 @@
 package com.icandoit.boottalk.coffeeChat.service;
 
+import java.time.LocalDateTime;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -64,14 +66,12 @@ public class CoffeeChatApplicationService {
         User user = getUser(userId);
         CoffeeChatInfo coffeeChatInfo = getCoffeeChatInfo(coffeChatInfoId);
 
-        // 멘토 타입에 따른 커피챗 포인트 차감. 포인트 부족 시 커피챗 신청 실패 처리
         MentorType mentorType = coffeeChatInfo.getMentorType();
-        int deductionPoint = getPointCostByMentorType (mentorType);
-
+        int deductionPoint = getPointCostByMentorType (mentorType); // 멘토 타입에 따른 커피챗 포인트
 
         createPointHistoryService.createPointHistory(EventType.COFFEE_CHAT_APPLY, userId, deductionPoint);
 
-        CoffeeChatApplication coffeeChatApp = CoffeeChatApplication.of(user, coffeeChatInfo, request);
+        CoffeeChatApplication coffeeChatApp = CoffeeChatApplication.of(user, coffeeChatInfo, deductionPoint, request);
         coffeeChatAppRepository.save(coffeeChatApp);
 
         return CoffeeChatApplicationResponseDto.from(coffeeChatApp);
@@ -129,8 +129,11 @@ public class CoffeeChatApplicationService {
         validateCoffeeChatInfo(coffeeChatApp.getCoffeeChatInfo().getCoffeeChatInfoId());
 
         coffeeChatApp.setStatus(StatusType.CANCELED);
-        // TODO: 신청 취소에 관한 세부 정책 적용 필요
 
+        // 커피챗 시작 시간 2일 전까지 취소 시 포인트 환불
+        if (LocalDateTime.now().plusDays(2).isBefore(coffeeChatApp.getCoffeeChatStartTime())) {
+            createPointHistoryService.createPointHistory(EventType.COFFEE_CHAT_CANCEL_REFUND, userId, coffeeChatApp.getUsedPoint());
+        }
 
     }
 

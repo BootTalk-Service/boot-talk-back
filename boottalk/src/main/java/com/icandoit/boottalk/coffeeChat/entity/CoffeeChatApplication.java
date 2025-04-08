@@ -49,6 +49,9 @@ public class CoffeeChatApplication extends BaseEntity {
     private StatusType status;
 
     @Column(nullable = false)
+    private int usedPoint;
+
+    @Column(nullable = false)
     private String content;
 
     @Column(nullable = false)
@@ -57,10 +60,11 @@ public class CoffeeChatApplication extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime coffeeChatEndTime;
 
-    public static CoffeeChatApplication of(User user, CoffeeChatInfo coffeeChatInfo, CoffeeChatApplicationCreateDto dto) {
+    public static CoffeeChatApplication of(User user, CoffeeChatInfo coffeeChatInfo, int deductionPoint, CoffeeChatApplicationCreateDto dto) {
         return CoffeeChatApplication.builder()
             .mentee(user)
             .coffeeChatInfo(coffeeChatInfo)
+            .usedPoint(deductionPoint)
             .content(dto.content())
             .coffeeChatStartTime(dto.coffeeChatStartTime())
             .coffeeChatEndTime(dto.coffeeChatEndTime())
