@@ -46,20 +46,20 @@ public class CoffeeChatApplicationService {
     public CoffeeChatApplicationResponseDto createCoffeeChatApp(Long userId, CoffeeChatApplicationCreateDto request) {
 
         Long coffeChatInfoId = request.coffeeChatInfoId();
-        
-        if (coffeeChatAppRepository.existsByMentee_UserIdAndCoffeeChatInfo_CoffeeChatInfoId(userId, coffeChatInfoId)) {
+
+        // 해당 커피챗에 대해 대기 또는 수락 상태의 신청이 이미 존재하면 예외 처리 (중복 신청 방지)
+        if (coffeeChatAppRepository.existsLatestPendingOrApprovedApplication(userId, coffeChatInfoId)) {
             throw new CustomException(ErrorCode.COFFEE_CHAT_APPLICATION_ALREADY_EXISTS);
         }
-        
-        log.debug("커피챗 신청 Lock : userId: {}", userId);
-        // 커피챗 신청 시, 해당 시간대의 커피챗에 다른 사용자가 신청 요청하지 못하도록 동시성 제어
-        if (coffeeChatAppRepository.existsByCoffeeChatInfo_CoffeeChatInfoIdAndCoffeeChatStartTime(
-            coffeChatInfoId, request.coffeeChatStartTime())
-        ) {
+
+        log.debug("커피챗 신청 Lock 시작: userId: {}", userId);
+
+        // 동일 시간대에 다른 사용자의 커피챗 신청이 존재하면 예외 처리 (동시성 제어용 Lock 설정)
+        if (coffeeChatAppRepository.isTimeSlotAlreadyTaken(coffeChatInfoId, request.coffeeChatStartTime())) {
             throw new CustomException(ErrorCode.COFFEE_CHAT_APPLICATION_TIME_ALREADY_EXISTS);
         }
-        log.debug("커피챗 신청 Lock 해제 : userId: {}", userId);
 
+        log.debug("커피챗 신청 Lock 해제: userId: {}", userId);
 
         User user = getUser(userId);
         CoffeeChatInfo coffeeChatInfo = getCoffeeChatInfo(coffeChatInfoId);
