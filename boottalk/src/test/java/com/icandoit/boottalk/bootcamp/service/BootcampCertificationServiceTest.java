@@ -1,9 +1,8 @@
 package com.icandoit.boottalk.bootcamp.service;
 
-import static com.icandoit.boottalk.bootcamp.exception.BootcampErrorCode.*;
+import static com.icandoit.boottalk.libs.exception.ErrorCode.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,11 +16,9 @@ import org.mockito.MockitoAnnotations;
 
 import com.icandoit.boottalk.bootcamp.dto.CertificationCreationRequestDto;
 import com.icandoit.boottalk.bootcamp.dto.CertificationResponseDto;
-import com.icandoit.boottalk.bootcamp.entity.BootcampCertification;
 import com.icandoit.boottalk.bootcamp.entity.Course;
 import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.entity.enums.CertificationStatus;
-import com.icandoit.boottalk.bootcamp.exception.BootcampCustomException;
 import com.icandoit.boottalk.bootcamp.repository.BootcampCertificationRepository;
 import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
@@ -108,11 +105,11 @@ class BootcampCertificationServiceTest {
 			.willReturn(true);
 
 		// when & then
-		BootcampCustomException exception = assertThrows(BootcampCustomException.class, () -> {
+		CustomException exception = assertThrows(CustomException.class, () -> {
 			certificationService.createCertification(testUser.getUserId(), testRequest);
 		});
 
-		assertEquals(DUPLICATE_CERTIFICATION_EXIST, exception.getBootcampErrorCode());
+		assertEquals(DUPLICATE_CERTIFICATION_EXIST, exception.getErrorCode());
 
 		verify(courseRepository, times(1)).findByCourseName(testRequest.courseName());
 		verify(userRepository, times(1)).getReferenceById(testUser.getUserId());

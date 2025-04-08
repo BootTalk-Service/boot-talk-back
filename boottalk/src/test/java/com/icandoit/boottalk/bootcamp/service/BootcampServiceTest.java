@@ -1,6 +1,6 @@
 package com.icandoit.boottalk.bootcamp.service;
 
-import static com.icandoit.boottalk.bootcamp.exception.BootcampErrorCode.*;
+import static com.icandoit.boottalk.libs.exception.ErrorCode.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -21,12 +21,12 @@ import org.springframework.data.domain.Pageable;
 
 import com.icandoit.boottalk.bootcamp.dto.BootcampResponseDto;
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
-import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.entity.Course;
 import com.icandoit.boottalk.bootcamp.entity.TrainingCenter;
-import com.icandoit.boottalk.bootcamp.exception.BootcampCustomException;
+import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.repository.BootcampQueryRepository;
 import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
+import com.icandoit.boottalk.libs.exception.CustomException;
 
 class BootcampServiceTest {
 
@@ -129,11 +129,11 @@ class BootcampServiceTest {
 		when(bootcampRepository.findById(999L)).thenReturn(Optional.empty());
 
 		//when & then
-		BootcampCustomException exception = assertThrows(BootcampCustomException.class,
+		CustomException exception = assertThrows(CustomException.class,
 			() -> bootcampService.findById(999L)
 		);
 
-		assertEquals(exception.getBootcampErrorCode(), BOOTCAMP_NOT_FOUND);
+		assertEquals(exception.getErrorCode(), BOOTCAMP_NOT_FOUND);
 		verify(bootcampRepository, times(1)).findById(999L);
 	}
 

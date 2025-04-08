@@ -1,7 +1,7 @@
 package com.icandoit.boottalk.bootcamp.service;
 
 import static com.icandoit.boottalk.bootcamp.dto.BootcampEmploy24Response.*;
-import static com.icandoit.boottalk.bootcamp.exception.BootcampErrorCode.*;
+import static com.icandoit.boottalk.libs.exception.ErrorCode.*;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -19,13 +19,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
-import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.entity.Course;
 import com.icandoit.boottalk.bootcamp.entity.TrainingCenter;
-import com.icandoit.boottalk.bootcamp.exception.BootcampCustomException;
+import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
 import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
 import com.icandoit.boottalk.bootcamp.repository.TrainingCenterRepository;
+import com.icandoit.boottalk.libs.exception.CustomException;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -183,7 +183,7 @@ public class Employ24ApiService {
 			JsonNode detailNode = objectMapper.readTree(response.getBody()).get("inst_base_info");
 			return objectMapper.treeToValue(detailNode, BootcampDetailResponseDto.class);
 		} catch (Exception e) {
-			throw new BootcampCustomException(DATA_PARSING_ERROR);
+			throw new CustomException(DATA_PARSING_ERROR);
 		}
 	}
 
@@ -193,7 +193,7 @@ public class Employ24ApiService {
 			JsonNode jsonList = objectMapper.readTree(body).get("srchList");
 
 			if (jsonList == null || jsonList.isEmpty()) {
-				throw new BootcampCustomException(API_DATA_IS_EMPTY);
+				throw new CustomException(API_DATA_IS_EMPTY);
 			}
 
 			List<BootcampListResponseDto> list = new ArrayList<>();
@@ -202,7 +202,7 @@ public class Employ24ApiService {
 			}
 			return list;
 		} catch (Exception e) {
-			throw new BootcampCustomException(DATA_PARSING_ERROR);
+			throw new CustomException(DATA_PARSING_ERROR);
 		}
 	}
 
@@ -246,7 +246,7 @@ public class Employ24ApiService {
 	// API 응답 유효성 검사
 	private void validateResponse(ResponseEntity<String> response) {
 		if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-			throw new BootcampCustomException(DATA_FETCH_ERROR);
+			throw new CustomException(DATA_FETCH_ERROR);
 		}
 	}
 }

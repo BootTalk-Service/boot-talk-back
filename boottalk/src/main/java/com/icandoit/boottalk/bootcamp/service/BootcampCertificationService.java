@@ -10,8 +10,6 @@ import com.icandoit.boottalk.bootcamp.dto.CertificationResponseDto;
 import com.icandoit.boottalk.bootcamp.entity.BootcampCertification;
 import com.icandoit.boottalk.bootcamp.entity.Course;
 import com.icandoit.boottalk.bootcamp.entity.enums.CertificationStatus;
-import com.icandoit.boottalk.bootcamp.exception.BootcampCustomException;
-import com.icandoit.boottalk.bootcamp.exception.BootcampErrorCode;
 import com.icandoit.boottalk.bootcamp.repository.BootcampCertificationRepository;
 import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
@@ -40,7 +38,7 @@ public class BootcampCertificationService {
 		// 해당 부트캠프에 승인됐거나 요청한 적이 있으면 에러 발생, 거절되었을때는 다시 신청 가능
 		List<CertificationStatus> blockedStatuses = List.of(CertificationStatus.PENDING, CertificationStatus.APPROVED);
 		if (bootcampCertificationRepository.existsByUserAndCourseAndStatusIn(user, course, blockedStatuses)) {
-			throw new BootcampCustomException(BootcampErrorCode.DUPLICATE_CERTIFICATION_EXIST);
+			throw new CustomException(ErrorCode.DUPLICATE_CERTIFICATION_EXIST);
 		}
 
 		BootcampCertification certification =
