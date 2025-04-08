@@ -128,6 +128,12 @@ public class CoffeeChatApplicationService {
         validateCoffeeChatApplicant(userId, coffeeChatApp.getMentee().getUserId());
         validateCoffeeChatInfo(coffeeChatApp.getCoffeeChatInfo().getCoffeeChatInfoId());
 
+        StatusType currentStatus = coffeeChatApp.getStatus();
+        // 커피챗 취소는 상태가 대기 또는 수락 중일 때만 가능
+        if (!(currentStatus == StatusType.PENDING || currentStatus == StatusType.APPROVED)) {
+            throw new CustomException(ErrorCode.COFFEE_CHAT_CANNOT_CANCEL);
+        }
+
         coffeeChatApp.setStatus(StatusType.CANCELED);
 
         // 커피챗 시작 시간 2일 전까지 취소 시 포인트 환불
