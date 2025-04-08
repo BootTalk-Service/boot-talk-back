@@ -1,53 +1,90 @@
 package com.icandoit.boottalk.coffeeChat.service;
 
-import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoApprovedDto;
-import com.icandoit.boottalk.common.dto.PagedResponseDto;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationResponseDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationCreateDto;
+import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationResponseDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationUpdateDto;
+import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoApprovedDto;
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatApplication;
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatInfo;
+import com.icandoit.boottalk.coffeeChat.entity.enums.MentorType;
 import com.icandoit.boottalk.coffeeChat.entity.enums.StatusType;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatApplicationRepository;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatInfoRepository;
+import com.icandoit.boottalk.common.dto.PagedResponseDto;
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
+import com.icandoit.boottalk.point_history.domain.type.EventType;
+import com.icandoit.boottalk.point_history.service.CreatePointHistoryService;
 import com.icandoit.boottalk.user.domain.entity.User;
 import com.icandoit.boottalk.user.domain.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CoffeeChatApplicationService {
 
     private final CoffeeChatInfoRepository coffeeChatInfoRepository;
     private final CoffeeChatApplicationRepository coffeeChatAppRepository;
     private final UserRepository userRepository;
 
+    private final CreatePointHistoryService createPointHistoryService;
+
+    // 멘토 타입에 따른 포인트 차감액
+    private final int GENERAL_COFFEE_CHAT_POINT = 1;
+    private final int GRADUATE_COFFEE_CHAT_POINT = 2;
+    private final int PROFESSIONAL_COFFEE_CHAT_POINT = 3;
+
     @Transactional
     public CoffeeChatApplicationResponseDto createCoffeeChatApp(Long userId, CoffeeChatApplicationCreateDto request) {
-        // TODO: 동일한 유저가 동일한 커피챗에 중복 신청 불가능하게 수정
-        // TODO: 커피챗 신청 성공 시, 해당 시간대의 커피챗에 다른 사용자가 신청 요청하지 못하도록 동시성 제어 필요
+
+        Long coffeChatInfoId = request.coffeeChatInfoId();
+        
+        if (coffeeChatAppRepository.existsByMentee_UserIdAndCoffeeChatInfo_CoffeeChatInfoId(userId, coffeChatInfoId)) {
+            throw new CustomException(ErrorCode.COFFEE_CHAT_APPLICATION_ALREADY_EXISTS);
+        }
+        
+        log.debug("커피챗 신청 Lock : userId: {}", userId);
+        // 커피챗 신청 시, 해당 시간대의 커피챗에 다른 사용자가 신청 요청하지 못하도록 동시성 제어
+        if (coffeeChatAppRepository.existsByCoffeeChatInfo_CoffeeChatInfoIdAndCoffeeChatStartTime(
+            coffeChatInfoId, request.coffeeChatStartTime())
+        ) {
+            throw new CustomException(ErrorCode.COFFEE_CHAT_APPLICATION_TIME_ALREADY_EXISTS);
+        }
+        log.debug("커피챗 신청 Lock 해제 : userId: {}", userId);
+
 
         User user = getUser(userId);
-        CoffeeChatInfo coffeeChatInfo = getCoffeeChatInfo(request.coffeeChatInfoId());
+        CoffeeChatInfo coffeeChatInfo = getCoffeeChatInfo(coffeChatInfoId);
+
+        // 멘토 타입에 따른 커피챗 포인트 차감. 포인트 부족 시 커피챗 신청 실패 처리
+        MentorType mentorType = coffeeChatInfo.getMentorType();
+        int deductionPoint = getPointCostByMentorType (mentorType);
+
+
+        createPointHistoryService.createPointHistory(EventType.COFFEE_CHAT_APPLY, userId, deductionPoint);
+
         CoffeeChatApplication coffeeChatApp = CoffeeChatApplication.of(user, coffeeChatInfo, request);
         coffeeChatAppRepository.save(coffeeChatApp);
-
-        // TODO: 포인트 차감
 
         return CoffeeChatApplicationResponseDto.from(coffeeChatApp);
 
     }
+
+	private int getPointCostByMentorType (MentorType mentorType) {
+		return switch(mentorType){
+            case  GENERAL -> GENERAL_COFFEE_CHAT_POINT;
+            case  GRADUATE -> GRADUATE_COFFEE_CHAT_POINT;
+			case  PROFESSIONAL -> PROFESSIONAL_COFFEE_CHAT_POINT;
+		};
+	}
 
 	@Transactional(readOnly = true)
     public PagedResponseDto<CoffeeChatApplicationResponseDto> getMyCoffeeChatApps(Long userId, Pageable pageable) {
@@ -85,13 +122,16 @@ public class CoffeeChatApplicationService {
     }
 
     @Transactional
-    public void deleteCoffeeChatApp(Long userId, Long coffeeChatAppId) {
+    public void cancelCoffeeChatApp(Long userId, Long coffeeChatAppId) {
         CoffeeChatApplication coffeeChatApp = getCoffeeChatApplication(coffeeChatAppId);
 
         validateCoffeeChatApplicant(userId, coffeeChatApp.getMentee().getUserId());
         validateCoffeeChatInfo(coffeeChatApp.getCoffeeChatInfo().getCoffeeChatInfoId());
 
-        coffeeChatAppRepository.delete(coffeeChatApp);
+        coffeeChatApp.setStatus(StatusType.CANCELED);
+        // TODO: 신청 취소에 관한 세부 정책 적용 필요
+
+
     }
 
 

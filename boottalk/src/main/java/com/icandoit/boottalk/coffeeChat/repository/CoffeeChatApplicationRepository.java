@@ -1,12 +1,17 @@
 package com.icandoit.boottalk.coffeeChat.repository;
 
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatApplication;
-import java.util.List;
+
+import java.time.LocalDateTime;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import jakarta.persistence.LockModeType;
 
 public interface CoffeeChatApplicationRepository extends JpaRepository<CoffeeChatApplication, Long> {
 
@@ -21,4 +26,11 @@ public interface CoffeeChatApplicationRepository extends JpaRepository<CoffeeCha
     AND ca.status = 'APPROVED'
 """)
 	Page<CoffeeChatApplication> findApprovedChatsByUserId(@Param("userId") Long userId, Pageable pageable);
+
+	boolean existsByMentee_UserIdAndCoffeeChatInfo_CoffeeChatInfoId(Long userId, Long coffeeChatInfoId);
+
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	boolean existsByCoffeeChatInfo_CoffeeChatInfoIdAndCoffeeChatStartTime(
+		Long coffeeChatInfoId, LocalDateTime coffeeChatStartTime);
+
 }
