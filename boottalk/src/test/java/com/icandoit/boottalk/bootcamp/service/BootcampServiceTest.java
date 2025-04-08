@@ -54,7 +54,7 @@ class BootcampServiceTest {
 			.trainingCenterUrl("www.trainingcenter.com")
 			.build();
 
-		Course course = Course.of("TPID-001", "테스트 코스", trainingCenter);
+		Course course = Course.of("TPID-001", "테스트 코스", BootcampCategoryType.APPLICATION_SW_ENGINEERING, trainingCenter);
 		course.updateReviewStats(8, 2); // 예시: 평균 평점 4.0
 
 		bootcamp = Bootcamp.builder()

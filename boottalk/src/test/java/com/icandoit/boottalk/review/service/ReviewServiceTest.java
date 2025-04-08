@@ -22,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
 import com.icandoit.boottalk.bootcamp.entity.Course;
 import com.icandoit.boottalk.bootcamp.entity.TrainingCenter;
+import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
 import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
@@ -62,7 +63,7 @@ class ReviewServiceTest {
 		String trainingProgramId = "TPID-123";
 		Long userId = 1L;
 
-		Course course = Course.of(trainingProgramId, "TestCourse", null);
+		Course course = Course.of(trainingProgramId, "TestCourse", BootcampCategoryType.AI_SERVICE_IMPLEMENTATION,null);
 		User user = User.builder().userId(userId).userName("testUser").build();
 
 		ReviewCreateRequestDto request = new ReviewCreateRequestDto(trainingProgramId, "this is review", 3);
@@ -105,7 +106,7 @@ class ReviewServiceTest {
 		Pageable pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
 
 		TrainingCenter trainingCenter = TrainingCenter.of("센터", "email", "주소", "url", "010-1234");
-		Course course = Course.of("TPID-123", "코스 이름", trainingCenter);
+		Course course = Course.of("TPID-123", "코스 이름", BootcampCategoryType.APPLICATION_SW_ENGINEERING,trainingCenter);
 
 		User user = User.builder()
 			.userId(1L)
@@ -167,7 +168,7 @@ class ReviewServiceTest {
 		String trainingProgramId = "TP123";
 		Long userId = 1L;
 
-		Course course = Course.of(trainingProgramId, "TestCourse", null);
+		Course course = Course.of(trainingProgramId, "TestCourse", BootcampCategoryType.APPLICATION_SW_ENGINEERING, null);
 		course.updateReviewStats(4, 1); // 기존 평점 4점 1개
 
 		User user = User.builder().userId(userId).userName("testUser").build();
@@ -198,7 +199,7 @@ class ReviewServiceTest {
 		Long ownerId = 1L;
 		Long anotherUserId = 2L;
 
-		Course course = Course.of("TP123", "course", null);
+		Course course = Course.of("TP123", "course", BootcampCategoryType.APPLICATION_SW_ENGINEERING, null);
 		User user = User.builder().userId(ownerId).build();
 		Review review = Review.builder().reviewId(reviewId).user(user).course(course).rating(3).build();
 
@@ -233,7 +234,7 @@ class ReviewServiceTest {
 		String trainingProgramId = "TP123";
 		Long userId = 1L;
 
-		Course course = Course.of(trainingProgramId, "TestCourse", null);
+		Course course = Course.of(trainingProgramId, "TestCourse", BootcampCategoryType.APPLICATION_SW_ENGINEERING, null);
 		course.updateReviewStats(4, 1); // 평점 4점 1개
 
 		User user = User.builder().userId(userId).userName("testUser").build();
@@ -273,7 +274,7 @@ class ReviewServiceTest {
 		Long reviewOwnerId = 1L;
 		Long anotherUserId = 2L;
 
-		Course course = Course.of("TP123", "CourseName", null);
+		Course course = Course.of("TP123", "CourseName", BootcampCategoryType.APPLICATION_SW_ENGINEERING, null);
 		User owner = User.builder().userId(reviewOwnerId).build();
 		Review review = Review.builder().reviewId(reviewId).user(owner).course(course).rating(4).build();
 

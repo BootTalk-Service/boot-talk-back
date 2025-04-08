@@ -66,7 +66,7 @@ public class ReviewConcurrencyTest {
 		this.trainingCenterId = center.getTrainingCenterId();
 
 		Course course = courseRepository.save(
-			Course.of(trainingProgramId, "동시성 테스트 코스", center)
+			Course.of(trainingProgramId, "동시성 테스트 코스", BootcampCategoryType.APPLICATION_SW_ENGINEERING, center)
 		);
 		this.courseId = course.getCourseId();
 	}
