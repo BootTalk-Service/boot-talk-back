@@ -68,7 +68,7 @@ public class ChatRoomService {
 
     // 채팅방 입장
     @Transactional
-    public boolean enterChatRoom(String roomUuid, Long userId) {
+    public void  enterChatRoom(String roomUuid, Long userId) {
 
         // 유효한 채팅방 상태 검증 및 조회
         ChatRoom chatRoom = getValidChatRoom(roomUuid);
@@ -87,7 +87,6 @@ public class ChatRoomService {
         }
 
         chatRoomRepository.save(chatRoom);
-        return true;
     }
 
     private ChatRoom getValidChatRoom(String roomUuid) {
