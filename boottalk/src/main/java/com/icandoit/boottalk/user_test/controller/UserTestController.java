@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.icandoit.boottalk.notification.service.SseEmitterService;
 import com.icandoit.boottalk.social_login.dto.CustomOAuth2User;
 import com.icandoit.boottalk.social_login.dto.UserRole;
 import com.icandoit.boottalk.social_login.jwt.JwtProvider;

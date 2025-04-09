@@ -107,7 +107,7 @@ class BootcampCertificationServiceTest {
 			.willReturn(testUser);
 
 		List<CertificationStatus> blockedStatuses = List.of(CertificationStatus.PENDING, CertificationStatus.APPROVED);
-		given(bootcampCertificationRepository.existsByUserAndCourseAndStatusIn(testUser, testCourse, blockedStatuses))
+		given(bootcampCertificationRepository.existsByUserAndCourseAndStatusNot(testUser, testCourse, CertificationStatus.REJECTED))
 			.willReturn(true);
 
 		// when & then
@@ -120,7 +120,7 @@ class BootcampCertificationServiceTest {
 		verify(courseRepository, times(1)).findById(testRequest.courseId());
 		verify(userRepository, times(1)).getReferenceById(testUser.getUserId());
 		verify(bootcampCertificationRepository, times(1))
-			.existsByUserAndCourseAndStatusIn(testUser, testCourse, blockedStatuses);
+			.existsByUserAndCourseAndStatusNot(testUser, testCourse, CertificationStatus.REJECTED);
 	}
 
 	@Test

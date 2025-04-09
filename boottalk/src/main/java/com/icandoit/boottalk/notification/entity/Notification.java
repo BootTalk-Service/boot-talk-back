@@ -1,0 +1,53 @@
+package com.icandoit.boottalk.notification.entity;
+
+import java.sql.Timestamp;
+
+import org.springframework.data.annotation.CreatedDate;
+
+import com.icandoit.boottalk.libs.entity.BaseEntity;
+import com.icandoit.boottalk.notification.dto.NotificationRequestDto;
+import com.icandoit.boottalk.notification.type.NotificationType;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Builder
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+public class Notification extends BaseEntity {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	long notificationId;
+
+	long userId;
+
+	@Enumerated(EnumType.STRING)
+	NotificationType type;
+
+	String message;
+
+	String url;
+
+	boolean checked;
+
+	public static Notification of(long userId, NotificationRequestDto dto) {
+		return Notification.builder()
+			.userId(userId)
+			.type(dto.type())
+			.message(dto.message())
+			.url(dto.url())
+			.build();
+	}
+}

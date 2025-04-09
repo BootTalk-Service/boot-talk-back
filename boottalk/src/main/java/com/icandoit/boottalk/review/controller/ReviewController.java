@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +21,7 @@ import com.icandoit.boottalk.review.dto.ReviewCreateRequestDto;
 import com.icandoit.boottalk.review.dto.ReviewResponseDto;
 import com.icandoit.boottalk.review.dto.ReviewUpdateRequestDto;
 import com.icandoit.boottalk.review.service.ReviewService;
+import com.icandoit.boottalk.social_login.dto.CustomOAuth2User;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,8 +35,12 @@ public class ReviewController {
 
 	// 리뷰 등록
 	@PostMapping
-	public ResponseEntity<ReviewResponseDto> createReview(@RequestBody @Valid ReviewCreateRequestDto request) {
-		Long userId = 1L; // test
+	public ResponseEntity<ReviewResponseDto> createReview(
+		@AuthenticationPrincipal CustomOAuth2User user,
+		@RequestBody @Valid ReviewCreateRequestDto request) {
+
+		Long userId = user.getServiceUserId();
+
 		return ResponseEntity.ok(reviewService.createReview(request, userId));
 	}
 
@@ -59,10 +65,11 @@ public class ReviewController {
 	// 내 리뷰 목록
 	@GetMapping("/my")
 	public ResponseEntity<PagedResponseDto<ReviewResponseDto>> getMyReviews(
+		@AuthenticationPrincipal CustomOAuth2User user,
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size
 	) {
-		Long userId = 1L; // 테스트용
+		Long userId = user.getServiceUserId();
 		Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 		Page<ReviewResponseDto> reviewPage = reviewService.getMyReviews(userId, pageable);
 
@@ -71,17 +78,22 @@ public class ReviewController {
 
 	// 내 리뷰 수정
 	@PutMapping("/my/{reviewId}")
-	public ResponseEntity<ReviewResponseDto> updateReview(@PathVariable Long reviewId,
+	public ResponseEntity<ReviewResponseDto> updateReview(
+		@AuthenticationPrincipal CustomOAuth2User user,
+		@PathVariable Long reviewId,
 		@RequestBody @Valid ReviewUpdateRequestDto request) {
-		Long userId = 1L; // test
-		return ResponseEntity.ok(reviewService.updateReview(request, reviewId, userId));
 
+		Long userId = user.getServiceUserId();
+
+		return ResponseEntity.ok(reviewService.updateReview(request, reviewId, userId));
 	}
 
 	// 내 리뷰 삭제
 	@DeleteMapping("/my/{reviewId}")
-	public ResponseEntity<Void> deleteReview(@PathVariable Long reviewId) {
-		Long userId = 1L; // test
+	public ResponseEntity<Void> deleteReview(
+		@AuthenticationPrincipal CustomOAuth2User user,
+		@PathVariable Long reviewId) {
+		Long userId = user.getServiceUserId();
 		reviewService.deleteReview(reviewId, userId);
 		return ResponseEntity.ok().build();
 	}
