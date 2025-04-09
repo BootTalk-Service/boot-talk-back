@@ -13,8 +13,8 @@ import com.icandoit.boottalk.notification.entity.Notification;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-	@Query("SELECT n FROM Notification n WHERE n.userId = :userId ORDER BY n.createdAt DESC LIMIT 20")
-	List<Notification> findUncheckedNotificationByUserId(@Param("userId") long userId);
+	@Query("SELECT n FROM Notification n WHERE n.userId = :userId ORDER BY n.createdAt DESC LIMIT 10")
+	List<Notification> findAllNotificationByUserId(@Param("userId") long userId);
 
 	@Query("SELECT n FROM Notification n WHERE n.userId = :userId AND n.createdAt > :time")
 	List<Notification> findByMissedNotifications(@Param("userId")long userId, @Param("time") LocalDateTime time);

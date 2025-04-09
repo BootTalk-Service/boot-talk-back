@@ -1,7 +1,6 @@
 package com.icandoit.boottalk.notification.controller;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import com.icandoit.boottalk.notification.dto.NotificationResponseDto;
+import com.icandoit.boottalk.notification.dto.AllNotificationResponseDto;
 import com.icandoit.boottalk.notification.service.NotificationService;
 import com.icandoit.boottalk.social_login.dto.CustomOAuth2User;
 
@@ -36,9 +35,9 @@ public class NotificationController {
 		return notificationService.connect(user.getServiceUserId(), lastEventId);
 	}
 
-	//알림 조회창 열었을 때 조회될 알림들 반환
+	//알림 조회창 열었을 때 사용자 알림 반환
 	@GetMapping
-	public ResponseEntity<List<NotificationResponseDto>> getNotifications(
+	public ResponseEntity<AllNotificationResponseDto> getNotifications(
 		@AuthenticationPrincipal CustomOAuth2User user
 	) {
 		return ResponseEntity.ok(notificationService.getNotifications(user.getServiceUserId()));
@@ -49,7 +48,8 @@ public class NotificationController {
 	public ResponseEntity<String> checkedNotification(
 		@AuthenticationPrincipal CustomOAuth2User user,
 		@RequestParam LocalDateTime time) {
-		notificationService.checkedNotification(user.getServiceUserId(), time);
+		notificationService.checkedAllNotification(user.getServiceUserId(), time);
 		return ResponseEntity.ok("알림을 확인하였습니다.");
 	}
+
 }
