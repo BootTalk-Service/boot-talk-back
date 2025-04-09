@@ -11,12 +11,7 @@ public record AllNotificationResponseDto(
 ) {
 	public static AllNotificationResponseDto from(
 		List<NotificationResponseDto> notificationList) {
-		int count = 0;
-		for (NotificationResponseDto notificationResponseDto : notificationList) {
-			if (!notificationResponseDto.checked()) {
-				count += 1;
-			}
-		}
+		int count = (int)notificationList.stream().filter(n -> !n.checked()).count();
 		return AllNotificationResponseDto.builder()
 			.notificationResponseDtoList(notificationList)
 			.uncheckedCount(count).build();
