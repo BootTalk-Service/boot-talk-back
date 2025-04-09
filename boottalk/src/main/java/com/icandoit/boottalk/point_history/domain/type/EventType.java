@@ -11,7 +11,9 @@ public enum EventType {
 	COFFEE_CHAT_RECEIVE("커피챗 수락", EARNED),
 	REVIEW("리뷰 작성", EARNED),
 	EVENT("이벤트", EARNED),
-	REDEEM("환급", EARNED),;
+	REDEEM("환급", EARNED),
+	COFFEE_CHAT_CANCEL_REFUND("커피챗 취소로 인한 환불", EARNED)
+	;
 
 	private final String typeName;
 	private final PointType pointType;

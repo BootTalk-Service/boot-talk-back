@@ -13,6 +13,7 @@ public enum ErrorCode {
     INSUFFICIENT_POINT(400, "잔여 포인트가 부족합니다."),
     EXCEEDS_MAX_LENGTH(400, "최대 길이를 초과했습니다."),
     COFFEE_CHAT_STATUS_NOT_PENDING(400, "대기 중 상태가 아니므로 상태를 변경할 수 없습니다."),
+    COFFEE_CHAT_CANNOT_CANCEL(400, "커피챗 신청 취소는 대기 또는 수락 중일 때만 가능합니다."),
     INVALID_CATEGORY_NAME(400, "잘못된 카테고리 이름입니다."),
 
     /* 401 UNAUTHORIZED */
