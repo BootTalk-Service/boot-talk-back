@@ -1,7 +1,9 @@
 package com.icandoit.boottalk.bootcamp.repository;
 
+import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -18,4 +20,9 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("SELECT c From Course c WHERE c.trainingProgramId = :trainingProgramId")
 	Optional<Course> findWithLockByTrainingProgramId(String trainingProgramId);
+
+	// course name 으로 코드 조회
+	Optional<Course> findByCourseName(String courseName);
+
+	List<Course> findByCourseNameContainingIgnoreCase(String query, Pageable pageable);
 }

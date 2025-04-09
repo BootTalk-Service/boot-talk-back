@@ -1,7 +1,7 @@
 package com.icandoit.boottalk.bootcamp.service;
 
 import static com.icandoit.boottalk.bootcamp.dto.BootcampEmploy24Response.*;
-import static com.icandoit.boottalk.bootcamp.exception.BootcampErrorCode.*;
+import static com.icandoit.boottalk.libs.exception.ErrorCode.*;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -19,13 +19,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
-import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.entity.Course;
 import com.icandoit.boottalk.bootcamp.entity.TrainingCenter;
-import com.icandoit.boottalk.bootcamp.exception.BootcampCustomException;
+import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
 import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
 import com.icandoit.boottalk.bootcamp.repository.TrainingCenterRepository;
+import com.icandoit.boottalk.libs.exception.CustomException;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -97,10 +97,10 @@ public class Employ24ApiService {
 		}
 
 		TrainingCenter center = saveOrGetTrainingCenter(dto, detail);
-
-		Course course = saveOrGetCourse(dto, center);
-
 		BootcampCategoryType category = BootcampCategoryType.fromKoreanName(categoryName);
+
+		Course course = saveOrGetCourse(dto, center, category);
+
 		Bootcamp bootcamp = createBootcampEntity(center, course, dto, category, detail);
 
 		bootcampRepository.save(bootcamp);
@@ -109,23 +109,27 @@ public class Employ24ApiService {
 
 	// TrainingCenter가 존재하지 않으면 저장, 있으면 조회해서 반환
 	private TrainingCenter saveOrGetTrainingCenter(BootcampListResponseDto dto, BootcampDetailResponseDto detail) {
+		String address1 = (detail.address1() != null) ? detail.address1() : "";
+		String address2 = (detail.address2() != null) ? detail.address2() : "";
+		String fullAddress = address1 + " " + address2;
+
 		return trainingCenterRepository.findByTrainingCenterName(dto.trainingCenterName())
 			.orElseGet(() -> trainingCenterRepository.save(
 				TrainingCenter.of(
 					dto.trainingCenterName(),
 					detail.trainingCenterEmail(),
-					detail.address1() + " " + detail.address2(),
+					fullAddress,
 					detail.trainingCenterUrl(),
 					detail.trainingCenterTelephoneNumber()
 				)
 			));
 	}
 
-	// Cource가 존재하지 않으면 저장, 있으면 조회해서 반환
-	private Course saveOrGetCourse(BootcampListResponseDto dto, TrainingCenter center) {
+	// Course 가 존재하지 않으면 저장, 있으면 조회해서 반환
+	private Course saveOrGetCourse(BootcampListResponseDto dto, TrainingCenter center, BootcampCategoryType category) {
 		return courseRepository.findByTrainingProgramId(dto.bootcampId())
 			.orElseGet(() -> courseRepository.save(
-				Course.of(dto.bootcampId(), dto.bootcampName(), center)
+				Course.of(dto.bootcampId(), dto.bootcampName(), category, center)
 			));
 	}
 
@@ -134,13 +138,16 @@ public class Employ24ApiService {
 		TrainingCenter center, Course course, BootcampListResponseDto dto,
 		BootcampCategoryType category, BootcampDetailResponseDto detail
 	) {
+		String bootcampRegion = (detail.address1() != null && !detail.address1().isEmpty())
+			? detail.address1() : "미입력";
+
 		return Bootcamp.of(
 			center,
 			course,
 			dto.bootcampName(),
 			category,
 			Integer.parseInt(dto.bootcampDegree()),
-			detail.address1(),
+			bootcampRegion,
 			Integer.parseInt(dto.maxCapacity()),
 			!(detail.bootcampCourseName().equals("K-디지털트레이닝") || dto.cost().equals("0")),
 			LocalDate.parse(dto.trainingStartDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd")),
@@ -176,7 +183,7 @@ public class Employ24ApiService {
 			JsonNode detailNode = objectMapper.readTree(response.getBody()).get("inst_base_info");
 			return objectMapper.treeToValue(detailNode, BootcampDetailResponseDto.class);
 		} catch (Exception e) {
-			throw new BootcampCustomException(DATA_PARSING_ERROR);
+			throw new CustomException(DATA_PARSING_ERROR);
 		}
 	}
 
@@ -186,7 +193,7 @@ public class Employ24ApiService {
 			JsonNode jsonList = objectMapper.readTree(body).get("srchList");
 
 			if (jsonList == null || jsonList.isEmpty()) {
-				throw new BootcampCustomException(API_DATA_IS_EMPTY);
+				throw new CustomException(API_DATA_IS_EMPTY);
 			}
 
 			List<BootcampListResponseDto> list = new ArrayList<>();
@@ -195,7 +202,7 @@ public class Employ24ApiService {
 			}
 			return list;
 		} catch (Exception e) {
-			throw new BootcampCustomException(DATA_PARSING_ERROR);
+			throw new CustomException(DATA_PARSING_ERROR);
 		}
 	}
 
@@ -239,7 +246,7 @@ public class Employ24ApiService {
 	// API 응답 유효성 검사
 	private void validateResponse(ResponseEntity<String> response) {
 		if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-			throw new BootcampCustomException(DATA_FETCH_ERROR);
+			throw new CustomException(DATA_FETCH_ERROR);
 		}
 	}
 }

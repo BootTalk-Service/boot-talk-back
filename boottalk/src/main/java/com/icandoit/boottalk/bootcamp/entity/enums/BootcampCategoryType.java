@@ -1,10 +1,10 @@
-package com.icandoit.boottalk.bootcamp.entity;
+package com.icandoit.boottalk.bootcamp.entity.enums;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import com.icandoit.boottalk.bootcamp.exception.BootcampCustomException;
-import com.icandoit.boottalk.bootcamp.exception.BootcampErrorCode;
+import com.icandoit.boottalk.libs.exception.CustomException;
+import com.icandoit.boottalk.libs.exception.ErrorCode;
 
 import lombok.Getter;
 
@@ -46,7 +46,7 @@ public enum BootcampCategoryType {
 
 	public static BootcampCategoryType fromKoreanName(String koreanName) {
 		if(!koreanToEnumMap.containsKey(koreanName)) {
-			throw new BootcampCustomException(BootcampErrorCode.INVALID_CATEGORY_NAME);
+			throw new CustomException(ErrorCode.INVALID_CATEGORY_NAME);
 		}
 		return koreanToEnumMap.get(koreanName);
 	}

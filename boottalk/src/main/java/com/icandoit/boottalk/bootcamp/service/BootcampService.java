@@ -1,6 +1,6 @@
 package com.icandoit.boottalk.bootcamp.service;
 
-import static com.icandoit.boottalk.bootcamp.exception.BootcampErrorCode.*;
+import static com.icandoit.boottalk.libs.exception.ErrorCode.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,10 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.icandoit.boottalk.bootcamp.dto.BootcampResponseDto;
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
-import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
-import com.icandoit.boottalk.bootcamp.exception.BootcampCustomException;
+import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.repository.BootcampQueryRepository;
 import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
+import com.icandoit.boottalk.libs.exception.CustomException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -38,7 +38,7 @@ public class BootcampService {
 		Optional<Bootcamp> bootcamp = bootcampRepository.findById(id);
 
 		if (bootcamp.isEmpty()) {
-			throw new BootcampCustomException(BOOTCAMP_NOT_FOUND);
+			throw new CustomException(BOOTCAMP_NOT_FOUND);
 		}
 
 		return BootcampResponseDto.from(bootcamp.get());

@@ -1,6 +1,6 @@
 package com.icandoit.boottalk.bootcamp.service;
 
-import static com.icandoit.boottalk.bootcamp.exception.BootcampErrorCode.*;
+import static com.icandoit.boottalk.libs.exception.ErrorCode.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -15,8 +15,8 @@ import org.mockito.MockitoAnnotations;
 
 import com.icandoit.boottalk.bootcamp.dto.TrainingCenterResponseDto;
 import com.icandoit.boottalk.bootcamp.entity.TrainingCenter;
-import com.icandoit.boottalk.bootcamp.exception.BootcampCustomException;
 import com.icandoit.boottalk.bootcamp.repository.TrainingCenterRepository;
+import com.icandoit.boottalk.libs.exception.CustomException;
 
 class TrainingCenterServiceTest {
 
@@ -69,10 +69,10 @@ class TrainingCenterServiceTest {
 		when(trainingCenterRepository.findById(9999L)).thenReturn(Optional.empty());
 
 		//when & then
-		BootcampCustomException exception = assertThrows(BootcampCustomException.class,
+		CustomException exception = assertThrows(CustomException.class,
 			() -> trainingCenterService.findById(9999L));
 
-		assertEquals(exception.getBootcampErrorCode(), TRAINING_CENTER_NOT_FOUND);
+		assertEquals(exception.getErrorCode(), TRAINING_CENTER_NOT_FOUND);
 		verify(trainingCenterRepository, times(1)).findById(9999L);
 	}
 

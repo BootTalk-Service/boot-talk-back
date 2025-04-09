@@ -14,7 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
+import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationCreateDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationResponseDto;
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatApplication;

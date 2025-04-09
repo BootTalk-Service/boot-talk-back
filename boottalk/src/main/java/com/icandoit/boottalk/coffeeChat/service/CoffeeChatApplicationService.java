@@ -1,5 +1,7 @@
 package com.icandoit.boottalk.coffeeChat.service;
 
+import java.time.LocalDateTime;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -46,32 +48,30 @@ public class CoffeeChatApplicationService {
     public CoffeeChatApplicationResponseDto createCoffeeChatApp(Long userId, CoffeeChatApplicationCreateDto request) {
 
         Long coffeChatInfoId = request.coffeeChatInfoId();
-        
-        if (coffeeChatAppRepository.existsByMentee_UserIdAndCoffeeChatInfo_CoffeeChatInfoId(userId, coffeChatInfoId)) {
+
+        // 해당 커피챗에 대해 대기 또는 수락 상태의 신청이 이미 존재하면 예외 처리 (중복 신청 방지)
+        if (coffeeChatAppRepository.existsLatestPendingOrApprovedApplication(userId, coffeChatInfoId)) {
             throw new CustomException(ErrorCode.COFFEE_CHAT_APPLICATION_ALREADY_EXISTS);
         }
-        
-        log.debug("커피챗 신청 Lock : userId: {}", userId);
-        // 커피챗 신청 시, 해당 시간대의 커피챗에 다른 사용자가 신청 요청하지 못하도록 동시성 제어
-        if (coffeeChatAppRepository.existsByCoffeeChatInfo_CoffeeChatInfoIdAndCoffeeChatStartTime(
-            coffeChatInfoId, request.coffeeChatStartTime())
-        ) {
+
+        log.debug("커피챗 신청 Lock 시작: userId: {}", userId);
+
+        // 동일 시간대에 다른 사용자의 커피챗 신청이 존재하면 예외 처리 (동시성 제어용 Lock 설정)
+        if (coffeeChatAppRepository.isTimeSlotAlreadyTaken(coffeChatInfoId, request.coffeeChatStartTime())) {
             throw new CustomException(ErrorCode.COFFEE_CHAT_APPLICATION_TIME_ALREADY_EXISTS);
         }
-        log.debug("커피챗 신청 Lock 해제 : userId: {}", userId);
 
+        log.debug("커피챗 신청 Lock 해제: userId: {}", userId);
 
         User user = getUser(userId);
         CoffeeChatInfo coffeeChatInfo = getCoffeeChatInfo(coffeChatInfoId);
 
-        // 멘토 타입에 따른 커피챗 포인트 차감. 포인트 부족 시 커피챗 신청 실패 처리
         MentorType mentorType = coffeeChatInfo.getMentorType();
-        int deductionPoint = getPointCostByMentorType (mentorType);
-
+        int deductionPoint = getPointCostByMentorType (mentorType); // 멘토 타입에 따른 커피챗 포인트
 
         createPointHistoryService.createPointHistory(EventType.COFFEE_CHAT_APPLY, userId, deductionPoint);
 
-        CoffeeChatApplication coffeeChatApp = CoffeeChatApplication.of(user, coffeeChatInfo, request);
+        CoffeeChatApplication coffeeChatApp = CoffeeChatApplication.of(user, coffeeChatInfo, deductionPoint, request);
         coffeeChatAppRepository.save(coffeeChatApp);
 
         return CoffeeChatApplicationResponseDto.from(coffeeChatApp);
@@ -128,9 +128,18 @@ public class CoffeeChatApplicationService {
         validateCoffeeChatApplicant(userId, coffeeChatApp.getMentee().getUserId());
         validateCoffeeChatInfo(coffeeChatApp.getCoffeeChatInfo().getCoffeeChatInfoId());
 
-        coffeeChatApp.setStatus(StatusType.CANCELED);
-        // TODO: 신청 취소에 관한 세부 정책 적용 필요
+        StatusType currentStatus = coffeeChatApp.getStatus();
+        // 커피챗 취소는 상태가 대기 또는 수락 중일 때만 가능
+        if (!(currentStatus == StatusType.PENDING || currentStatus == StatusType.APPROVED)) {
+            throw new CustomException(ErrorCode.COFFEE_CHAT_CANNOT_CANCEL);
+        }
 
+        coffeeChatApp.setStatus(StatusType.CANCELED);
+
+        // 커피챗 시작 시간 2일 전까지 취소 시 포인트 환불
+        if (LocalDateTime.now().plusDays(2).isBefore(coffeeChatApp.getCoffeeChatStartTime())) {
+            createPointHistoryService.createPointHistory(EventType.COFFEE_CHAT_CANCEL_REFUND, userId, coffeeChatApp.getUsedPoint());
+        }
 
     }
 
