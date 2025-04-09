@@ -1,6 +1,6 @@
 package com.icandoit.boottalk.bootcamp.service;
 
-import static com.icandoit.boottalk.bootcamp.exception.BootcampErrorCode.*;
+import static com.icandoit.boottalk.libs.exception.ErrorCode.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -21,12 +21,12 @@ import org.springframework.data.domain.Pageable;
 
 import com.icandoit.boottalk.bootcamp.dto.BootcampResponseDto;
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
-import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.entity.Course;
 import com.icandoit.boottalk.bootcamp.entity.TrainingCenter;
-import com.icandoit.boottalk.bootcamp.exception.BootcampCustomException;
+import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.repository.BootcampQueryRepository;
 import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
+import com.icandoit.boottalk.libs.exception.CustomException;
 
 class BootcampServiceTest {
 
@@ -54,7 +54,7 @@ class BootcampServiceTest {
 			.trainingCenterUrl("www.trainingcenter.com")
 			.build();
 
-		Course course = Course.of("TPID-001", "테스트 코스", trainingCenter);
+		Course course = Course.of("TPID-001", "테스트 코스", BootcampCategoryType.APPLICATION_SW_ENGINEERING, trainingCenter);
 		course.updateReviewStats(8, 2); // 예시: 평균 평점 4.0
 
 		bootcamp = Bootcamp.builder()
@@ -129,11 +129,11 @@ class BootcampServiceTest {
 		when(bootcampRepository.findById(999L)).thenReturn(Optional.empty());
 
 		//when & then
-		BootcampCustomException exception = assertThrows(BootcampCustomException.class,
+		CustomException exception = assertThrows(CustomException.class,
 			() -> bootcampService.findById(999L)
 		);
 
-		assertEquals(exception.getBootcampErrorCode(), BOOTCAMP_NOT_FOUND);
+		assertEquals(exception.getErrorCode(), BOOTCAMP_NOT_FOUND);
 		verify(bootcampRepository, times(1)).findById(999L);
 	}
 
