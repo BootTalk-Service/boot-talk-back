@@ -39,13 +39,13 @@ public class ChatRoom {
     private CoffeeChatApplication coffeeChatApplication;
 
     @Column(nullable = false)
-    private LocalDateTime reservationAt;
+    private LocalDateTime reservationAt; // 커피챗 시작시간
 
     @Column(nullable = false)
-    private LocalDateTime expiresAt;
+    private LocalDateTime endAt; // 예약종료 시간
 
     @Column(nullable = false)
-    private LocalDateTime deletionScheduledAt; // 채팅방 보존 기간 후 삭제 예정 시간
+    private LocalDateTime expiresAt; // 채팅방 보존 기간 후 삭제 예정 시간
 
     @Column(nullable = false)
     @Setter
@@ -70,8 +70,8 @@ public class ChatRoom {
             .roomUuid(UUID.randomUUID().toString())
             .coffeeChatApplication(coffeeChatApplication)
             .reservationAt(startTime)
-            .expiresAt(startTime.plusMinutes(30))
-            .deletionScheduledAt(startTime.plusDays(7)) // 7일 후 삭제
+            .endAt(startTime.plusMinutes(30))
+            .expiresAt(startTime.plusDays(7)) // 7일 후 삭제
             .isActive(true)
             .mentorEntered(false)
             .menteeEntered(false)
@@ -85,5 +85,9 @@ public class ChatRoom {
 
     public User getMentee() {
         return this.coffeeChatApplication.getMentee();
+    }
+
+    public boolean isParticipant(Long userId) {
+        return getMentor().getUserId().equals(userId) || getMentee().getUserId().equals(userId);
     }
 }

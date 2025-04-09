@@ -7,9 +7,11 @@ import com.icandoit.boottalk.libs.exception.ErrorCode;
 import com.icandoit.boottalk.stomp_chat.dto.ChatRoomCreateResponse;
 import com.icandoit.boottalk.stomp_chat.dto.ChatRoomResponseDto;
 import com.icandoit.boottalk.stomp_chat.dto.MessageRequestDto;
+import com.icandoit.boottalk.stomp_chat.dto.MessageResponseDto;
 import com.icandoit.boottalk.stomp_chat.entity.ChatRoom;
-import com.icandoit.boottalk.stomp_chat.entity.enums.MessageType;
+import com.icandoit.boottalk.stomp_chat.entity.Message;
 import com.icandoit.boottalk.stomp_chat.repository.ChatRoomRepository;
+import com.icandoit.boottalk.stomp_chat.repository.MessageRepository;
 import com.icandoit.boottalk.stomp_chat.util.SystemMessageUtil;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,10 +27,9 @@ public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final CoffeeChatApplicationRepository coffeeChatApplicationRepository;
-    private final MessageService messageService;
-
-    private static final Long SYSTEM_SENDER_ID = 0L; // 시스템이 메시지를 보낼 때
-
+    private final ChatWebsocketService chatWebsocketService;
+    private final MessageFactoryService messageFactory;
+    private final MessageRepository messageRepository;
 
     // 채팅방 생성
     @Transactional
@@ -46,22 +47,24 @@ public class ChatRoomService {
 
         ChatRoom chatRoom = chatRoomRepository.save(ChatRoom.of(application));
 
-        // 시스템 메시지 생성
-        MessageRequestDto systemMessage = MessageRequestDto.from(
+        // 시스템 메시지 생성 및 전송
+        MessageRequestDto systemMessage = messageFactory.createSystemMessage(
             chatRoom.getRoomUuid(),
-            SYSTEM_SENDER_ID,
-            chatRoom.getMentee().getUserId(),   // 멘티에게 보내는 시스템 메시지
-            SystemMessageUtil.createSystemMessage(
-                chatRoom.getReservationAt()),
-            MessageType.SYSTEM
+            chatRoom.getMentee().getUserId(),
+            SystemMessageUtil.createSystemMessage(chatRoom.getReservationAt())
         );
 
-        // 시스템 메시지 저장 및 전송
-        messageService.saveAndSendMessage(systemMessage);
+        chatWebsocketService.saveAndSendMessage(systemMessage);
         return ChatRoomCreateResponse.from(chatRoom.getRoomUuid());
     }
 
-    // 사용자가 속한 채팅방 조회
+    public ChatRoomResponseDto getUserChatRoom(String roomUuid) {
+        ChatRoom chatRoom = chatRoomRepository.findByRoomUuid(roomUuid)
+            .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+
+        return ChatRoomResponseDto.from(chatRoom);
+    }
+
     @Transactional(readOnly = true)
     public List<ChatRoomResponseDto> getUserChatRooms(Long userId) {
         List<ChatRoom> chatRooms = chatRoomRepository.findActiveChatRoomsByUserId(userId);
@@ -70,22 +73,40 @@ public class ChatRoomService {
             .toList();
     }
 
+    // 채팅 메시지 기록 조회
+    public List<MessageResponseDto> getMessages(Long userId, String roomUuid) {
+        ChatRoom chatRoom = chatRoomRepository.findByRoomUuid(roomUuid)
+            .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+
+        // 해당 채팅방에 참여한 유저인지 체크
+        if (!chatRoom.isParticipant(userId)) {
+            throw new CustomException(ErrorCode.CHAT_ROOM_FORBIDDEN);
+        }
+
+        // 만료일 체크
+        if (chatRoom.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new CustomException(ErrorCode.MESSAGE_EXPIRED);
+        }
+
+        List<Message> messages = messageRepository.findByRoomUuid(roomUuid);
+
+        return messages.stream()
+            .map(MessageResponseDto::from)
+            .toList();
+    }
+
+
     // 채팅방 입장
     @Transactional
     public void enterChatRoom(String roomUuid, Long userId) {
 
-        // 유효한 채팅방 상태 검증 및 조회
         ChatRoom chatRoom = getValidChatRoom(roomUuid);
-
-        // 입장 권한 확인
         validateChatRoomEntry(chatRoom, userId);
 
-        // 멘토인 경우
         if (isMentor(chatRoom, userId)) {
             handleMentorEntry(chatRoom);
         }
 
-        // 멘티인 경우
         if (isMentee(chatRoom, userId)) {
             handleMenteeEntry(chatRoom);
         }
@@ -131,15 +152,13 @@ public class ChatRoomService {
         if (!chatRoom.isMentorEntered()) {
             chatRoom.setMentorEntered(true);
 
-            MessageRequestDto systemMessage = MessageRequestDto.from(
+            MessageRequestDto systemMessage = messageFactory.createSystemMessage(
                 chatRoom.getRoomUuid(),
-                SYSTEM_SENDER_ID,
                 chatRoom.getMentee().getUserId(),
-                SystemMessageUtil.MentorEnterMessage(chatRoom.getMentor().getUserName()),
-                MessageType.SYSTEM
+                SystemMessageUtil.MentorEnterMessage(chatRoom.getMentor().getUserName())
             );
 
-            messageService.saveAndSendMessage(systemMessage);
+            chatWebsocketService.saveAndSendMessage(systemMessage);
         }
     }
 
@@ -147,15 +166,13 @@ public class ChatRoomService {
         if (!chatRoom.isMenteeEntered()) {
             chatRoom.setMenteeEntered(true);
 
-            MessageRequestDto systemMessage = MessageRequestDto.from(
+            MessageRequestDto systemMessage = messageFactory.createSystemMessage(
                 chatRoom.getRoomUuid(),
-                SYSTEM_SENDER_ID,
                 chatRoom.getMentor().getUserId(),
-                SystemMessageUtil.MenteeEnterMessage(chatRoom.getMentee().getUserName()),
-                MessageType.SYSTEM
+                SystemMessageUtil.MenteeEnterMessage(chatRoom.getMentee().getUserName())
             );
 
-            messageService.saveAndSendMessage(systemMessage);
+            chatWebsocketService.saveAndSendMessage(systemMessage);
         }
     }
 }

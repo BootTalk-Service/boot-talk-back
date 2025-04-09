@@ -16,7 +16,7 @@ public record ChatRoomResponseDto(
             chatRoom.getMentor().getUserName(),
             chatRoom.getMentee().getUserName(),
             chatRoom.getReservationAt(),
-            chatRoom.getExpiresAt()
+            chatRoom.getEndAt()
         );
     }
 }
