@@ -1,9 +1,5 @@
 package com.icandoit.boottalk.notification.entity;
 
-import java.sql.Timestamp;
-
-import org.springframework.data.annotation.CreatedDate;
-
 import com.icandoit.boottalk.libs.entity.BaseEntity;
 import com.icandoit.boottalk.notification.dto.NotificationRequestDto;
 import com.icandoit.boottalk.notification.type.NotificationType;
