@@ -1,7 +1,11 @@
 package com.icandoit.boottalk.bootcamp.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.icandoit.boottalk.bootcamp.dto.CertificationCreationRequestDto;
 import com.icandoit.boottalk.bootcamp.dto.CertificationResponseDto;
+import com.icandoit.boottalk.bootcamp.dto.GetCertificationInfoDto;
+import com.icandoit.boottalk.bootcamp.dto.GetPendingCertificationResponseDto;
 import com.icandoit.boottalk.bootcamp.service.BootcampCertificationService;
 import com.icandoit.boottalk.social_login.dto.CustomOAuth2User;
 
@@ -34,5 +40,17 @@ public class BootcampCertificationController {
 		);
 
 		return ResponseEntity.ok(response);
+	}
+
+	// 관리자 권한 추가
+	@GetMapping
+	public ResponseEntity<List<GetPendingCertificationResponseDto>> getAllCertifications() {
+		return ResponseEntity.ok(certificationService.getPendingCertifications());
+	}
+
+	// 관리자 권한 추가
+	@GetMapping("/{certificationId}")
+	public ResponseEntity<GetCertificationInfoDto> getCertification(@PathVariable Long certificationId) {
+		return ResponseEntity.ok(certificationService.findById(certificationId));
 	}
 }
