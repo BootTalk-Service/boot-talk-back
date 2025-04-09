@@ -42,9 +42,12 @@ public enum ErrorCode {
     ALREADY_CREATED_COFFEE_CHAT_TIME(409, "해당 유저의 커피챗 시간이 등록되어 있습니다."),
     COFFEE_CHAT_APPLICATION_ALREADY_EXISTS(409, "이미 해당 커피챗에 신청되었습니다."),
     COFFEE_CHAT_APPLICATION_TIME_ALREADY_EXISTS(400, "이미 신청된 시간입니다."),
+    CHAT_ROOM_NOT_STARTED(409, "채팅 시간이 아직 시작되지 않았습니다."),
 
     /* 410 GONE */
+    CHAT_ROOM_ENDED(410, "채팅 시간이 종료되어 메시지를 보낼 수 없습니다."),
     CHAT_ROOM_EXPIRED(410, "채팅방의 유효 시간이 만료되었습니다."),
+    MESSAGE_EXPIRED(410, "메시지가 만료되었습니다."),
 
     /* 500 INTERNAL_SERVER_ERROR */
     INTERNAL_SERVER_ERROR(500, "서버 오류가 발생했습니다."),
