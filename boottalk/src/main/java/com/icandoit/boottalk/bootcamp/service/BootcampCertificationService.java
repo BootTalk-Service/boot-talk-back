@@ -36,8 +36,7 @@ public class BootcampCertificationService {
 		User user = userRepository.getReferenceById(userId);
 
 		// 해당 부트캠프에 승인됐거나 요청한 적이 있으면 에러 발생, 거절되었을때는 다시 신청 가능
-		List<CertificationStatus> blockedStatuses = List.of(CertificationStatus.PENDING, CertificationStatus.APPROVED);
-		if (bootcampCertificationRepository.existsByUserAndCourseAndStatusIn(user, course, blockedStatuses)) {
+		if (bootcampCertificationRepository.existsByUserAndCourseAndStatusNot(user, course, CertificationStatus.REJECTED)) {
 			throw new CustomException(ErrorCode.DUPLICATE_CERTIFICATION_EXIST);
 		}
 

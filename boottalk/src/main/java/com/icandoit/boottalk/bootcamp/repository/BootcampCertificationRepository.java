@@ -11,4 +11,6 @@ import com.icandoit.boottalk.user.domain.entity.User;
 
 public interface BootcampCertificationRepository extends JpaRepository<BootcampCertification, Long> {
 	boolean existsByUserAndCourseAndStatusIn(User user, Course course, List<CertificationStatus> blockedStatuses);
+
+	boolean existsByUserAndCourseAndStatusNot(User user, Course course, CertificationStatus status);
 }
