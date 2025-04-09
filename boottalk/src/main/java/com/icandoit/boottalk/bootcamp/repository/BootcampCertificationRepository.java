@@ -13,4 +13,6 @@ public interface BootcampCertificationRepository extends JpaRepository<BootcampC
 	boolean existsByUserAndCourseAndStatusIn(User user, Course course, List<CertificationStatus> blockedStatuses);
 
 	boolean existsByUserAndCourseAndStatusNot(User user, Course course, CertificationStatus status);
+
+	List<BootcampCertification> findAllByUserAndStatus(User user, CertificationStatus certificationStatus);
 }

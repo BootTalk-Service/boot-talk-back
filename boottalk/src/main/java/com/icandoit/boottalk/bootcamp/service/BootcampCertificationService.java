@@ -1,12 +1,14 @@
 package com.icandoit.boottalk.bootcamp.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.icandoit.boottalk.bootcamp.dto.CertificationCreationRequestDto;
 import com.icandoit.boottalk.bootcamp.dto.CertificationResponseDto;
+import com.icandoit.boottalk.bootcamp.dto.GetCertificationResponseDto;
 import com.icandoit.boottalk.bootcamp.entity.BootcampCertification;
 import com.icandoit.boottalk.bootcamp.entity.Course;
 import com.icandoit.boottalk.bootcamp.entity.enums.CertificationStatus;
@@ -46,5 +48,15 @@ public class BootcampCertificationService {
 		BootcampCertification savedCertification = bootcampCertificationRepository.save(certification);
 
 		return CertificationResponseDto.from(savedCertification);
+	}
+
+	public List<GetCertificationResponseDto> getMyCertifications(Long userId) {
+		User user = userRepository.getReferenceById(userId);
+
+		List<BootcampCertification> certifications = bootcampCertificationRepository.findAllByUserAndStatus(user, CertificationStatus.APPROVED);
+
+		return certifications.stream()
+			.map(GetCertificationResponseDto::from)
+			.collect(Collectors.toList());
 	}
 }
