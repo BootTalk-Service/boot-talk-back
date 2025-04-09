@@ -5,6 +5,7 @@ import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatApplicationReposito
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
 import com.icandoit.boottalk.stomp_chat.dto.ChatRoomCreateResponse;
+import com.icandoit.boottalk.stomp_chat.dto.ChatRoomResponseDto;
 import com.icandoit.boottalk.stomp_chat.dto.MessageRequestDto;
 import com.icandoit.boottalk.stomp_chat.entity.ChatRoom;
 import com.icandoit.boottalk.stomp_chat.entity.enums.MessageType;
@@ -51,7 +52,7 @@ public class ChatRoomService {
             SYSTEM_SENDER_ID,
             chatRoom.getMentee().getUserId(),   // 멘티에게 보내는 시스템 메시지
             SystemMessageUtil.createSystemMessage(
-                chatRoom.getCreatedAt()),
+                chatRoom.getReservationAt()),
             MessageType.SYSTEM
         );
 
@@ -62,13 +63,16 @@ public class ChatRoomService {
 
     // 사용자가 속한 채팅방 조회
     @Transactional(readOnly = true)
-    public List<ChatRoom> getUserChatRooms(Long userId) {
-        return chatRoomRepository.findActiveChatRoomsByUserId(userId);
+    public List<ChatRoomResponseDto> getUserChatRooms(Long userId) {
+        List<ChatRoom> chatRooms = chatRoomRepository.findActiveChatRoomsByUserId(userId);
+        return chatRooms.stream()
+            .map(ChatRoomResponseDto::from)
+            .toList();
     }
 
     // 채팅방 입장
     @Transactional
-    public void  enterChatRoom(String roomUuid, Long userId) {
+    public void enterChatRoom(String roomUuid, Long userId) {
 
         // 유효한 채팅방 상태 검증 및 조회
         ChatRoom chatRoom = getValidChatRoom(roomUuid);

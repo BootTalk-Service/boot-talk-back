@@ -2,7 +2,7 @@ package com.icandoit.boottalk.stomp_chat.controller;
 
 import com.icandoit.boottalk.social_login.dto.CustomOAuth2User;
 import com.icandoit.boottalk.stomp_chat.dto.ChatRoomCreateResponse;
-import com.icandoit.boottalk.stomp_chat.entity.ChatRoom;
+import com.icandoit.boottalk.stomp_chat.dto.ChatRoomResponseDto;
 import com.icandoit.boottalk.stomp_chat.service.ChatRoomService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -29,10 +29,11 @@ public class ChatRoomController {
 
     // 참여중인 채팅방 리스트조회
     @GetMapping
-    public ResponseEntity<List<ChatRoom>> getUserChatRooms(
+    public ResponseEntity<List<ChatRoomResponseDto>> getUserChatRooms(
         @AuthenticationPrincipal CustomOAuth2User user) {
 
-        List<ChatRoom> chatRooms = chatRoomService.getUserChatRooms(user.getServiceUserId());
+        List<ChatRoomResponseDto> chatRooms = chatRoomService.getUserChatRooms(
+            user.getServiceUserId());
         return ResponseEntity.ok(chatRooms);
     }
 
