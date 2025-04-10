@@ -50,6 +50,13 @@ dependencies {
 	// swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
 
+	// redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+	// quartz
+	implementation 'org.springframework.boot:spring-boot-starter-quartz'
+
+
 	implementation 'org.apache.httpcomponents.client5:httpclient5:5.4.1'
 	implementation 'org.springframework.boot:spring-boot-starter-batch'
 	implementation 'org.springframework:spring-context-support'
