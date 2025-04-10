@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,14 +21,6 @@ public class CoffeeChatTimeController {
 
     private final CoffeeChatTimeService coffeeChatTimeService;
 
-    @PostMapping
-    public ResponseEntity<List<CoffeeChatTimeResponseDto>> createCoffeeChatTimes(
-        @RequestBody @Valid CoffeeChatTimeMapDto requestDto) {
-        // todo : 사용자 인증 사용 시 수정
-        Long userId = 1L;
-        return ResponseEntity.ok(coffeeChatTimeService.createCoffeeChatTimes(userId, requestDto));
-    }
-
     // 멘토 자신의 시간을 조회
     @GetMapping
     public ResponseEntity<List<CoffeeChatTimeResponseDto>> getMyCoffeeChatTimes() {
@@ -40,7 +31,8 @@ public class CoffeeChatTimeController {
 
     //mentorId를 받아 커피챗 가능 시간 조회
     @GetMapping("/{mentorId}")
-    public ResponseEntity<List<CoffeeChatTimeResponseDto>> getMentorAvailableChatTimes(@PathVariable Long mentorId) {
+    public ResponseEntity<List<CoffeeChatTimeResponseDto>> getMentorAvailableChatTimes(
+        @PathVariable Long mentorId) {
 
         return ResponseEntity.ok(coffeeChatTimeService.getMentorAvailableChatTimes(mentorId));
     }
