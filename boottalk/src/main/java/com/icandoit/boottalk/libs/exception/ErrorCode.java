@@ -59,7 +59,6 @@ public enum ErrorCode {
     DATA_PARSING_ERROR(500, "API 응답 데이터 파싱에 실패했습니다."),
     FILE_UPLOAD_FAILED(500, "파일 업로드에 실패했습니다.");
 
-
     private final Integer httpStatus;
     private final String message;
 }
