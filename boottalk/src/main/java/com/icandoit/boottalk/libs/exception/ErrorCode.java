@@ -13,6 +13,7 @@ public enum ErrorCode {
     INSUFFICIENT_POINT(400, "잔여 포인트가 부족합니다."),
     EXCEEDS_MAX_LENGTH(400, "최대 길이를 초과했습니다."),
     COFFEE_CHAT_STATUS_NOT_PENDING(400, "대기 중 상태가 아니므로 상태를 변경할 수 없습니다."),
+    COFFEE_CHAT_CANNOT_CANCEL(400, "커피챗 신청 취소는 대기 또는 수락 중일 때만 가능합니다."),
     INVALID_CATEGORY_NAME(400, "잘못된 카테고리 이름입니다."),
     FILE_IS_EMPTY(400, "파일이 비어 있습니다."),
     INVALID_IMAGE_TYPE(400, "이미지 파일만 업로드할 수 있습니다."),
@@ -48,12 +49,16 @@ public enum ErrorCode {
     COFFEE_CHAT_APPLICATION_ALREADY_EXISTS(409, "이미 해당 커피챗에 신청되었습니다."),
     COFFEE_CHAT_APPLICATION_TIME_ALREADY_EXISTS(400, "이미 신청된 시간입니다."),
 
+    /* SERVICE_UNAVAILABLE */
+    SSE_CONNECTION_FAILED(503, "SSE 연결 오류가 발생하였습니다."),
+
     /* 500 INTERNAL_SERVER_ERROR */
     INTERNAL_SERVER_ERROR(500, "서버 오류가 발생했습니다."),
     TOKEN_PARSING_ERROR(500, "토큰 파싱 과정에서 오류가 발생했습니다."),
     DATA_FETCH_ERROR(500, "데이터 요청 중 오류가 발생했습니다."),
     DATA_PARSING_ERROR(500, "API 응답 데이터 파싱에 실패했습니다."),
     FILE_UPLOAD_FAILED(500, "파일 업로드에 실패했습니다.");
+
 
     private final Integer httpStatus;
     private final String message;
