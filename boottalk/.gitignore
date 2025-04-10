@@ -1,0 +1,2 @@
+# 환경 변수 및 민감 정보 파일
+/src/main/resources/s3-key.properties
