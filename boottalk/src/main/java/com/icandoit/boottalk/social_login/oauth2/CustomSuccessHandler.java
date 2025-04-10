@@ -13,7 +13,6 @@ import com.icandoit.boottalk.social_login.dto.CustomOAuth2User;
 import com.icandoit.boottalk.social_login.dto.UserRole;
 import com.icandoit.boottalk.social_login.jwt.JwtProvider;
 
-import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +29,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-		Authentication authentication) throws IOException, ServletException {
+		Authentication authentication) throws IOException {
 
 		//CustomOAuth2UserService.loadUser 에서 반환된 사용자 정보 가져오기
 		CustomOAuth2User userDetails = (CustomOAuth2User) authentication.getPrincipal();
