@@ -35,4 +35,4 @@ spring:
   data:
     redis:
       host: 43.200.67.27
-      port: 6397
+      port: 6379

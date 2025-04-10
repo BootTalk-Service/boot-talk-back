@@ -1,17 +1,26 @@
 package com.icandoit.boottalk.common.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 @Configuration
 public class RedisConfig {
 
+	@Value("${spring.data.redis.host}")
+	private String redisHost;
+
+	@Value("${spring.data.redis.port}")
+	private int redisPort;
+
 	@Bean
 	public LettuceConnectionFactory redisConnectionFactory() {
-		// 기본 host와 port를 사용합니다. (필요에 따라 application.properties에서 설정 가능)
-		return new LettuceConnectionFactory();
+		RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(redisHost, redisPort);
+		return new LettuceConnectionFactory(config);
 	}
 
 	@Bean
