@@ -7,12 +7,14 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.icandoit.boottalk.bootcamp.dto.CertificationCreationRequestDto;
 import com.icandoit.boottalk.bootcamp.dto.CertificationResponseDto;
+import com.icandoit.boottalk.bootcamp.dto.CertificationUpdateRequestDto;
 import com.icandoit.boottalk.bootcamp.dto.GetCertificationInfoDto;
 import com.icandoit.boottalk.bootcamp.dto.GetPendingCertificationResponseDto;
 import com.icandoit.boottalk.bootcamp.service.BootcampCertificationService;
@@ -42,7 +44,7 @@ public class BootcampCertificationController {
 		return ResponseEntity.ok(response);
 	}
 
-	// 관리자 권한 추가
+	// TODO :관리자 권한 추가
 	@GetMapping
 	public ResponseEntity<List<GetPendingCertificationResponseDto>> getAllCertifications() {
 		return ResponseEntity.ok(certificationService.getPendingCertifications());
@@ -52,5 +54,10 @@ public class BootcampCertificationController {
 	@GetMapping("/{certificationId}")
 	public ResponseEntity<GetCertificationInfoDto> getCertification(@PathVariable Long certificationId) {
 		return ResponseEntity.ok(certificationService.findById(certificationId));
+	}
+
+	@PutMapping
+	public ResponseEntity<CertificationResponseDto> updateCertification(@RequestBody CertificationUpdateRequestDto request){
+		return ResponseEntity.ok(certificationService.updateCertification(request));
 	}
 }

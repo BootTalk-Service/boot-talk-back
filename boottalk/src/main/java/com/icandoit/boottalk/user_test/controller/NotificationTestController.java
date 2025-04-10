@@ -30,8 +30,8 @@ public class NotificationTestController {
 	}
 
 
-	@PostMapping
-	public ResponseEntity<NotificationResponseDto>  create(@RequestParam long userId, @RequestBody NotificationRequestDto dto) {
-		return ResponseEntity.ok(notificationService.sendNotification(userId, dto));
-	}
+	// @PostMapping
+	// public ResponseEntity<NotificationResponseDto>  create(@RequestParam long userId, @RequestBody NotificationRequestDto dto) {
+	// 	return ResponseEntity.ok(notificationService.sendNotification(userId, dto));
+	// }
 }

@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.icandoit.boottalk.bootcamp.dto.CertificationCreationRequestDto;
 import com.icandoit.boottalk.bootcamp.dto.CertificationResponseDto;
+import com.icandoit.boottalk.bootcamp.dto.CertificationUpdateRequestDto;
 import com.icandoit.boottalk.bootcamp.dto.GetCertificationInfoDto;
 import com.icandoit.boottalk.bootcamp.dto.GetCertificationResponseDto;
 import com.icandoit.boottalk.bootcamp.dto.GetPendingCertificationResponseDto;
@@ -72,11 +73,22 @@ public class BootcampCertificationService {
 	}
 
 	// 수료증 정보 조회
+	// TODO : 관리자 권한 추가
 	public GetCertificationInfoDto findById(Long certificationId) {
 		BootcampCertification certification = bootcampCertificationRepository.getReferenceById(certificationId);
 
 		return GetCertificationInfoDto.from(certification);
 	}
 
-	// TODO : 승인 시 승인으로 거절시 거절로 바뀌는 로직 추가
+	// TODO : 관리자 권한 추가
+	public CertificationResponseDto updateCertification(CertificationUpdateRequestDto request) {
+		BootcampCertification certification = bootcampCertificationRepository.getReferenceById(request.certificationId());
+
+		CertificationStatus newStatus = request.isTrue() ? CertificationStatus.APPROVED : CertificationStatus.REJECTED;
+		certification.updateStatus(newStatus);
+
+		BootcampCertification savedCertification = bootcampCertificationRepository.save(certification);
+
+		return CertificationResponseDto.from(savedCertification);
+	}
 }
