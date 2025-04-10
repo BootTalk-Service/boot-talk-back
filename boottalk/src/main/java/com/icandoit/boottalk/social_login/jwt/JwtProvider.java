@@ -40,11 +40,11 @@ public class JwtProvider {
 
 	//회원 토큰
 	//TODO 사용자 정보를 암호화하여 토큰에 저장
-	public String createToken(Long serviceUserId, String resourceUserId, String userRole) {
+	public String createToken(Long serviceUserId, String userName, String userRole) {
 
 		return Jwts.builder()
 			.claim("serviceUserId", serviceUserId.toString())
-			.claim("resourceUserId", resourceUserId)
+			.claim("userName", userName)
 			.claim("role", userRole)
 			.issuedAt(new Date(System.currentTimeMillis()))
 			.expiration(new Date(System.currentTimeMillis() + tokenValidTime))
@@ -96,7 +96,7 @@ public class JwtProvider {
 			.serviceUserId(
 				Long.valueOf(Objects.requireNonNull(
 					claims.get("serviceUserId", String.class))))
-			.resourceUserId(claims.get("resourceUserId", String.class))
+			.userName(claims.get("userName", String.class))
 			.role(UserRole.valueOf(claims.get("role", String.class)))
 			.build();
 	}
