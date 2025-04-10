@@ -15,6 +15,7 @@ public enum ErrorCode {
     COFFEE_CHAT_STATUS_NOT_PENDING(400, "대기 중 상태가 아니므로 상태를 변경할 수 없습니다."),
     CHAT_ROOM_NOT_ACTIVE(400, "채팅방이 비활성화되어 입장할 수 없습니다."),
     COFFEE_CHAT_CANNOT_CANCEL(400, "커피챗 신청 취소는 대기 또는 수락 중일 때만 가능합니다."),
+    COFFEE_CHAT_DELETE_BANNED(400, "멘토링 활동 금지 기간에는 커피챗 정보를 삭제할 수 없습니다."),
     INVALID_CATEGORY_NAME(400, "잘못된 카테고리 이름입니다."),
     FILE_IS_EMPTY(400, "파일이 비어 있습니다."),
     INVALID_IMAGE_TYPE(400, "이미지 파일만 업로드할 수 있습니다."),
@@ -30,6 +31,7 @@ public enum ErrorCode {
     NOT_COFFEE_CHAT_APPLICATION_OWNER(403, "사용자가 작성한 커피챗 신청 내역이 아닙니다."),
     NOT_COFFEE_CHAT_INFO_OWNER(403, "사용자가 작성한 커피챗 정보가 아닙니다."),
     CHAT_ROOM_FORBIDDEN(403, "해당 채팅방에 접근할 수 있는 권한이 없습니다."),
+
     /* 404 NOT_FOUND */
     NOT_FOUND(404, "요청한 리소스를 찾을 수 없습니다."),
     USER_NOT_FOUND(404, "유저를 찾을 수 없습니다."),

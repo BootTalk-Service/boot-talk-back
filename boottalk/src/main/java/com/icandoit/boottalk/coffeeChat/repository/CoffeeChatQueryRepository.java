@@ -9,6 +9,8 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.annotation.Nullable;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -42,7 +44,8 @@ public class CoffeeChatQueryRepository {
             .from(coffeeChatInfo)
             .where(
                 jobTypeEq(jobType),
-                mentorTypeEq(mentorType)
+                mentorTypeEq(mentorType),
+                coffeeChatInfo.mentoringBanEndDate.before(LocalDateTime.now()) // 멘토링 활동 금지 당한 커피챗 조회 제외
             )
             .orderBy(coffeeChatInfo.createdAt.desc())
             .offset(pageable.getOffset())
