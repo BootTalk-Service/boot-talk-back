@@ -52,9 +52,22 @@ public class CreatePointHistoryService {
 				.build()));
 	}
 
+	// 포인트 내역을 생성할 때 사용 (이 떄는 락이 필요)
 	private int getCurrentPoint(long userId) {
 
 		PointHistory pointHistory = pointHistoryRepository.findTopByUserIdOrderByPointHistoryIdDesc(userId)
+			.orElse(null);
+
+		if(pointHistory == null) {
+			return 0;
+		}
+
+		return pointHistory.getCurrentPoint();
+	}
+
+	// 내비게이션 상단 바에 표시될 포인트를 위한 메서드 (이 때는 굳이 학이 필요없음)
+	public int getCurrentPointToNavi(long userId) {
+		PointHistory pointHistory = pointHistoryRepository.findFirstByUserIdOrderByPointHistoryIdDesc(userId)
 			.orElse(null);
 
 		if(pointHistory == null) {
