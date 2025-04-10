@@ -16,6 +16,9 @@ public enum ErrorCode {
     CHAT_ROOM_NOT_ACTIVE(400, "채팅방이 비활성화되어 입장할 수 없습니다."),
     COFFEE_CHAT_CANNOT_CANCEL(400, "커피챗 신청 취소는 대기 또는 수락 중일 때만 가능합니다."),
     INVALID_CATEGORY_NAME(400, "잘못된 카테고리 이름입니다."),
+    FILE_IS_EMPTY(400, "파일이 비어 있습니다."),
+    INVALID_IMAGE_TYPE(400, "이미지 파일만 업로드할 수 있습니다."),
+    INVALID_FILE_NAME(400, "잘못된 파일명입니다."),
 
 
     /* 401 UNAUTHORIZED */
@@ -55,11 +58,15 @@ public enum ErrorCode {
     CHAT_ROOM_EXPIRED(410, "채팅방의 유효 시간이 만료되었습니다."),
     MESSAGE_EXPIRED(410, "메시지가 만료되었습니다."),
 
+    /* SERVICE_UNAVAILABLE */
+    SSE_CONNECTION_FAILED(503, "SSE 연결 오류가 발생하였습니다."),
+
     /* 500 INTERNAL_SERVER_ERROR */
     INTERNAL_SERVER_ERROR(500, "서버 오류가 발생했습니다."),
     TOKEN_PARSING_ERROR(500, "토큰 파싱 과정에서 오류가 발생했습니다."),
     DATA_FETCH_ERROR(500, "데이터 요청 중 오류가 발생했습니다."),
-    DATA_PARSING_ERROR(500, "API 응답 데이터 파싱에 실패했습니다.");
+    DATA_PARSING_ERROR(500, "API 응답 데이터 파싱에 실패했습니다."),
+    FILE_UPLOAD_FAILED(500, "파일 업로드에 실패했습니다.");
 
     private final Integer httpStatus;
     private final String message;

@@ -48,6 +48,8 @@ public class User extends BaseEntity {
 	@Setter
 	private Timestamp deletedAt;
 
+	private boolean admin;
+
 
 	public User updateOf(UpdateForm form) {
 		this.profileImage = form.profileImage();

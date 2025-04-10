@@ -1,12 +1,17 @@
 package com.icandoit.boottalk.bootcamp.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.icandoit.boottalk.bootcamp.dto.CertificationCreationRequestDto;
 import com.icandoit.boottalk.bootcamp.dto.CertificationResponseDto;
+import com.icandoit.boottalk.bootcamp.dto.CertificationUpdateRequestDto;
+import com.icandoit.boottalk.bootcamp.dto.GetCertificationInfoDto;
+import com.icandoit.boottalk.bootcamp.dto.GetCertificationResponseDto;
+import com.icandoit.boottalk.bootcamp.dto.GetPendingCertificationResponseDto;
 import com.icandoit.boottalk.bootcamp.entity.BootcampCertification;
 import com.icandoit.boottalk.bootcamp.entity.Course;
 import com.icandoit.boottalk.bootcamp.entity.enums.CertificationStatus;
@@ -42,6 +47,45 @@ public class BootcampCertificationService {
 
 		BootcampCertification certification =
 			BootcampCertification.of(user, course, request.fileUrl());
+
+		BootcampCertification savedCertification = bootcampCertificationRepository.save(certification);
+
+		return CertificationResponseDto.from(savedCertification);
+	}
+
+	public List<GetCertificationResponseDto> getMyCertifications(Long userId) {
+		User user = userRepository.getReferenceById(userId);
+
+		List<BootcampCertification> certifications = bootcampCertificationRepository.findAllByUserAndStatus(user, CertificationStatus.APPROVED);
+
+		return certifications.stream()
+			.map(GetCertificationResponseDto::from)
+			.collect(Collectors.toList());
+	}
+
+	// TODO : 관리자 권한 추가
+	// 승인 대기중인 요청 모두 조회
+	public List<GetPendingCertificationResponseDto> getPendingCertifications() {
+		List<BootcampCertification> certifications = bootcampCertificationRepository.findAllByStatus(CertificationStatus.PENDING);
+		return certifications.stream()
+			.map(GetPendingCertificationResponseDto::from)
+		.collect(Collectors.toList());
+	}
+
+	// 수료증 정보 조회
+	// TODO : 관리자 권한 추가
+	public GetCertificationInfoDto findById(Long certificationId) {
+		BootcampCertification certification = bootcampCertificationRepository.getReferenceById(certificationId);
+
+		return GetCertificationInfoDto.from(certification);
+	}
+
+	// TODO : 관리자 권한 추가
+	public CertificationResponseDto updateCertification(CertificationUpdateRequestDto request) {
+		BootcampCertification certification = bootcampCertificationRepository.getReferenceById(request.certificationId());
+
+		CertificationStatus newStatus = request.isTrue() ? CertificationStatus.APPROVED : CertificationStatus.REJECTED;
+		certification.updateStatus(newStatus);
 
 		BootcampCertification savedCertification = bootcampCertificationRepository.save(certification);
 

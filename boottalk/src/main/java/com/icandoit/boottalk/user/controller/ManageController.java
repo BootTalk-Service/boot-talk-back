@@ -1,5 +1,7 @@
 package com.icandoit.boottalk.user.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -10,8 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.icandoit.boottalk.bootcamp.dto.GetCertificationResponseDto;
+import com.icandoit.boottalk.bootcamp.service.BootcampCertificationService;
 import com.icandoit.boottalk.social_login.dto.CustomOAuth2User;
 import com.icandoit.boottalk.user.domain.dto.UserDto;
+import com.icandoit.boottalk.user.domain.dto.UserInfoDto;
 import com.icandoit.boottalk.user.domain.form.UpdateForm;
 import com.icandoit.boottalk.user.service.ManageService;
 
@@ -23,11 +28,17 @@ import lombok.RequiredArgsConstructor;
 public class ManageController {
 
 	private final ManageService manageService;
+	private final BootcampCertificationService bootcampCertificationService;
 
 	@GetMapping
-	public ResponseEntity<UserDto> getUser(@AuthenticationPrincipal CustomOAuth2User user) {
+	public ResponseEntity<UserInfoDto> getUser(@AuthenticationPrincipal CustomOAuth2User user) {
+		Long userId = user.getServiceUserId();
 
-		return ResponseEntity.ok(manageService.getUser(user.getServiceUserId()));
+		UserDto userDto = manageService.getUser(userId);
+		List<GetCertificationResponseDto> myCertifications
+			= bootcampCertificationService.getMyCertifications(userId);
+
+		return ResponseEntity.ok(UserInfoDto.from(userDto, myCertifications));
 	}
 
 	@PutMapping
