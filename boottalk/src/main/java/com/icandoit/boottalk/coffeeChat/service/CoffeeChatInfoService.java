@@ -61,6 +61,12 @@ public class CoffeeChatInfoService {
     @Transactional
     public void deleteMyCoffeeChatInfo(Long userId) {
         CoffeeChatInfo coffeeChatInfo = getCoffeeChatInfoByUserId(userId);
+
+        // 멘토링 활동 금지 당한 커피챗 정보는 삭제 불가
+        if (coffeeChatInfo.isMentoringBanned()) {
+            throw new CustomException(ErrorCode.COFFEE_CHAT_DELETE_BANNED);
+        }
+
         coffeeChatInfoRepository.delete(coffeeChatInfo);
     }
 

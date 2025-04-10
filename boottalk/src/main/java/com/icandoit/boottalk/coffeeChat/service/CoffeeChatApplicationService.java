@@ -1,7 +1,5 @@
 package com.icandoit.boottalk.coffeeChat.service;
 
-import java.time.LocalDateTime;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -129,17 +127,21 @@ public class CoffeeChatApplicationService {
         validateCoffeeChatInfo(coffeeChatApp.getCoffeeChatInfo().getCoffeeChatInfoId());
 
         StatusType currentStatus = coffeeChatApp.getStatus();
+
         // 커피챗 취소는 상태가 대기 또는 수락 중일 때만 가능
         if (!(currentStatus == StatusType.PENDING || currentStatus == StatusType.APPROVED)) {
             throw new CustomException(ErrorCode.COFFEE_CHAT_CANNOT_CANCEL);
         }
 
-        coffeeChatApp.setStatus(StatusType.CANCELED);
-
-        // 커피챗 시작 시간 2일 전까지 취소 시 포인트 환불
-        if (LocalDateTime.now().plusDays(2).isBefore(coffeeChatApp.getCoffeeChatStartTime())) {
+        // 커피챗 취소시 환불 처리
+        // 상태가 대기이거나, 상태가 승인이고 커피챗 시작 시간 2일 전까지는 환불 처리
+        if (currentStatus == StatusType.PENDING ||
+            currentStatus == StatusType.APPROVED && coffeeChatApp.isNDaysOrMoreUntilStart(2)
+        ) {
             createPointHistoryService.createPointHistory(EventType.COFFEE_CHAT_CANCEL_REFUND, userId, coffeeChatApp.getUsedPoint());
         }
+
+        coffeeChatApp.setStatus(StatusType.CANCELED);
 
     }
 

@@ -15,6 +15,7 @@ public enum ErrorCode {
     COFFEE_CHAT_STATUS_NOT_PENDING(400, "대기 중 상태가 아니므로 상태를 변경할 수 없습니다."),
     COFFEE_CHAT_CANNOT_CANCEL(400, "커피챗 신청 취소는 대기 또는 수락 중일 때만 가능합니다."),
     INVALID_CATEGORY_NAME(400, "잘못된 카테고리 이름입니다."),
+    COFFEE_CHAT_DELETE_BANNED(400, "멘토링 활동 금지 기간에는 커피챗 정보를 삭제할 수 없습니다."),
 
     /* 401 UNAUTHORIZED */
     INVALID_TOKEN(401, "유효한 토큰이 아닙니다."),
