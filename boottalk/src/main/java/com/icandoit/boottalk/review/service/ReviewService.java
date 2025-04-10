@@ -1,7 +1,5 @@
 package com.icandoit.boottalk.review.service;
 
-import static com.icandoit.boottalk.bootcamp.exception.BootcampErrorCode.*;
-import static com.icandoit.boottalk.libs.exception.ErrorCode.BOOTCAMP_NOT_FOUND;
 import static com.icandoit.boottalk.libs.exception.ErrorCode.*;
 
 import org.springframework.data.domain.Page;
@@ -10,9 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
-import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.entity.Course;
-import com.icandoit.boottalk.bootcamp.exception.BootcampCustomException;
+import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
 import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
@@ -60,7 +57,7 @@ public class ReviewService {
 	public Page<ReviewResponseDto> getAllReviews(Pageable pageable, String category) {
 		if (category != null && !category.isBlank()) {
 			if (!BootcampCategoryType.isValidKoreanName(category)) {
-				throw new BootcampCustomException(INVALID_CATEGORY_NAME);
+				throw new CustomException(INVALID_CATEGORY_NAME);
 			}
 			BootcampCategoryType categoryType = BootcampCategoryType.fromKoreanName(category);
 			return reviewRepository.findByBootcampCategory(categoryType, pageable)

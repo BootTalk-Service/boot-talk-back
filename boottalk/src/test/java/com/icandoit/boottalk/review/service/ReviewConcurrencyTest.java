@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
+import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.entity.Course;
 import com.icandoit.boottalk.bootcamp.entity.TrainingCenter;
 import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
@@ -66,7 +66,7 @@ public class ReviewConcurrencyTest {
 		this.trainingCenterId = center.getTrainingCenterId();
 
 		Course course = courseRepository.save(
-			Course.of(trainingProgramId, "동시성 테스트 코스", center)
+			Course.of(trainingProgramId, "동시성 테스트 코스", BootcampCategoryType.APPLICATION_SW_ENGINEERING, center)
 		);
 		this.courseId = course.getCourseId();
 	}

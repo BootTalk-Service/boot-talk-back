@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.icandoit.boottalk.bootcamp.dto.BootcampResponseDto;
-import com.icandoit.boottalk.bootcamp.entity.BootcampCategoryType;
+import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.service.BootcampService;
 import com.icandoit.boottalk.common.dto.PagedResponseDto;
 import com.icandoit.boottalk.review.dto.ReviewResponseDto;

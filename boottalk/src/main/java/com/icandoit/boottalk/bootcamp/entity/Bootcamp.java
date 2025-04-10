@@ -2,6 +2,7 @@ package com.icandoit.boottalk.bootcamp.entity;
 
 import java.time.LocalDate;
 
+import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.libs.entity.BaseEntity;
 
 import jakarta.persistence.Column;

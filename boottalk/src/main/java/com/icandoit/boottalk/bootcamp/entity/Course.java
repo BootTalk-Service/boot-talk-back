@@ -1,9 +1,12 @@
 package com.icandoit.boottalk.bootcamp.entity;
 
+import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.libs.entity.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -39,6 +42,10 @@ public class Course extends BaseEntity {
 	@Column(nullable = false)
 	private String courseName;
 
+	@Column(nullable = false)
+	@Enumerated(EnumType.STRING)
+	private BootcampCategoryType bootcampCategoryType;
+
 	private int totalScore;
 	private int reviewCount;
 
@@ -47,10 +54,12 @@ public class Course extends BaseEntity {
 		this.reviewCount = reviewCount;
 	}
 
-	public static Course of(String trainingProgramId, String courseName, TrainingCenter trainingCenter) {
+	public static Course of(String trainingProgramId, String courseName,
+		BootcampCategoryType bootcampCategoryType, TrainingCenter trainingCenter) {
 		return Course.builder()
 			.trainingProgramId(trainingProgramId)
 			.courseName(courseName)
+			.bootcampCategoryType(bootcampCategoryType)
 			.trainingCenter(trainingCenter)
 			.totalScore(0)
 			.reviewCount(0)

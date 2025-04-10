@@ -53,7 +53,6 @@ public class CoffeeChatReceivedService {
         Long mentoId = coffeeChatApp.getCoffeeChatInfo().getMentor().getUserId();
 
         validateCoffeeChatOwner(mentoId, userId);
-        validatePendingStatus(coffeeChatApp.getStatus());
 
         StatusType changeStatus = request.changeStatus();
         coffeeChatApp.setStatus(changeStatus); // 상태 변경
@@ -65,13 +64,6 @@ public class CoffeeChatReceivedService {
         }
         return CoffeeChatAppStatusResponseDto.from(coffeeChatApp);
 
-    }
-
-    // 커피챗 신청이 대기 중 상태가 아닐 경우 상태 요청 변경 방지
-    private void validatePendingStatus(StatusType currentStatus) {
-        if (currentStatus != StatusType.PENDING) {
-            throw new CustomException(ErrorCode.COFFEE_CHAT_STATUS_NOT_PENDING);
-        }
     }
 
     // 커피챗 정보의 작성자가 요청한 사용자와 일치하는지 확인
