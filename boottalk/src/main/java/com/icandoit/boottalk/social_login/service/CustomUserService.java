@@ -33,8 +33,6 @@ public class CustomUserService extends DefaultOAuth2UserService {
 		OAuth2User oAuth2User = super.loadUser(userRequest);
 		log.info("UserInfo from Service: {}", oAuth2User);
 
-		String registrationId = userRequest.getClientRegistration().getRegistrationId();
-
 		// 네이버의 경우 사용자 정보를 이중맵형식으로 전달받기 때문에 아래와 같이 작성
 		NaverResponse naverResponse = NaverResponse.from((Map<String, Object>) oAuth2User.getAttributes().get("response"));
 
@@ -56,8 +54,11 @@ public class CustomUserService extends DefaultOAuth2UserService {
 			));
 		}
 
-		// 기존 회원인 경우 인증 성공
-		//TODO 회원 권한(관리자, 일반)을 구별할 수 있는 기능 필요
+		// 관리자와 일반 회원을 구분하여 권한 부여
+		if (user.isAdmin()) {
+			return new CustomOAuth2User(UserAuthDto.from(user, ADMIN));
+		}
+
 		return new CustomOAuth2User(UserAuthDto.from(user, USER));
 	}
 

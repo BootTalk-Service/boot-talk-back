@@ -7,9 +7,10 @@ import com.icandoit.boottalk.libs.exception.ErrorCode;
 import com.icandoit.boottalk.social_login.dto.CustomOAuth2User;
 import com.icandoit.boottalk.social_login.dto.UserAuthDto;
 import com.icandoit.boottalk.social_login.dto.UserRole;
+import com.icandoit.boottalk.social_login.jwt.JwtProvider;
 import com.icandoit.boottalk.user.domain.entity.User;
-import com.icandoit.boottalk.user_test.form.TestSignUpForm;
 import com.icandoit.boottalk.user.domain.repository.UserRepository;
+import com.icandoit.boottalk.user_test.form.TestSignUpForm;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class UserTestService {
 
 	private final UserRepository userRepository;
+	private final JwtProvider jwtProvider;
 
 	public CustomOAuth2User signUp(TestSignUpForm form) {
 		User user = userRepository.save(User.builder()
@@ -31,11 +33,15 @@ public class UserTestService {
 		return new CustomOAuth2User(UserAuthDto.from(user, UserRole.USER));
 	}
 
-	public CustomOAuth2User login(String username) {
-		User user = userRepository.findByUserName(username).orElseThrow(
+	public String login(Long userId) {
+		User user = userRepository.findById(userId).orElseThrow(
 			() -> new CustomException(ErrorCode.USER_NOT_FOUND)
 		);
 
-		return new CustomOAuth2User(UserAuthDto.from(user, UserRole.USER));
+		if (user.isAdmin()) {
+			return jwtProvider.createToken(user.getUserId(), user.getResourceUserId(), UserRole.ADMIN.name());
+		}
+
+		return jwtProvider.createToken(user.getUserId(), user.getResourceUserId(), UserRole.USER.name());
 	}
 }
