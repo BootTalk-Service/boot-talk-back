@@ -51,4 +51,8 @@ public class BootcampCertification extends BaseEntity {
 			.status(CertificationStatus.PENDING)
 			.build();
 	}
+
+	public void updateStatus(CertificationStatus status) {
+		this.status = status;
+	}
 }
