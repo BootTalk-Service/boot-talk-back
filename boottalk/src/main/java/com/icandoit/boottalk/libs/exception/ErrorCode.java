@@ -13,11 +13,13 @@ public enum ErrorCode {
     INSUFFICIENT_POINT(400, "잔여 포인트가 부족합니다."),
     EXCEEDS_MAX_LENGTH(400, "최대 길이를 초과했습니다."),
     COFFEE_CHAT_STATUS_NOT_PENDING(400, "대기 중 상태가 아니므로 상태를 변경할 수 없습니다."),
+    CHAT_ROOM_NOT_ACTIVE(400, "채팅방이 비활성화되어 입장할 수 없습니다."),
     COFFEE_CHAT_CANNOT_CANCEL(400, "커피챗 신청 취소는 대기 또는 수락 중일 때만 가능합니다."),
     INVALID_CATEGORY_NAME(400, "잘못된 카테고리 이름입니다."),
     FILE_IS_EMPTY(400, "파일이 비어 있습니다."),
     INVALID_IMAGE_TYPE(400, "이미지 파일만 업로드할 수 있습니다."),
     INVALID_FILE_NAME(400, "잘못된 파일명입니다."),
+
 
     /* 401 UNAUTHORIZED */
     INVALID_TOKEN(401, "유효한 토큰이 아닙니다."),
@@ -27,7 +29,7 @@ public enum ErrorCode {
     NOT_REVIEW_OWNER(403, "사용자가 작성한 리뷰가 아닙니다."),
     NOT_COFFEE_CHAT_APPLICATION_OWNER(403, "사용자가 작성한 커피챗 신청 내역이 아닙니다."),
     NOT_COFFEE_CHAT_INFO_OWNER(403, "사용자가 작성한 커피챗 정보가 아닙니다."),
-
+    CHAT_ROOM_FORBIDDEN(403, "해당 채팅방에 접근할 수 있는 권한이 없습니다."),
     /* 404 NOT_FOUND */
     NOT_FOUND(404, "요청한 리소스를 찾을 수 없습니다."),
     USER_NOT_FOUND(404, "유저를 찾을 수 없습니다."),
@@ -37,6 +39,7 @@ public enum ErrorCode {
     USER_COFFEE_CHAT_NOT_FOUND(404, "유저의 해당하는 커피챗을 찾을 수 없습니다."),
     COFFEE_CHAT_APPLICATION_NOT_FOUND(404, "커피챗 신청 내역을 찾을 수 없습니다."),
     COURSE_NOT_FOUND(404, "코스를 찾을 수 없습니다."),
+    CHAT_ROOM_NOT_FOUND(404, "채팅방을 찾을 수 없습니다."),
     TRAINING_CENTER_NOT_FOUND(404, "요청한 훈련 기관을 찾을 수 없습니다."),
     API_DATA_IS_EMPTY(404, "API 데이터가 비어 있습니다."),
 
@@ -48,6 +51,12 @@ public enum ErrorCode {
     ALREADY_CREATED_COFFEE_CHAT_TIME(409, "해당 유저의 커피챗 시간이 등록되어 있습니다."),
     COFFEE_CHAT_APPLICATION_ALREADY_EXISTS(409, "이미 해당 커피챗에 신청되었습니다."),
     COFFEE_CHAT_APPLICATION_TIME_ALREADY_EXISTS(400, "이미 신청된 시간입니다."),
+    CHAT_ROOM_NOT_STARTED(409, "채팅 시간이 아직 시작되지 않았습니다."),
+
+    /* 410 GONE */
+    CHAT_ROOM_ENDED(410, "채팅 시간이 종료되어 메시지를 보낼 수 없습니다."),
+    CHAT_ROOM_EXPIRED(410, "채팅방의 유효 시간이 만료되었습니다."),
+    MESSAGE_EXPIRED(410, "메시지가 만료되었습니다."),
 
     /* SERVICE_UNAVAILABLE */
     SSE_CONNECTION_FAILED(503, "SSE 연결 오류가 발생하였습니다."),
