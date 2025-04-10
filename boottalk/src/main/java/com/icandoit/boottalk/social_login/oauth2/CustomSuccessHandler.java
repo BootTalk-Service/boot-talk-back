@@ -50,10 +50,10 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
 		// 신규회원인 경우,추가정보 입력 url로 리다이렉션
 		if (UserRole.valueOf(role).equals(UserRole.NEW_USER)) {
-			response.sendRedirect("http://localhost:8080/new");
+			response.sendRedirect("http://localhost:3000/social-register");
 		} else {
 			// 기존 회원의 경우, 메인페이지로 리다이렉션
-			response.sendRedirect("http://localhost:8080/");
+			response.sendRedirect("http://localhost:3000/");
 		}
 	}
 

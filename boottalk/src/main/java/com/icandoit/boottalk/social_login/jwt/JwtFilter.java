@@ -67,11 +67,11 @@ public class JwtFilter extends OncePerRequestFilter {
 						// 응답 헤더에 토큰 추가
 						response.setHeader(TOKEN_HEADER, TOKEN_PREFIX + token);
 
-						// TODO 추후 프론트 엔드에서 헤더에 토큰 값을 담아서 요청을 보내도록 설정 시 쿠키 삭제 활성화
-						// Cookie deleteCookie = new Cookie(TOKEN_HEADER, null);
-						// deleteCookie.setMaxAge(0); // 쿠키 만료
-						// deleteCookie.setPath("/"); // 쿠키의 경로를 원래 쿠키와 동일하게 설정
-						// response.addCookie(deleteCookie);
+						// 헤더에 토큰을 옮긴 후에 쿠키에서는 삭제
+						Cookie deleteCookie = new Cookie(TOKEN_HEADER, null);
+						deleteCookie.setMaxAge(0); // 쿠키 만료
+						deleteCookie.setPath("/"); // 쿠키의 경로를 원래 쿠키와 동일하게 설정
+						response.addCookie(deleteCookie);
 
 						break;
 					}
