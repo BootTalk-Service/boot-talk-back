@@ -39,21 +39,14 @@ public class ChatRoomController {
         return ResponseEntity.ok().build();
     }
 
-    // 채팅방 단건조회
-    @GetMapping("/{roomUuid}")
-    public ResponseEntity<ChatRoomResponseDto> getChatRoomByUuid(@PathVariable String roomUuid) {
-        ChatRoomResponseDto dto = chatRoomService.getUserChatRoom(roomUuid);
-        return ResponseEntity.ok(dto);
-    }
 
     // 참여중인 채팅방 리스트조회
     @GetMapping
     public ResponseEntity<List<ChatRoomResponseDto>> getUserChatRooms(
         @AuthenticationPrincipal CustomOAuth2User user) {
 
-        List<ChatRoomResponseDto> chatRooms = chatRoomService.getUserChatRooms(
-            user.getServiceUserId());
-        return ResponseEntity.ok(chatRooms);
+        return ResponseEntity.ok(chatRoomService.getUserChatRooms(
+            user.getServiceUserId()));
     }
 
     @GetMapping("/{roomUuid}/messages")

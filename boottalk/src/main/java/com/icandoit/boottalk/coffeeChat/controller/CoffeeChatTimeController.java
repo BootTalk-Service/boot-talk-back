@@ -4,7 +4,6 @@ import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeMapDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeResponseDto;
 import com.icandoit.boottalk.coffeeChat.service.CoffeeChatTimeService;
 import com.icandoit.boottalk.social_login.dto.CustomOAuth2User;
-
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -34,17 +33,14 @@ public class CoffeeChatTimeController {
 
     // 멘토 자신의 시간을 조회
     @GetMapping
-    public ResponseEntity<List<CoffeeChatTimeResponseDto>> getMyCoffeeChatTimes(
-        @AuthenticationPrincipal CustomOAuth2User user) {
+    public ResponseEntity<List<CoffeeChatTimeResponseDto>> getMyCoffeeChatTimes(@AuthenticationPrincipal CustomOAuth2User user) {
 
         return ResponseEntity.ok(coffeeChatTimeService.getMentorAvailableChatTimes(user.getServiceUserId()));
     }
 
     //mentorId를 받아 커피챗 가능 시간 조회
     @GetMapping("/{mentorId}")
-    public ResponseEntity<List<CoffeeChatTimeResponseDto>> getMentorAvailableChatTimes(
-        @AuthenticationPrincipal CustomOAuth2User user,
-        @PathVariable Long mentorId) {
+    public ResponseEntity<List<CoffeeChatTimeResponseDto>> getMentorAvailableChatTimes(@PathVariable Long mentorId) {
 
         return ResponseEntity.ok(coffeeChatTimeService.getMentorAvailableChatTimes(mentorId));
     }

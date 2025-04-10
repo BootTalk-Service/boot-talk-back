@@ -58,13 +58,6 @@ public class ChatRoomService {
         return ChatRoomCreateResponse.from(chatRoom.getRoomUuid());
     }
 
-    public ChatRoomResponseDto getUserChatRoom(String roomUuid) {
-        ChatRoom chatRoom = chatRoomRepository.findByRoomUuid(roomUuid)
-            .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
-
-        return ChatRoomResponseDto.from(chatRoom);
-    }
-
     @Transactional(readOnly = true)
     public List<ChatRoomResponseDto> getUserChatRooms(Long userId) {
         List<ChatRoom> chatRooms = chatRoomRepository.findActiveChatRoomsByUserId(userId);
