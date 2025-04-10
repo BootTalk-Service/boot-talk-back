@@ -18,7 +18,9 @@ spring:
 
   batch:
     jdbc:
-      initialize-schema: always # 테이블이 만들어진 이후에넌 never 로 변경하는 것이 좋음
+      initialize-schema: never # 테이블이 만들어진 이후에넌 never 로 변경하는 것이 좋음
+    job:
+      enabled: false
 
   security:
     oauth2:

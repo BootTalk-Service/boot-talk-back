@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.icandoit.boottalk.notification.service.SseEmitterService;
 import com.icandoit.boottalk.social_login.dto.CustomOAuth2User;
 import com.icandoit.boottalk.social_login.dto.UserRole;
 import com.icandoit.boottalk.social_login.jwt.JwtProvider;
@@ -36,14 +35,14 @@ public class UserTestController {
 
 
 	//로그인 (회원가입된 이름으로 로그인)
-	@GetMapping("/login")
-	public ResponseEntity<String> login(@RequestParam String username) {
-		CustomOAuth2User authUser = userTestService.login(username);
+
+	@PostMapping("/login")
+	public ResponseEntity<String> login(@RequestParam Long userId) {
 
 		return ResponseEntity.ok(
-			jwtProvider.createToken(authUser.getServiceUserId(), authUser.getName(), UserRole.USER.name()));
-
+			userTestService.login(userId));
 	}
+
 
 
 }
