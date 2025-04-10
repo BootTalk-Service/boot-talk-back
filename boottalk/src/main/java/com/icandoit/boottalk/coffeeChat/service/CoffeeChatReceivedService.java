@@ -1,16 +1,13 @@
 package com.icandoit.boottalk.coffeeChat.service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationResponseDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatAppChangeStatusDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatAppStatusResponseDto;
+import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationResponseDto;
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatApplication;
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatInfo;
 import com.icandoit.boottalk.coffeeChat.entity.enums.StatusType;
@@ -18,6 +15,8 @@ import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatApplicationReposito
 import com.icandoit.boottalk.common.dto.PagedResponseDto;
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
+import com.icandoit.boottalk.point_history.domain.type.EventType;
+import com.icandoit.boottalk.point_history.service.CreatePointHistoryService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,6 +28,9 @@ public class CoffeeChatReceivedService {
 
     private final CoffeeChatInfoService coffeeChatInfoService;
     private final CoffeeChatApplicationService coffeeChatAppService;
+    private final CreatePointHistoryService createPointHistoryService;
+
+    private static final int MENTORING_BAN_DAYS = 30;
 
     // 나에게 신청한 커피챗 신정 목록 조회
     public PagedResponseDto<CoffeeChatApplicationResponseDto> getReceivedCoffeeChatApplications(
@@ -50,18 +52,36 @@ public class CoffeeChatReceivedService {
 
         CoffeeChatApplication coffeeChatApp = coffeeChatAppService.getCoffeeChatApplication(coffeeChatAppId);
 
-        Long mentoId = coffeeChatApp.getCoffeeChatInfo().getMentor().getUserId();
+        Long mentorId = coffeeChatApp.getCoffeeChatInfo().getMentor().getUserId();
 
-        validateCoffeeChatOwner(mentoId, userId);
+        validateCoffeeChatOwner(mentorId, userId);
 
         StatusType changeStatus = request.changeStatus();
-        coffeeChatApp.setStatus(changeStatus); // 상태 변경
+        StatusType currentStatus = coffeeChatApp.getStatus();
 
-        if (changeStatus == StatusType.REJECTED) {
-            // TODO: 멘티가 커피챗 신청 시 차감 되었던 포인트 회수 처리 추가
-        } else if (changeStatus == StatusType.APPROVED) {
+        if (changeStatus == StatusType.CANCELED) {
+            // 승인된 커피챗을 1일 전 멘토가 취소할 경우, 멘토 활동 30일 금지 패널티 부여
+            if (currentStatus == StatusType.APPROVED && !coffeeChatApp.isNDaysOrMoreUntilStart(1)) {
+                coffeeChatApp.getCoffeeChatInfo().applyMentoringBan(MENTORING_BAN_DAYS);
+            }
+
+            // 거절 또는 취소된 경우 -> 포인트 환불
+            if (currentStatus == StatusType.REJECTED || currentStatus == StatusType.APPROVED) {
+                createPointHistoryService.createPointHistory(
+                    EventType.COFFEE_CHAT_CANCEL_REFUND,
+                    coffeeChatApp.getMentee().getUserId(),
+                    coffeeChatApp.getUsedPoint()
+                );
+            }
+
+        }
+
+        if (changeStatus == StatusType.APPROVED) {
             // TODO: 채팅룸 생성 (커피챗 시작 시간이 되면 채팅방 활성화)
         }
+
+        coffeeChatApp.setStatus(changeStatus); // 상태 변경
+
         return CoffeeChatAppStatusResponseDto.from(coffeeChatApp);
 
     }

@@ -80,4 +80,8 @@ public class CoffeeChatApplication extends BaseEntity {
         this.status = status;
     }
 
+    public boolean isNDaysOrMoreUntilStart(int days) {
+        return LocalDateTime.now().isBefore(this.coffeeChatStartTime.minusDays(days));
+    }
+
 }

@@ -14,6 +14,7 @@ public record CoffeeChatInfoResponseDto(
     MentorType mentorType,
     JobType jobType,
     String introduction,
+    LocalDateTime mentoringBanEndDate,
     LocalDateTime createdAt,
     LocalDateTime updatedAt
 ) {
@@ -26,6 +27,7 @@ public record CoffeeChatInfoResponseDto(
             coffeeChatInfo.getMentorType(),
             coffeeChatInfo.getJobType(),
             coffeeChatInfo.getIntroduction(),
+            coffeeChatInfo.getMentoringBanEndDate(),
             coffeeChatInfo.getCreatedAt(),
             coffeeChatInfo.getUpdatedAt()
         );
