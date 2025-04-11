@@ -59,6 +59,7 @@ public class BootcampCertificationController {
 	}
 
 	@PutMapping
+	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<CertificationResponseDto> updateCertification(@RequestBody CertificationUpdateRequestDto request){
 		return ResponseEntity.ok(certificationService.updateCertification(request));
 	}

@@ -63,7 +63,6 @@ public class BootcampCertificationService {
 			.collect(Collectors.toList());
 	}
 
-	// TODO : 관리자 권한 추가
 	// 승인 대기중인 요청 모두 조회
 	public List<GetPendingCertificationResponseDto> getPendingCertifications() {
 		List<BootcampCertification> certifications = bootcampCertificationRepository.findAllByStatus(CertificationStatus.PENDING);
@@ -73,14 +72,13 @@ public class BootcampCertificationService {
 	}
 
 	// 수료증 정보 조회
-	// TODO : 관리자 권한 추가
 	public GetCertificationInfoDto findById(Long certificationId) {
 		BootcampCertification certification = bootcampCertificationRepository.getReferenceById(certificationId);
 
 		return GetCertificationInfoDto.from(certification);
 	}
 
-	// TODO : 관리자 권한 추가
+	// 수료증 승인 거절 로직
 	public CertificationResponseDto updateCertification(CertificationUpdateRequestDto request) {
 		BootcampCertification certification = bootcampCertificationRepository.getReferenceById(request.certificationId());
 
