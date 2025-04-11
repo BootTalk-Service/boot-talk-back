@@ -36,6 +36,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Employ24ApiService {
 
+	private final RedisService redisService;
+
 	private static final String HOST = "www.work24.go.kr";
 	private static final String LIST_API_PATH = "/cm/openApi/call/hr/callOpenApiSvcInfo310L01.do";
 	private static final String DETAIL_API_PATH = "/cm/openApi/call/hr/callOpenApiSvcInfo310L02.do";
@@ -66,7 +68,7 @@ public class Employ24ApiService {
 	}
 
 	// 주어진 카테고리와 NCS 코드로 리스트 조회 후 저장 처리
-	private void processCategoryAndNcs(String categoryCode, String ncsCode) {
+	public void processCategoryAndNcs(String categoryCode, String ncsCode) {
 		try {
 			List<BootcampListResponseDto> list = fetchBootcampList(categoryCode, ncsCode);
 			processBootcampList(list);
@@ -104,6 +106,8 @@ public class Employ24ApiService {
 		Bootcamp bootcamp = createBootcampEntity(center, course, dto, category, detail);
 
 		bootcampRepository.save(bootcamp);
+
+		redisService.storeNewBootcampInfo(String.valueOf(bootcamp.getBootcampId()), bootcamp.getBootcampCategoryType());
 		log.info("저장 성공: {}", bootcamp.getBootcampName());
 	}
 
@@ -208,7 +212,7 @@ public class Employ24ApiService {
 
 	// 리스트 API 호출 URL 생성
 	private String buildListApiUrl(String categoryCode, String ncsCode) {
-		LocalDate today = LocalDate.now();
+		LocalDate today = LocalDate.now().plusDays(1);
 		LocalDate end = today.plusDays(7);
 		return UriComponentsBuilder.newInstance()
 			.scheme("https")
