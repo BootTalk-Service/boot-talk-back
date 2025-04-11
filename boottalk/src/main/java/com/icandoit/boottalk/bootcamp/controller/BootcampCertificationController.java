@@ -3,6 +3,7 @@ package com.icandoit.boottalk.bootcamp.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,15 +45,16 @@ public class BootcampCertificationController {
 		return ResponseEntity.ok(response);
 	}
 
-	// TODO :관리자 권한 추가
 	@GetMapping
+	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<List<GetPendingCertificationResponseDto>> getAllCertifications() {
 		return ResponseEntity.ok(certificationService.getPendingCertifications());
 	}
 
-	// 관리자 권한 추가
 	@GetMapping("/{certificationId}")
-	public ResponseEntity<GetCertificationInfoDto> getCertification(@PathVariable Long certificationId) {
+	@PreAuthorize("hasAuthority('ADMIN')")
+	public ResponseEntity<GetCertificationInfoDto> getCertification(
+		@PathVariable Long certificationId) {
 		return ResponseEntity.ok(certificationService.findById(certificationId));
 	}
 
