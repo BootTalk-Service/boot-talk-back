@@ -39,9 +39,9 @@ public class UserTestService {
 		);
 
 		if (user.isAdmin()) {
-			return jwtProvider.createToken(user.getUserId(), user.getResourceUserId(), UserRole.ADMIN.name());
+			return jwtProvider.createToken(user.getUserId(), user.getUserName(), UserRole.ADMIN.name());
 		}
 
-		return jwtProvider.createToken(user.getUserId(), user.getResourceUserId(), UserRole.USER.name());
+		return jwtProvider.createToken(user.getUserId(), user.getUserName(), UserRole.USER.name());
 	}
 }

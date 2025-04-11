@@ -17,4 +17,6 @@ public interface PointHistoryRepository extends JpaRepository<PointHistory, Long
 
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	Optional<PointHistory> findTopByUserIdOrderByPointHistoryIdDesc(long userId);
+
+	Optional<PointHistory> findFirstByUserIdOrderByPointHistoryIdDesc(long userId);
 }
