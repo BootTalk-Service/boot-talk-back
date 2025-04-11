@@ -26,7 +26,7 @@ public class CoffeeChatInfoService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        if (coffeeChatInfoRepository.existsBymentor_UserId(userId)) {
+        if (coffeeChatInfoRepository.existsByMentor_UserId(userId)) {
             throw new CustomException(ErrorCode.COFFEE_CHAT_ALREADY_EXISTS);
         }
 
@@ -46,6 +46,13 @@ public class CoffeeChatInfoService {
 
         CoffeeChatInfo coffeeChatInfo = getCoffeeChatInfoByUserId(userId);
         return CoffeeChatInfoResponseDto.from(coffeeChatInfo);
+    }
+
+    public CoffeeChatInfoResponseDto getCoffeeChatInfo(Long coffeeChatInfoId) {
+        return CoffeeChatInfoResponseDto.from(
+            coffeeChatInfoRepository.findByCoffeeChatInfoId(coffeeChatInfoId)
+                .orElseThrow(() -> new CustomException(ErrorCode.COFFEE_CHAT_NOT_FOUND))
+        );
     }
 
     @Transactional
@@ -71,7 +78,7 @@ public class CoffeeChatInfoService {
     }
 
     protected CoffeeChatInfo getCoffeeChatInfoByUserId(Long userId) {
-        return coffeeChatInfoRepository.findBymentor_UserId(userId)
+        return coffeeChatInfoRepository.findByMentor_UserId(userId)
             .orElseThrow(() -> new CustomException(ErrorCode.USER_COFFEE_CHAT_NOT_FOUND));
     }
 }
