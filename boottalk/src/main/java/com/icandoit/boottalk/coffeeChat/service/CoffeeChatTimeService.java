@@ -1,32 +1,44 @@
 package com.icandoit.boottalk.coffeeChat.service;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.icandoit.boottalk.coffeeChat.dto.AvailableChatTimeDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeMapDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeResponseDto;
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatInfo;
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatTime;
+import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatApplicationRepository;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatInfoRepository;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatTimeRepository;
 import com.icandoit.boottalk.coffeeChat.service.converter.CoffeeChatTimeConverter;
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
-import java.time.DayOfWeek;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class CoffeeChatTimeService {
+    private static final int COFFEE_CHAT_APPLICATION_PERIOD_DAYS = 30;
 
     private final CoffeeChatInfoRepository coffeeChatInfoRepository;
     private final CoffeeChatTimeRepository coffeeChatTimeRepository;
+    private final CoffeeChatApplicationRepository coffeeChatAppRepository;
 
     @Transactional
     public List<CoffeeChatTimeResponseDto> createCoffeeChatTimes(Long userId,
@@ -62,11 +74,31 @@ public class CoffeeChatTimeService {
     // 자신의 멘토 가능 시간 조회
     @Transactional(readOnly = true)
     public List<CoffeeChatTimeResponseDto> getMentorAvailableChatTimes(Long userId) {
-        List<CoffeeChatTime> coffeeChatTimes = getmentorCoffeeChatTimesOrThrow(userId);
+        List<CoffeeChatTime> coffeeChatTimes = getMentorCoffeeChatTimesOrThrow(userId);
 
         return coffeeChatTimes.stream()
             .map(CoffeeChatTimeResponseDto::from)
             .toList();
+    }
+
+    public AvailableChatTimeDto getAvailableChatTimes(Long coffeeChatInfoId) {
+
+        // 현재 시간과 신청 기간 설정
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate startDate = now.toLocalDate();
+        LocalDate endDate = startDate.plusDays(COFFEE_CHAT_APPLICATION_PERIOD_DAYS);
+        
+        // 멘토가 설정한 요일별 멘토링(커피챗) 시간 목록
+        List<CoffeeChatTime> mentoringTimeList = coffeeChatTimeRepository.findAllWithCoffeeChatInfoByCoffeeChatInfoId(coffeeChatInfoId);
+
+        // 이미 신청된 커피챗 시간 목록
+        List<LocalDateTime> appliedDateTimes = coffeeChatAppRepository.findStartTimesByCoffeeChatInfoIdAndPeriod(
+                coffeeChatInfoId, now, now.plusDays(COFFEE_CHAT_APPLICATION_PERIOD_DAYS));
+
+        // 신청된 시간 제외한 신청 가능한 시간 필터링
+        Map<LocalDate, List<LocalTime>> availableChatTimesByDate  = getAvailableChatTimesByDate(mentoringTimeList, appliedDateTimes, startDate, endDate);
+
+        return new AvailableChatTimeDto(availableChatTimesByDate);
     }
 
     @Transactional
@@ -125,11 +157,42 @@ public class CoffeeChatTimeService {
         return dayOfWeek.toString() + "-" + startTime.format(DateTimeFormatter.ofPattern("HH:mm"));
     }
 
-    private List<CoffeeChatTime> getmentorCoffeeChatTimesOrThrow(Long userId) {
+    private List<CoffeeChatTime> getMentorCoffeeChatTimesOrThrow(Long userId) {
 
         return Optional.ofNullable(
                 coffeeChatTimeRepository.findAllWithCoffeeChatInfoByUserId(userId))
             .filter(list -> !list.isEmpty())
             .orElseThrow(() -> new CustomException(ErrorCode.USER_COFFEE_CHAT_NOT_FOUND));
     }
+
+    // 멘토링 가능한 시간과 신청된 시간을 필터링하여 신청 가능한 시간을 구함
+    private Map<LocalDate, List<LocalTime>> getAvailableChatTimesByDate(
+        List<CoffeeChatTime> mentoringTimeList,
+        List<LocalDateTime> appliedDateTimes,
+        LocalDate startDate, LocalDate endDate
+    ) {
+        // 신청일 기준 30일 내 멘토링 가능한 요일의 날짜를 key로, 해당 날짜의 신청 가능 시간을 리스트로 매핑
+        Map<LocalDate, List<LocalTime>> availableChatTimesByDate = new HashMap<>();
+
+        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            List<LocalTime> availableTimes = new ArrayList<>();
+            for (CoffeeChatTime chatTime : mentoringTimeList) {
+                if (date.getDayOfWeek() == chatTime.getDayOfWeek()) { // 멘토링 시간의 요일과 일치하는 날짜라면
+                    LocalTime startTime = chatTime.getStartTime();
+                    LocalDateTime fullDateTime = LocalDateTime.of(date, startTime); // appliedDateTimes의 LocalDateTime 과 비교하기 위해 포맷팅
+                    if (!appliedDateTimes.contains(fullDateTime)) { // 이미 신청된 시간이 아니라면 추가
+                        availableTimes.add(startTime);
+                    }
+                }
+            }
+
+            // 신청 가능한 시간이 있다면 맵에 추가
+            if (!availableTimes.isEmpty()) {
+                availableChatTimesByDate.put(date, availableTimes);
+            }
+        }
+
+        return availableChatTimesByDate;
+    }
+
 }

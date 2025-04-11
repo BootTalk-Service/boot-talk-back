@@ -12,5 +12,9 @@ public interface CoffeeChatTimeRepository extends JpaRepository<CoffeeChatTime, 
     @Query("SELECT ct FROM CoffeeChatTime ct JOIN FETCH ct.coffeeChatInfo WHERE ct.coffeeChatInfo.mentor.userId = :mentorId")
     List<CoffeeChatTime> findAllWithCoffeeChatInfoByUserId(@Param("mentorId") Long mentorId);
 
+    @Query("SELECT ct FROM CoffeeChatTime ct JOIN FETCH ct.coffeeChatInfo WHERE ct.coffeeChatInfo.coffeeChatInfoId = :coffeeChatInfoId")
+    List<CoffeeChatTime> findAllWithCoffeeChatInfoByCoffeeChatInfoId(@Param("coffeeChatInfoId") Long coffeeChatInfoId);
+
     boolean existsByCoffeeChatInfo(CoffeeChatInfo coffeeChatInfo);
+
 }

@@ -1,5 +1,6 @@
 package com.icandoit.boottalk.coffeeChat.controller;
 
+import com.icandoit.boottalk.coffeeChat.dto.AvailableChatTimeDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeMapDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeResponseDto;
 import com.icandoit.boottalk.coffeeChat.service.CoffeeChatTimeService;
@@ -31,11 +32,9 @@ public class CoffeeChatTimeController {
     }
 
     //mentorId를 받아 커피챗 가능 시간 조회
-    @GetMapping("/{mentorId}")
-    public ResponseEntity<List<CoffeeChatTimeResponseDto>> getMentorAvailableChatTimes(
-        @PathVariable Long mentorId) {
-
-        return ResponseEntity.ok(coffeeChatTimeService.getMentorAvailableChatTimes(mentorId));
+    @GetMapping("/{coffeeChatInfoId}")
+    public ResponseEntity<AvailableChatTimeDto> getAvailableChatTimes(@PathVariable Long coffeeChatInfoId) {
+        return ResponseEntity.ok(coffeeChatTimeService.getAvailableChatTimes(coffeeChatInfoId));
     }
 
     @PutMapping
