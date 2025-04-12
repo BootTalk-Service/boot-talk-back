@@ -3,6 +3,7 @@ package com.icandoit.boottalk.coffeeChat.repository;
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatApplication;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -56,5 +57,12 @@ public interface CoffeeChatApplicationRepository extends JpaRepository<CoffeeCha
 		@Param("coffeeChatStartTime") LocalDateTime coffeeChatStartTime);
 
 	boolean existsByMentee_UserIdAndCoffeeChatInfo_CoffeeChatInfoId(Long userId, Long coffeeChatInfoId);
+
+	// 커피챗 신청 시간이 지난 무응답 상태의 신청 내역 조회
+	@Query("""
+		SELECT ca FROM CoffeeChatApplication ca
+		WHERE ca.coffeeChatStartTime < CURRENT_TIMESTAMP AND ca.status = 'PENDING'
+	""")
+	List<CoffeeChatApplication> findAllExpiredPendingApplications();
 
 }
