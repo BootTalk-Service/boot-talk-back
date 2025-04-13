@@ -50,7 +50,7 @@ public class CoffeeChatInfoService {
 
     public CoffeeChatInfoResponseDto getCoffeeChatInfo(Long coffeeChatInfoId) {
         return CoffeeChatInfoResponseDto.from(
-            coffeeChatInfoRepository.findByCoffeeChatInfoId(coffeeChatInfoId)
+            coffeeChatInfoRepository.findById(coffeeChatInfoId)
                 .orElseThrow(() -> new CustomException(ErrorCode.COFFEE_CHAT_NOT_FOUND))
         );
     }

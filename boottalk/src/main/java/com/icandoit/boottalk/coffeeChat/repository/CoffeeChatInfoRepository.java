@@ -8,7 +8,5 @@ public interface CoffeeChatInfoRepository extends JpaRepository<CoffeeChatInfo, 
 
     Optional<CoffeeChatInfo> findByMentor_UserId(Long userId);
 
-    Optional<CoffeeChatInfo> findByCoffeeChatInfoId(Long coffeeChatInfoId);
-
     boolean existsByMentor_UserId(Long userId);
 }
