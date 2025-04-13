@@ -2,10 +2,12 @@ package com.icandoit.boottalk.point_history.service;
 
 import static com.icandoit.boottalk.libs.exception.ErrorCode.*;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.icandoit.boottalk.libs.exception.CustomException;
+import com.icandoit.boottalk.notification.util.CreatePointEvent;
 import com.icandoit.boottalk.point_history.domain.dto.PointHistoryDto;
 import com.icandoit.boottalk.point_history.domain.entity.PointHistory;
 import com.icandoit.boottalk.point_history.domain.repository.PointHistoryRepository;
@@ -21,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CreatePointHistoryService {
 
 	private final PointHistoryRepository pointHistoryRepository;
+	private final ApplicationEventPublisher eventPublisher;
 
 	@Transactional
 	public PointHistoryDto createPointHistory(EventType eventType, long userId, int changedPoint) {
@@ -41,15 +44,19 @@ public class CreatePointHistoryService {
 			currentPoint += changedPoint;
 		}
 
-		return PointHistoryDto.from(
-			pointHistoryRepository.save(
+		PointHistory pointHistory = pointHistoryRepository.save(
 			PointHistory.builder()
 				.userId(userId)
 				.currentPoint(currentPoint)
 				.changedPoint(changedPoint)
 				.pointType(eventType.getPointType())
 				.eventType(eventType)
-				.build()));
+				.build());
+
+		// 포인트 내역 생성 transaction 이 성공적으로 커밋되면 이벤트를 발생시켜 알림을 전송하도록 함.
+		eventPublisher.publishEvent(new CreatePointEvent(userId));
+
+		return PointHistoryDto.from(pointHistory);
 	}
 
 	// 포인트 내역을 생성할 때 사용 (이 떄는 락이 필요)
