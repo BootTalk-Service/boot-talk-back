@@ -17,4 +17,7 @@ public interface BootcampCertificationRepository extends JpaRepository<BootcampC
 	List<BootcampCertification> findAllByUserAndStatus(User user, CertificationStatus certificationStatus);
 
 	List<BootcampCertification> findAllByStatus(CertificationStatus certificationStatus);
+
+	// 유저가 해당 코스에 대해 APPROVED 인증을 가지고 있는지 여부
+	boolean existsByUserAndCourseAndStatus(User user, Course course, CertificationStatus certificationStatus);
 }

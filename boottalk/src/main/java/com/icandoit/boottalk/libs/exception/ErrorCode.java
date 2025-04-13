@@ -31,6 +31,7 @@ public enum ErrorCode {
     NOT_COFFEE_CHAT_APPLICATION_OWNER(403, "사용자가 작성한 커피챗 신청 내역이 아닙니다."),
     NOT_COFFEE_CHAT_INFO_OWNER(403, "사용자가 작성한 커피챗 정보가 아닙니다."),
     CHAT_ROOM_FORBIDDEN(403, "해당 채팅방에 접근할 수 있는 권한이 없습니다."),
+    WRITE_REVIEW_FORBIDDEN(403, "리뷰 작성할 권한이 없습니다."),
 
     /* 404 NOT_FOUND */
     NOT_FOUND(404, "요청한 리소스를 찾을 수 없습니다."),
