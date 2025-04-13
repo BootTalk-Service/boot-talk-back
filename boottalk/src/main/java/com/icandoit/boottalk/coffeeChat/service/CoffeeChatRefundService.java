@@ -46,6 +46,8 @@ public class CoffeeChatRefundService {
                 coffeeChatApp.setStatus(StatusType.AUTO_CANCELED);
                 coffeeChatAppRepository.save(coffeeChatApp);
 
+                // TODO: 멘티에게 알림 전송
+
                 log.info("커피챗 자동 환불. menteeId: {}, coffeeChatAppId: {}, refundPoint: {}",
                     menteeId, coffeeChatApp.getCoffeeChatInfo().getCoffeeChatInfoId(), refundPoint);
 

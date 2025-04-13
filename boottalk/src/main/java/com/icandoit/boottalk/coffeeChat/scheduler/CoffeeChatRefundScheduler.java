@@ -15,8 +15,7 @@ public class CoffeeChatRefundScheduler {
 
     private final CoffeeChatRefundService coffeeChatRefundService;
 
-    // @Scheduled(cron = "0 0 0 * * *") // 매일 자정
-    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "0 0 0 * * *") // 매일 자정
     public void runCoffeeChatRefundJob() {
         coffeeChatRefundService.refundExpiredPendingChats();
     }
