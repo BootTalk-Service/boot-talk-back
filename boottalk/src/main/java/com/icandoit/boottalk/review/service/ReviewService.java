@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
 import com.icandoit.boottalk.bootcamp.entity.Course;
 import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
+import com.icandoit.boottalk.bootcamp.entity.enums.CertificationStatus;
+import com.icandoit.boottalk.bootcamp.repository.BootcampCertificationRepository;
 import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
 import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
@@ -31,6 +33,7 @@ public class ReviewService {
 	private final UserRepository userRepository;
 	private final ReviewRepository reviewRepository;
 	private final CourseRepository courseRepository;
+	private final BootcampCertificationRepository certificationRepository;
 
 	@Transactional
 	public ReviewResponseDto createReview(ReviewCreateRequestDto request, Long userId) {
@@ -42,6 +45,10 @@ public class ReviewService {
 		Course course = getCourseWithLock(trainingProgramId);
 
 		User user = userRepository.getReferenceById(userId);
+
+		if (!certificationRepository.existsByUserAndCourseAndStatus(user, course, CertificationStatus.APPROVED)) {
+			throw new CustomException(WRITE_REVIEW_FORBIDDEN);
+		}
 
 		Review review = Review.of(request, course, user);
 

@@ -55,25 +55,16 @@ public class Employ24ApiService {
 	@Getter
 	private final Set<String> failedCategoryNames = new HashSet<>();
 
-	// Employ24 API 에서 카테고리/분야 조합별로 데이터를 수집 및 저장
-	public void saveAllFromEmploy24() {
-		List<String> categoryCodes = List.of("C0061", "C0104", "C0105");
-		List<String> ncsCodes = List.of("19", "20");
-
-		for (String categoryCode : categoryCodes) {
-			for (String ncsCode : ncsCodes) {
-				processCategoryAndNcs(categoryCode, ncsCode);
-			}
-		}
-	}
-
 	// 주어진 카테고리와 NCS 코드로 리스트 조회 후 저장 처리
 	public void processCategoryAndNcs(String categoryCode, String ncsCode) {
 		try {
+			log.info("API 호출 시작 - categoryCode: {}, ncsCode: {}", categoryCode, ncsCode);
 			List<BootcampListResponseDto> list = fetchBootcampList(categoryCode, ncsCode);
+			log.info("API 호출 완료 - 수신된 항목 수: {}", list.size());
 			processBootcampList(list);
 		} catch (Exception e) {
 			log.warn("데이터 수집 실패: categoryCode={}, ncsCode={}, message={}", categoryCode, ncsCode, e.getMessage());
+			e.printStackTrace();
 		}
 	}
 
@@ -171,7 +162,10 @@ public class Employ24ApiService {
 	// Bootcamp 리스트 API 호출
 	private List<BootcampListResponseDto> fetchBootcampList(String categoryCode, String ncsCode) {
 		String url = buildListApiUrl(categoryCode, ncsCode);
+		log.debug("fetchBootcampList - 호출 URL: {}", url);
 		ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
+		log.debug("fetchBootcampList - HTTP Status: {}", response.getStatusCode());
+		log.debug("fetchBootcampList - 응답 본문: {}", response.getBody());
 		validateResponse(response);
 		return parseListResponse(response.getBody());
 	}
@@ -179,14 +173,17 @@ public class Employ24ApiService {
 	// Bootcamp 상세 API 호출
 	private BootcampDetailResponseDto fetchBootcampDetail(String id, String degree, String centerId) {
 		String url = buildDetailApiUrl(id, degree, centerId);
-
+		log.debug("fetchBootcampDetail - 호출 URL: {}", url);
 		ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
+		log.debug("fetchBootcampDetail - HTTP Status: {}", response.getStatusCode());
+		log.debug("fetchBootcampDetail - 응답 본문: {}", response.getBody());
 		validateResponse(response);
 
 		try {
 			JsonNode detailNode = objectMapper.readTree(response.getBody()).get("inst_base_info");
 			return objectMapper.treeToValue(detailNode, BootcampDetailResponseDto.class);
 		} catch (Exception e) {
+			log.error("상세 데이터 파싱 실패 - 응답 본문: {}", response.getBody(), e);
 			throw new CustomException(DATA_PARSING_ERROR);
 		}
 	}
@@ -197,6 +194,7 @@ public class Employ24ApiService {
 			JsonNode jsonList = objectMapper.readTree(body).get("srchList");
 
 			if (jsonList == null || jsonList.isEmpty()) {
+				log.warn("parseListResponse - 검색 결과가 빈 리스트입니다.");
 				throw new CustomException(API_DATA_IS_EMPTY);
 			}
 
@@ -206,14 +204,15 @@ public class Employ24ApiService {
 			}
 			return list;
 		} catch (Exception e) {
+			log.error("응답 데이터 파싱 중 오류 발생", e);
 			throw new CustomException(DATA_PARSING_ERROR);
 		}
 	}
 
 	// 리스트 API 호출 URL 생성
 	private String buildListApiUrl(String categoryCode, String ncsCode) {
-		LocalDate today = LocalDate.now().plusDays(1);
-		LocalDate end = today.plusDays(7);
+		LocalDate today = LocalDate.now();
+		LocalDate end = today.plusMonths(2);
 		return UriComponentsBuilder.newInstance()
 			.scheme("https")
 			.host(HOST)
@@ -250,6 +249,7 @@ public class Employ24ApiService {
 	// API 응답 유효성 검사
 	private void validateResponse(ResponseEntity<String> response) {
 		if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+			log.error("API 응답 유효성 검사 실패 - Status: {}, Body: {}", response.getStatusCode(), response.getBody());
 			throw new CustomException(DATA_FETCH_ERROR);
 		}
 	}

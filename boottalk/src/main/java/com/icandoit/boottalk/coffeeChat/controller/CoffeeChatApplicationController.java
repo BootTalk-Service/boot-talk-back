@@ -63,6 +63,12 @@ public class CoffeeChatApplicationController {
             user.getServiceUserId(), pageable));
     }
 
+    // 커피챗 신청 상세 조회
+    @GetMapping("/{coffeeChatAppId}")
+    public ResponseEntity<CoffeeChatApplicationResponseDto> getCoffeeChatAppInfo(@PathVariable Long coffeeChatAppId) {
+        return ResponseEntity.ok(coffeeChatAppService.getCoffeeChatAppInfo(coffeeChatAppId));
+    }
+
     // 커피챗 신청 수정
     @PutMapping("/{coffeeChatAppId}")
     public ResponseEntity<CoffeeChatApplicationResponseDto> updateCoffeeChatApp(
@@ -84,6 +90,5 @@ public class CoffeeChatApplicationController {
         return ResponseEntity.ok().build();
     }
 
-    // TODO: 커피챗 신청 예약 일정 조회
 
 }

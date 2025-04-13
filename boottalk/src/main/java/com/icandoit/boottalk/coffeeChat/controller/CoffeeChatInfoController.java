@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +28,11 @@ public class CoffeeChatInfoController {
     public ResponseEntity<CoffeeChatInfoResponseDto> getMyCoffeeChatInfo(@AuthenticationPrincipal CustomOAuth2User user) {
 
         return ResponseEntity.ok(coffeeChatInfoService.getMyCoffeeChatInfo(user.getServiceUserId()));
+    }
+
+    @GetMapping("/{coffeeChatInfoId}")
+    public ResponseEntity<CoffeeChatInfoResponseDto> getCoffeeChatInfo(@PathVariable Long coffeeChatInfoId) {
+        return ResponseEntity.ok(coffeeChatInfoService.getCoffeeChatInfo(coffeeChatInfoId));
     }
 
     @PutMapping
