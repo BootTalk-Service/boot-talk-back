@@ -84,6 +84,5 @@ public class CoffeeChatApplicationController {
         return ResponseEntity.ok().build();
     }
 
-    // TODO: 커피챗 신청 예약 일정 조회
 
 }
