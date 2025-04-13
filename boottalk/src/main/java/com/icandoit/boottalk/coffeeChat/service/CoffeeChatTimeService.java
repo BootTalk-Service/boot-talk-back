@@ -44,7 +44,7 @@ public class CoffeeChatTimeService {
     public List<CoffeeChatTimeResponseDto> createCoffeeChatTimes(Long userId,
         CoffeeChatTimeMapDto requestDto) {
 
-        CoffeeChatInfo coffeeChatInfo = coffeeChatInfoRepository.findBymentor_UserId(userId)
+        CoffeeChatInfo coffeeChatInfo = coffeeChatInfoRepository.findByMentor_UserId(userId)
             .orElseThrow(() -> new CustomException(ErrorCode.USER_COFFEE_CHAT_NOT_FOUND));
 
         // 이미 시간이 존재한다면 예외처리
@@ -105,7 +105,7 @@ public class CoffeeChatTimeService {
     public List<CoffeeChatTimeResponseDto> updateCoffeeChatTimes(Long userId,
         CoffeeChatTimeMapDto requestDto) {
 
-        CoffeeChatInfo coffeeChatInfo = coffeeChatInfoRepository.findBymentor_UserId(userId)
+        CoffeeChatInfo coffeeChatInfo = coffeeChatInfoRepository.findByMentor_UserId(userId)
             .orElseThrow(() -> new CustomException(ErrorCode.USER_COFFEE_CHAT_NOT_FOUND));
 
         List<CoffeeChatTime> existingTimes = coffeeChatTimeRepository.findAllWithCoffeeChatInfoByUserId(
