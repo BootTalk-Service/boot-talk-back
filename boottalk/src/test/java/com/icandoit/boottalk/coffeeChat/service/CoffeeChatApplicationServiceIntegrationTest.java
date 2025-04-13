@@ -9,6 +9,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatApplicationCreateDto;
@@ -17,17 +21,35 @@ import com.icandoit.boottalk.coffeeChat.entity.enums.JobType;
 import com.icandoit.boottalk.coffeeChat.entity.enums.MentorType;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatApplicationRepository;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatInfoRepository;
+import com.icandoit.boottalk.point_history.domain.entity.PointHistory;
+import com.icandoit.boottalk.point_history.domain.repository.PointHistoryRepository;
 import com.icandoit.boottalk.point_history.domain.type.EventType;
 import com.icandoit.boottalk.point_history.service.CreatePointHistoryService;
 import com.icandoit.boottalk.user.domain.entity.User;
 import com.icandoit.boottalk.user.domain.repository.UserRepository;
 
-import jakarta.transaction.Transactional;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @Transactional // 테스트 끝나면 자동 롤백
 @DisplayName("커피챗 신청 서비스 통합 테스트")
 public class CoffeeChatApplicationServiceIntegrationTest {
+    @TestConfiguration
+    static class TestHelper {
+
+        @Autowired
+        PointHistoryRepository pointHistoryRepository;
+
+        @Transactional(propagation = Propagation.NOT_SUPPORTED)
+        public int getCurrentPointToTest(Long userId) {
+            return pointHistoryRepository.findFirstByUserIdOrderByPointHistoryIdDesc(userId)
+                .map(PointHistory::getCurrentPoint)
+                .orElse(0);
+        }
+    }
+
+    @Autowired
+    TestHelper testHelper;
 
     @Autowired
     private CoffeeChatApplicationService coffeeChatApplicationService;
@@ -80,7 +102,7 @@ public class CoffeeChatApplicationServiceIntegrationTest {
     @DisplayName("커피챗 신청 실패 시 포인트 차감 롤백됨")
     void shouldRollbackPointDeduction_WhenApplicationFails() {
         // Given
-        int beforePoint = createPointHistoryService.getCurrentPoint(mentee.getUserId());
+        int beforePoint = testHelper.getCurrentPointToTest(mentee.getUserId());
 
         CoffeeChatApplicationCreateDto request = new CoffeeChatApplicationCreateDto(
             chatInfo.getCoffeeChatInfoId(),
@@ -89,15 +111,14 @@ public class CoffeeChatApplicationServiceIntegrationTest {
             LocalDateTime.of(2025, 4, 5, 11, 0)
         );
 
-        // Save 실패 유도: 예를 들면 필수 필드 누락 or 유니크 위반
-
         // When
         assertThrows(Exception.class, () -> {
             coffeeChatApplicationService.createCoffeeChatApp(mentee.getUserId(), request);
         });
 
         // Then: 포인트 차감이 롤백되어 이전과 동일한 값 유지
-        int afterPoint = createPointHistoryService.getCurrentPoint(mentee.getUserId());
+        int afterPoint = testHelper.getCurrentPointToTest(mentee.getUserId());
         assertEquals(beforePoint, afterPoint, "커피챗 저장 실패 시 포인트 차감이 롤백되어야 합니다.");
     }
+
 }
