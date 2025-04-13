@@ -108,12 +108,12 @@ public class SseEmitterService {
 	// 이벤트를 발행한 트랜잭션이 성공적으로 커밋된 후에만 해당 이벤트 핸들러가 실행됨.
 	@Async
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-	public void CreatePointEvent(CreatePointEvent createPointEvent) {
+	public void createPointEvent(CreatePointEvent createPointEvent) {
 		sendPointNotification(createPointEvent.userId());
 	}
 
 	// 포인트 변동사항 발생 시 상단 내비 바에 있는 포인트에 실시간으로 반영될 수 있도록 알림 전송
-	public void sendPointNotification(Long userId) {
+	private void sendPointNotification(Long userId) {
 
 		SseEmitter sseEmitter = findById(userId);
 		int point = createPointHistoryService.getCurrentPointToNavi(userId);
