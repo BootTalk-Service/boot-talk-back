@@ -18,9 +18,10 @@ import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.notification.dto.NotificationRequestDto;
 import com.icandoit.boottalk.notification.dto.NotificationResponseDto;
 import com.icandoit.boottalk.notification.entity.Notification;
+import com.icandoit.boottalk.notification.event.CreatePointEvent;
+import com.icandoit.boottalk.notification.event.SendNotificationEvent;
 import com.icandoit.boottalk.notification.repository.NotificationRepository;
 import com.icandoit.boottalk.notification.repository.SseEmitterRepository;
-import com.icandoit.boottalk.notification.util.CreatePointEvent;
 import com.icandoit.boottalk.notification.util.DateTimeFormatterUtil;
 import com.icandoit.boottalk.point_history.service.CreatePointHistoryService;
 
@@ -81,8 +82,21 @@ public class SseEmitterService {
 		return sseEmitter;
 	}
 
+	@Async
+	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+	public void createPointEvent(CreatePointEvent createPointEvent) {
+		sendPointNotification(createPointEvent.userId());
+	}
+
+	@Async
+	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+	public void sendNotificationEvent(SendNotificationEvent sendNotificationEvent) {
+		sendToClient(sendNotificationEvent.userId(), sendNotificationEvent.notificationRequestDto());
+	}
+
+	// 이벤트를 발행한 트랜잭션이 성공적으로 커밋된 후에만 해당 이벤트 핸들러가 실행됨.
 	// 알림 전송
-	public void sendToClient(Long userId, NotificationRequestDto requestDto) {
+	private void sendToClient(Long userId, NotificationRequestDto requestDto) {
 		// 먼저 알림을 보내기 전 알림 저장
 		NotificationResponseDto responseDto = NotificationResponseDto
 			.from(notificationRepository.save(Notification.of(userId, requestDto)));
@@ -103,13 +117,6 @@ public class SseEmitterService {
 			log.error("SSE 알림 전송 실패: 대상자 Id: {}, 원인: {}", userId, e.getMessage());
 			throw new CustomException(SSE_CONNECTION_FAILED);
 		}
-	}
-
-	// 이벤트를 발행한 트랜잭션이 성공적으로 커밋된 후에만 해당 이벤트 핸들러가 실행됨.
-	@Async
-	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-	public void createPointEvent(CreatePointEvent createPointEvent) {
-		sendPointNotification(createPointEvent.userId());
 	}
 
 	// 포인트 변동사항 발생 시 상단 내비 바에 있는 포인트에 실시간으로 반영될 수 있도록 알림 전송
