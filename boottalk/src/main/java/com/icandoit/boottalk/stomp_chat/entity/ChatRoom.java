@@ -82,7 +82,7 @@ public class ChatRoom {
             .reservationAt(startTime)
             .endAt(startTime.plusMinutes(30))
             .expiresAt(startTime.plusDays(7)) // 7일 후 삭제
-            .isActive(false)
+            .isActive(true)
             .mentorEntered(false)
             .menteeEntered(false)
             .hasNewMessages(false)
