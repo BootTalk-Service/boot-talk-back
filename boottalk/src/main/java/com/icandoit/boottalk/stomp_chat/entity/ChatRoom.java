@@ -2,6 +2,7 @@ package com.icandoit.boottalk.stomp_chat.entity;
 
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatApplication;
 import com.icandoit.boottalk.user.domain.entity.User;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -28,17 +29,12 @@ import lombok.Setter;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class ChatRoom {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long chatRoomId;
 
     @Column(nullable = false, unique = true)
-    private String roomUuid;  // UUID 형식의 고유 식별자 -> 프론트 노출용
-
-    @OneToOne
-    @JoinColumn(name = "application_id", nullable = false)
-    private CoffeeChatApplication coffeeChatApplication;
+    private String roomUuid;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mentor_id", nullable = false)
@@ -48,44 +44,43 @@ public class ChatRoom {
     @JoinColumn(name = "mentee_id", nullable = false)
     private User mentee;
 
-    @Column(nullable = false)
-    private LocalDateTime reservationAt; // 커피챗 시작시간
+    @OneToOne
+    @JoinColumn(name = "coffee_chat_app_id", nullable = false)
+    private CoffeeChatApplication coffeeChatApplication;
 
-    @Column(nullable = false)
-    private LocalDateTime endAt; // 예약종료 시간
-
-    @Column(nullable = false)
-    private LocalDateTime expiresAt; // 채팅방 보존 기간 후 삭제 예정 시간
-
-    @Column(nullable = false)
+    // 양방향 관계 설정
     @Setter
-    private boolean isActive; // 채팅방 활성화 여부
+    @OneToOne(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
+    private ChatRoomStatus roomStatus;
+
 
     @Column(nullable = false)
-    @Setter
-    private boolean mentorEntered; // 멘토 접속 여부 확인 -> 미접속 시 알림
+    private LocalDateTime reservationAt;
 
     @Column(nullable = false)
-    @Setter
-    private boolean menteeEntered; // 멘티 접속 여부 확인 -> 미접속 시 알림
+    private LocalDateTime endAt;
 
     @Column(nullable = false)
-    private boolean hasNewMessages;
+    private LocalDateTime expiresAt;
 
 
     public static ChatRoom of(CoffeeChatApplication coffeeChatApplication) {
-
         LocalDateTime startTime = coffeeChatApplication.getCoffeeChatStartTime();
-        return ChatRoom.builder()
+
+        ChatRoom chatRoom = ChatRoom.builder()
             .roomUuid(UUID.randomUUID().toString())
+            .mentor(coffeeChatApplication.getCoffeeChatInfo().getMentor())
+            .mentee(coffeeChatApplication.getMentee())
             .coffeeChatApplication(coffeeChatApplication)
             .reservationAt(startTime)
             .endAt(startTime.plusMinutes(30))
-            .expiresAt(startTime.plusDays(7)) // 7일 후 삭제
-            .isActive(true)
-            .mentorEntered(false)
-            .menteeEntered(false)
-            .hasNewMessages(false)
+            .expiresAt(startTime.plusDays(7))
             .build();
+
+        // ChatRoomStatus 생성 및 양방향 관계 설정
+        ChatRoomStatus status = ChatRoomStatus.of(chatRoom, false, false, false, false);
+        chatRoom.setRoomStatus(status);
+
+        return chatRoom;
     }
 }
