@@ -4,6 +4,7 @@ import com.icandoit.boottalk.bootcamp.entity.enums.CertificationStatus;
 import com.icandoit.boottalk.libs.entity.BaseEntity;
 import com.icandoit.boottalk.user.domain.entity.User;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -41,6 +42,7 @@ public class BootcampCertification extends BaseEntity {
 	private String fileUrl;
 
 	@Enumerated(EnumType.STRING)
+	@Column(columnDefinition = "VARCHAR(20)", nullable = false)
 	private CertificationStatus status;
 
 	public static BootcampCertification of(User user, Course course, String fileUrl) {

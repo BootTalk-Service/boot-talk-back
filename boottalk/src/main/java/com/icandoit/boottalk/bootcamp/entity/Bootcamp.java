@@ -47,7 +47,7 @@ public class Bootcamp extends BaseEntity {
 	private String bootcampName;
 
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
+	@Column(columnDefinition = "VARCHAR(50)", nullable = false)
 	private BootcampCategoryType bootcampCategoryType;
 
 	@Column(nullable = false)
