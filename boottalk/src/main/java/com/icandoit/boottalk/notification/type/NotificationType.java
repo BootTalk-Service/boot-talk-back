@@ -6,10 +6,10 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum NotificationType {
-	COFFEE_CHAT_REQUEST_RECEIVED( "/api/coffee-chats/received", "커피챗 신청이 들어왔습니다."),    // 멘티로부터 커피챗 신청 도착 알림
-	COFFEE_CHAT_REQUEST_CANCELLED("/api/coffee-chats/received","취소된 커피챗 신청이 있습니다."),    // 커피챗 신청 취소 알림
-	COFFEE_CHAT_REQUEST_ACCEPTED("/api/coffee-chats/applications", "신청한 커피챗이 수락되었습니다."),    // 멘토로부터 커피챗 신청 수락 알림
-	COFFEE_CHAT_REQUEST_REJECTED("/api/coffee-chats/applications", "신청한 커피챗이 거절되었습니다."),           // 커피챗 거절 알림
+	COFFEE_CHAT_REQUEST_RECEIVED( "/api/coffee-chats/applications/received", "커피챗 신청이 들어왔습니다."),    // 멘티로부터 커피챗 신청 도착 알림
+	COFFEE_CHAT_REQUEST_CANCELLED("/api/coffee-chats/applications/received","취소된 커피챗 신청이 있습니다."),    // 커피챗 신청 취소 알림
+	COFFEE_CHAT_REQUEST_ACCEPTED("/api/coffee-chats", "신청한 커피챗이 수락되었습니다."),    // 멘토로부터 커피챗 신청 수락 알림
+	COFFEE_CHAT_REQUEST_REJECTED("/api/coffee-chats", "신청한 커피챗이 거절되었습니다."),           // 커피챗 거절 알림
 	CHAT_SUSPENDED("/api/coffee-chats/info", "커피챗 활동이 정지되었습니다."),		//등록된 커피챗 정지 알림
 	CERTIFICATE_VERIFIED("/api/users/my", "수료증 인증이 완료되었습니다."),       // 수료증 인증 완료 알림
 	CERTIFICATE_REJECTED("/api/users/my", "수료증 인증이 거절되었습니다."),// 수료증 인증 반려 알림
