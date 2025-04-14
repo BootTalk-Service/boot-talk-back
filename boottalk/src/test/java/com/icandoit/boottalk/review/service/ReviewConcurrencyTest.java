@@ -12,9 +12,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.icandoit.boottalk.bootcamp.entity.BootcampCertification;
 import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.entity.Course;
 import com.icandoit.boottalk.bootcamp.entity.TrainingCenter;
+import com.icandoit.boottalk.bootcamp.entity.enums.CertificationStatus;
+import com.icandoit.boottalk.bootcamp.repository.BootcampCertificationRepository;
 import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
 import com.icandoit.boottalk.bootcamp.repository.TrainingCenterRepository;
 import com.icandoit.boottalk.review.dto.ReviewCreateRequestDto;
@@ -38,16 +41,21 @@ public class ReviewConcurrencyTest {
 	private ReviewRepository reviewRepository;
 
 	@Autowired
+	private BootcampCertificationRepository certificationRepository;
+
+	@Autowired
 	private TrainingCenterRepository trainingCenterRepository;
 
-	private final String trainingProgramId = "CONCURRENT-TPID";
+	private String trainingProgramId;
 	private Long userId = 999L;
 
 	private Long trainingCenterId;
 	private Long courseId;
+	private Long certificationId;
 
 	@BeforeEach
 	void setUp() {
+		trainingProgramId = "CONCURRENT-TPID-" + System.currentTimeMillis();
 		// 기존 유저 먼저 삭제 (테스트용이라면 깔끔하게 시작)
 		userRepository.findById(userId).ifPresent(userRepository::delete);
 
@@ -69,6 +77,15 @@ public class ReviewConcurrencyTest {
 			Course.of(trainingProgramId, "동시성 테스트 코스", BootcampCategoryType.APPLICATION_SW_ENGINEERING, center)
 		);
 		this.courseId = course.getCourseId();
+
+		BootcampCertification approvedCertification = BootcampCertification.builder()
+			.user(user)
+			.course(course)
+			.fileUrl("dummy-url")
+			.status(CertificationStatus.APPROVED)
+			.build();
+		BootcampCertification certification = certificationRepository.save(approvedCertification);
+		certificationId = certification.getId();
 	}
 
 
@@ -77,13 +94,16 @@ public class ReviewConcurrencyTest {
 		// 1. 리뷰 먼저 삭제
 		reviewRepository.deleteAll();
 
-		// 2. 코스 삭제
+		// 2. certification 데이터 삭제
+		certificationRepository.deleteById(certificationId);
+
+		// 3. 코스 삭제
 		courseRepository.deleteById(courseId);
 
-		// 3. 센터 삭제
+		// 4. 센터 삭제
 		trainingCenterRepository.deleteById(trainingCenterId);
 
-		// 4. 유저 삭제
+		// 5. 유저 삭제
 		userRepository.deleteById(userId);
 	}
 

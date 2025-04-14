@@ -13,7 +13,8 @@ public enum EventType {
 	EVENT("이벤트", EARNED),
 	REDEEM("환급", EARNED),
 	COFFEE_CHAT_CANCEL_REFUND("커피챗 취소로 인한 환불", EARNED),
-	COFFEE_CHAT_NO_RESPONSE_REFUND("커피챗 무응답으로 인한 환불", EARNED)
+	COFFEE_CHAT_NO_RESPONSE_REFUND("커피챗 무응답으로 인한 환불", EARNED),
+	REVIEW_DELETED("리뷰 삭제로 인한 포인트 회수", USED)
 	;
 
 	private final String typeName;
