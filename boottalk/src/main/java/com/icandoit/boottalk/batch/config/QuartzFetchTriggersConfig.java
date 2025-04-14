@@ -23,7 +23,7 @@ public class QuartzFetchTriggersConfig {
 		CronTriggerFactoryBean triggerFactoryBean = new CronTriggerFactoryBean();
 		triggerFactoryBean.setJobDetail(fetchBootcampJobDetail);
 		// 매일 11시 25분에 실행
-		triggerFactoryBean.setCronExpression("0 25 11 * * ?");
+		triggerFactoryBean.setCronExpression("0 25 23 * * ?");
 		triggerFactoryBean.setName("fetchTrigger_C0061_19");
 
 		JobDataMap dataMap = new JobDataMap();
@@ -41,7 +41,7 @@ public class QuartzFetchTriggersConfig {
 		CronTriggerFactoryBean triggerFactoryBean = new CronTriggerFactoryBean();
 		triggerFactoryBean.setJobDetail(fetchBootcampJobDetail);
 		// 매일 11시 30분에 실행
-		triggerFactoryBean.setCronExpression("0 30 11 * * ?");
+		triggerFactoryBean.setCronExpression("0 30 23 * * ?");
 		triggerFactoryBean.setName("fetchTrigger_C0061_20");
 		JobDataMap dataMap = new JobDataMap();
 		dataMap.put("categoryCode", "C0061");
@@ -56,7 +56,7 @@ public class QuartzFetchTriggersConfig {
 		CronTriggerFactoryBean triggerFactoryBean = new CronTriggerFactoryBean();
 		triggerFactoryBean.setJobDetail(fetchBootcampJobDetail);
 		// 매일 11시 35분에 실행
-		triggerFactoryBean.setCronExpression("0 35 11 * * ?");
+		triggerFactoryBean.setCronExpression("0 35 23 * * ?");
 		triggerFactoryBean.setName("fetchTrigger_C0104_19");
 		JobDataMap dataMap = new JobDataMap();
 		dataMap.put("categoryCode", "C0104");
@@ -71,7 +71,7 @@ public class QuartzFetchTriggersConfig {
 		CronTriggerFactoryBean triggerFactoryBean = new CronTriggerFactoryBean();
 		triggerFactoryBean.setJobDetail(fetchBootcampJobDetail);
 		// 매일 11시 40분에 실행
-		triggerFactoryBean.setCronExpression("0 40 11 * * ?");
+		triggerFactoryBean.setCronExpression("0 40 23 * * ?");
 		triggerFactoryBean.setName("fetchTrigger_C0104_20");
 		JobDataMap dataMap = new JobDataMap();
 		dataMap.put("categoryCode", "C0104");
@@ -86,7 +86,7 @@ public class QuartzFetchTriggersConfig {
 		CronTriggerFactoryBean triggerFactoryBean = new CronTriggerFactoryBean();
 		triggerFactoryBean.setJobDetail(fetchBootcampJobDetail);
 		// 매일 11시 45분에 실행
-		triggerFactoryBean.setCronExpression("0 45 11 * * ?");
+		triggerFactoryBean.setCronExpression("0 45 23 * * ?");
 		triggerFactoryBean.setName("fetchTrigger_C0105_19");
 		JobDataMap dataMap = new JobDataMap();
 		dataMap.put("categoryCode", "C0105");
@@ -101,7 +101,7 @@ public class QuartzFetchTriggersConfig {
 		CronTriggerFactoryBean triggerFactoryBean = new CronTriggerFactoryBean();
 		triggerFactoryBean.setJobDetail(fetchBootcampJobDetail);
 		// 매일 11시 50분에 실행
-		triggerFactoryBean.setCronExpression("0 50 11 * * ?");
+		triggerFactoryBean.setCronExpression("0 50 23 * * ?");
 		triggerFactoryBean.setName("fetchTrigger_C0105_20");
 		JobDataMap dataMap = new JobDataMap();
 		dataMap.put("categoryCode", "C0105");

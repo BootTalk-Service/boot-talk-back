@@ -8,5 +8,6 @@ public enum NotificationType {
 	CHAT_SUSPENDED,		//등록된 커피챗 정지 알림
 	CERTIFICATE_VERIFIED,       // 수료증 인증 완료 알림
 	CERTIFICATE_REJECTED,// 수료증 인증 반려 알림
-	BOOT_TALK_EVENT
+	BOOT_TALK_EVENT,
+	BOOTCAMP_OPEN // 관심 직군의 bootcamp 오픈
 }
