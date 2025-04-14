@@ -31,3 +31,11 @@ spring:
 
   jwt:
     secret: "vmfhaltmskdlstkfkdgodyroqkfwkdbalroqkfwkdbalaaaaaaaaaaaaaaaabbbbb"
+
+  data:
+    redis:
+      host: 43.200.67.27
+      port: 6379
+
+server:
+  url: "http://localhost:3000"

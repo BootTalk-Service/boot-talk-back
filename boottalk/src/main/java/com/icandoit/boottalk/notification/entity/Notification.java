@@ -40,11 +40,7 @@ public class Notification extends BaseEntity {
 	@Column(nullable = false)
 	NotificationType type;
 
-	@Column(nullable = false)
-	String message;
-
-	@Column(nullable = false)
-	String url;
+	Long targetId;
 
 	boolean checked;
 
@@ -52,8 +48,8 @@ public class Notification extends BaseEntity {
 		return Notification.builder()
 			.userId(userId)
 			.type(dto.type())
-			.message(dto.message())
-			.url(dto.url())
+			.targetId(dto.targetId())
+			.checked(false)
 			.build();
 	}
 }
