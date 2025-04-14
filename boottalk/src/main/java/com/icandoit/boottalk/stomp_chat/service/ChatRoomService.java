@@ -96,6 +96,21 @@ public class ChatRoomService {
         chatRoomRepository.save(chatRoom);
     }
 
+    // 채팅방 퇴장
+    public void leaveChatRoom(Long userId, String roomUuid) {
+        ChatRoom chatRoom = getChatRoom(roomUuid);
+        validateChatRoomEntry(chatRoom, userId);
+
+        if (isMentor(chatRoom, userId)) {
+            chatRoom.setMentorEntered(false);
+        }
+
+        if (isMentee(chatRoom, userId)) {
+            chatRoom.setMenteeEntered(false);
+        }
+        chatRoomRepository.save(chatRoom);
+    }
+
     private ChatRoom getValidChatRoom(String roomUuid) {
         ChatRoom chatRoom = getChatRoom(roomUuid);
 

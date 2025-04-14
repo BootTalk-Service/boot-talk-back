@@ -1,5 +1,6 @@
 package com.icandoit.boottalk.stomp_chat.dto;
 
+import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatTime;
 import com.icandoit.boottalk.stomp_chat.entity.ChatRoom;
 import java.time.LocalDateTime;
 
@@ -10,6 +11,7 @@ public record ChatRoomResponseDto(
     String menteeName,
     Long menteeId,
     LocalDateTime reservationAt,
+    LocalDateTime endAt,
     LocalDateTime expiresAt,
     boolean isActive
 ) {
@@ -21,6 +23,7 @@ public record ChatRoomResponseDto(
             chatRoom.getMentee().getUserName(),
             chatRoom.getMentee().getUserId(),
             chatRoom.getReservationAt(),
+            chatRoom.getEndAt(),
             chatRoom.getEndAt(),
             chatRoom.isActive()
         );

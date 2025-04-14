@@ -12,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -56,5 +57,14 @@ public class ChatRoomController {
         @PathVariable String roomUuid) {
 
         return ResponseEntity.ok(chatRoomService.getMessages(user.getServiceUserId(), roomUuid));
+    }
+
+    // 방 떠나기 API
+    @PutMapping("/{roomUuid}/leave")
+    public ResponseEntity<Void> leaveChatRoom(
+        @AuthenticationPrincipal CustomOAuth2User user,
+        @PathVariable String roomUuid
+    ) {chatRoomService.leaveChatRoom(user.getServiceUserId(), roomUuid);
+        return ResponseEntity.ok().build();
     }
 }
