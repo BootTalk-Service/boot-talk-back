@@ -3,10 +3,12 @@ package com.icandoit.boottalk.notification.service;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.icandoit.boottalk.notification.dto.AllNotificationResponseDto;
 import com.icandoit.boottalk.notification.dto.NotificationResponseDto;
+import com.icandoit.boottalk.notification.entity.Notification;
 import com.icandoit.boottalk.notification.repository.NotificationRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -19,11 +21,13 @@ public class NotificationService {
 
 	private final NotificationRepository notificationRepository;
 
+	@Value("${server.url}")
+	private String BASE_URL;
 
 	// 알림조회창에 들어갈 알림내역과 확인하지 않은 알림 개수 반환
 	public AllNotificationResponseDto getNotifications(long userId) {
 		return AllNotificationResponseDto.from(notificationRepository.findAllNotificationByUserId(userId)
-			.stream().map(NotificationResponseDto::from).collect(Collectors.toList()));
+			.stream().map((Notification notification) -> NotificationResponseDto.from(notification, BASE_URL)).collect(Collectors.toList()));
 	}
 
 
