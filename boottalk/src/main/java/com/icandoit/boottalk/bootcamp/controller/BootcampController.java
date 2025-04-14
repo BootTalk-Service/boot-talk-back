@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.icandoit.boottalk.bootcamp.dto.BootcampAutocompleteDto;
+import com.icandoit.boottalk.bootcamp.dto.BootcampDetailResponseDto;
 import com.icandoit.boottalk.bootcamp.dto.BootcampResponseDto;
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
 import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
@@ -81,7 +82,7 @@ public class BootcampController {
 
 	// 단일 부트캠프 조회
 	@GetMapping("/{bootcampId}")
-	public ResponseEntity<BootcampResponseDto> getBootcamp(@PathVariable Long bootcampId) {
+	public ResponseEntity<BootcampDetailResponseDto> getBootcamp(@PathVariable Long bootcampId) {
 		return ResponseEntity.ok(bootcampService.findById(bootcampId));
 	}
 

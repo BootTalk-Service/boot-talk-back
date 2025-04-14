@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.icandoit.boottalk.bootcamp.dto.BootcampDetailResponseDto;
 import com.icandoit.boottalk.bootcamp.dto.BootcampResponseDto;
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
 import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
@@ -34,14 +35,14 @@ public class BootcampService {
 
 	// 부트캠프 단일 조회
 	@Transactional(readOnly = true)
-	public BootcampResponseDto findById(Long id) {
+	public BootcampDetailResponseDto findById(Long id) {
 		Optional<Bootcamp> bootcamp = bootcampRepository.findById(id);
 
 		if (bootcamp.isEmpty()) {
 			throw new CustomException(BOOTCAMP_NOT_FOUND);
 		}
 
-		return BootcampResponseDto.from(bootcamp.get());
+		return BootcampDetailResponseDto.from(bootcamp.get());
 	}
 
 	// 부트캠프 필터링, 검색 조회
