@@ -37,7 +37,7 @@ public class Notification extends BaseEntity {
 	long userId;
 
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
+	@Column(columnDefinition = "VARCHAR(50)",nullable = false)
 	NotificationType type;
 
 	Long targetId;
