@@ -15,6 +15,8 @@ import com.icandoit.boottalk.bootcamp.repository.BootcampCertificationRepository
 import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
 import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
+import com.icandoit.boottalk.point_history.domain.type.EventType;
+import com.icandoit.boottalk.point_history.service.CreatePointHistoryService;
 import com.icandoit.boottalk.review.dto.ReviewCreateRequestDto;
 import com.icandoit.boottalk.review.dto.ReviewResponseDto;
 import com.icandoit.boottalk.review.dto.ReviewUpdateRequestDto;
@@ -34,6 +36,7 @@ public class ReviewService {
 	private final ReviewRepository reviewRepository;
 	private final CourseRepository courseRepository;
 	private final BootcampCertificationRepository certificationRepository;
+	private final CreatePointHistoryService createPointHistoryService;
 
 	@Transactional
 	public ReviewResponseDto createReview(ReviewCreateRequestDto request, Long userId) {
@@ -57,7 +60,8 @@ public class ReviewService {
 
 		reviewRepository.save(review);
 
-		// TODO: 포인트 적립 추가
+		createPointHistoryService.createPointHistory(EventType.REVIEW, userId, 1);
+
 		return ReviewResponseDto.from(review);
 	}
 
@@ -108,7 +112,7 @@ public class ReviewService {
 
 		updateCourseReviewStats(course, -review.getRating(), -1);
 
-		// TODO: 리뷰를 삭제하면 이미 리뷰 작성으로 적립받은 포인트는 어떻게 되는 것인지?
+		createPointHistoryService.createPointHistory(EventType.REVIEW_DELETED, userId, 1);
 		reviewRepository.delete(review);
 
 	}
