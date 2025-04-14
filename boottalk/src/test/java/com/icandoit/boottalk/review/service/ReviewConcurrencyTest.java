@@ -46,8 +46,6 @@ public class ReviewConcurrencyTest {
 	@Autowired
 	private TrainingCenterRepository trainingCenterRepository;
 
-	private BootcampCertification approvedCertification;
-
 	private String trainingProgramId;
 	private Long userId = 999L;
 
@@ -80,7 +78,7 @@ public class ReviewConcurrencyTest {
 		);
 		this.courseId = course.getCourseId();
 
-		approvedCertification = BootcampCertification.builder()
+		BootcampCertification approvedCertification = BootcampCertification.builder()
 			.user(user)
 			.course(course)
 			.fileUrl("dummy-url")
