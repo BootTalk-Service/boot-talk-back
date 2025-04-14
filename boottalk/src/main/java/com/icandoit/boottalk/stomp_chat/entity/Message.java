@@ -50,7 +50,7 @@ public class Message {
     private boolean isRead;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(columnDefinition = "VARCHAR(20)", nullable = false)
     private MessageType type;
 
     public static Message of(String roomUuid, Long senderId, String senderName, Long receiverId, String message,
