@@ -26,6 +26,7 @@ public class CoffeeChatService {
         );
     }
 
+    @Transactional
     public CoffeeChatResponseDto getMyCoffeeChat(Long userId) {
         return CoffeeChatResponseDto.of(
             coffeeChatInfoService.getMyCoffeeChatInfo(userId),
@@ -41,6 +42,7 @@ public class CoffeeChatService {
         );
     }
 
+    @Transactional
     public CoffeeChatResponseDto updateCoffeeChat(Long userId, CoffeeChatRequestDto requestDto) {
         return CoffeeChatResponseDto.of(
             coffeeChatInfoService.updateMyCoffeeChatInfo(userId, requestDto.info()),
