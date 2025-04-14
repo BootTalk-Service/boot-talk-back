@@ -1,4 +1,4 @@
-package com.icandoit.boottalk.notification.util;
+package com.icandoit.boottalk.notification.event;
 
 
 public record CreatePointEvent(

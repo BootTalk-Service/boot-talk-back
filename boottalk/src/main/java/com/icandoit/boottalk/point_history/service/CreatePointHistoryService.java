@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.icandoit.boottalk.libs.exception.CustomException;
-import com.icandoit.boottalk.notification.util.CreatePointEvent;
+import com.icandoit.boottalk.notification.event.CreatePointEvent;
 import com.icandoit.boottalk.point_history.domain.dto.PointHistoryDto;
 import com.icandoit.boottalk.point_history.domain.entity.PointHistory;
 import com.icandoit.boottalk.point_history.domain.repository.PointHistoryRepository;
