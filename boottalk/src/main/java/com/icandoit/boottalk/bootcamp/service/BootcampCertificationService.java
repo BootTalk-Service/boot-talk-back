@@ -1,7 +1,6 @@
 package com.icandoit.boottalk.bootcamp.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,7 +59,7 @@ public class BootcampCertificationService {
 
 		return certifications.stream()
 			.map(GetCertificationResponseDto::from)
-			.collect(Collectors.toList());
+			.toList();
 	}
 
 	// 승인 대기중인 요청 모두 조회
@@ -68,7 +67,7 @@ public class BootcampCertificationService {
 		List<BootcampCertification> certifications = bootcampCertificationRepository.findAllByStatus(CertificationStatus.PENDING);
 		return certifications.stream()
 			.map(GetPendingCertificationResponseDto::from)
-		.collect(Collectors.toList());
+			.toList();
 	}
 
 	// 수료증 정보 조회

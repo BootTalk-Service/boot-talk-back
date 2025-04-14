@@ -2,7 +2,6 @@ package com.icandoit.boottalk.bootcamp.dto;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
 
@@ -42,6 +41,6 @@ public record BootcampResponseDto(
 	public static List<BootcampResponseDto> from(List<Bootcamp> bootcamps) {
 		return bootcamps.stream()
 			.map(BootcampResponseDto::from)
-			.collect(Collectors.toList());
+			.toList();
 	}
 }
