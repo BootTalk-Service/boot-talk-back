@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ import com.icandoit.boottalk.notification.dto.NotificationRequestDto;
 import com.icandoit.boottalk.notification.dto.NotificationResponseDto;
 import com.icandoit.boottalk.notification.entity.Notification;
 import com.icandoit.boottalk.notification.event.CreatePointEvent;
-import com.icandoit.boottalk.notification.event.SendNotificationEvent;
+import com.icandoit.boottalk.notification.event.NotificationEvent;
 import com.icandoit.boottalk.notification.repository.NotificationRepository;
 import com.icandoit.boottalk.notification.repository.SseEmitterRepository;
 import com.icandoit.boottalk.notification.util.DateTimeFormatterUtil;
@@ -37,7 +38,8 @@ public class SseEmitterService {
 	//SSE eventId를 LocalDateTime 으로 설정하기 위한 포맷
 	private final DateTimeFormatterUtil dateTimeFormatter;
 
-
+	@Value("${server.url}")
+	private String BASE_URL;
 
 	private final SseEmitterRepository emitterRepository;
 	private final NotificationRepository notificationRepository;
@@ -66,7 +68,7 @@ public class SseEmitterService {
 							SseEmitter.event()
 								.id(dateTimeFormatter.formatTime(notification.getCreatedAt()))
 								.name("notification")
-								.data(NotificationResponseDto.from(notification))
+								.data(NotificationResponseDto.from(notification, BASE_URL))
 						);
 					} catch (IOException e) {
 						log.error("SSE 알림 전송 실패: 대상자 Id: {}, 원인: {}", userId, e.getMessage());
@@ -82,24 +84,25 @@ public class SseEmitterService {
 		return sseEmitter;
 	}
 
+	// 이벤트를 발행한 트랜잭션이 성공적으로 커밋된 후에만 해당 이벤트 핸들러들이 실행됨.
+
 	@Async
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-	public void createPointEvent(CreatePointEvent createPointEvent) {
+	public void HandlePointEvent(CreatePointEvent createPointEvent) {
 		sendPointNotification(createPointEvent.userId());
 	}
 
 	@Async
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-	public void sendNotificationEvent(SendNotificationEvent sendNotificationEvent) {
-		sendToClient(sendNotificationEvent.userId(), sendNotificationEvent.notificationRequestDto());
+	public void HandleNotificationEvent(NotificationEvent notificationEvent) {
+		sendToClient(notificationEvent.userId(), notificationEvent.notificationRequestDto());
 	}
 
-	// 이벤트를 발행한 트랜잭션이 성공적으로 커밋된 후에만 해당 이벤트 핸들러가 실행됨.
 	// 알림 전송
-	private void sendToClient(Long userId, NotificationRequestDto requestDto) {
+	public void sendToClient(Long userId, NotificationRequestDto requestDto) {
 		// 먼저 알림을 보내기 전 알림 저장
 		NotificationResponseDto responseDto = NotificationResponseDto
-			.from(notificationRepository.save(Notification.of(userId, requestDto)));
+			.from(notificationRepository.save(Notification.of(userId, requestDto)), BASE_URL);
 
 		SseEmitter sseEmitter = findById(userId);
 		if (sseEmitter == null) {

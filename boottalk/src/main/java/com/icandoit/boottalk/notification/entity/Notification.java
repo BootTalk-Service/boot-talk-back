@@ -37,14 +37,10 @@ public class Notification extends BaseEntity {
 	long userId;
 
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
+	@Column(columnDefinition = "VARCHAR(50)",nullable = false)
 	NotificationType type;
 
-	@Column(nullable = false)
-	String message;
-
-	@Column(nullable = false)
-	String url;
+	Long targetId;
 
 	boolean checked;
 
@@ -52,8 +48,8 @@ public class Notification extends BaseEntity {
 		return Notification.builder()
 			.userId(userId)
 			.type(dto.type())
-			.message(dto.message())
-			.url(dto.url())
+			.targetId(dto.targetId())
+			.checked(false)
 			.build();
 	}
 }
