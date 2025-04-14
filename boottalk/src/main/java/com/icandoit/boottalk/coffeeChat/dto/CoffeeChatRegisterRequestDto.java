@@ -1,8 +1,10 @@
 package com.icandoit.boottalk.coffeeChat.dto;
 
+import jakarta.validation.Valid;
+
 public record CoffeeChatRegisterRequestDto(
-    CoffeeChatInfoRequestDto info,
-    CoffeeChatTimeMapDto time
+    @Valid CoffeeChatInfoRequestDto info,
+    @Valid CoffeeChatTimeMapDto time
 ) {
 
 }
