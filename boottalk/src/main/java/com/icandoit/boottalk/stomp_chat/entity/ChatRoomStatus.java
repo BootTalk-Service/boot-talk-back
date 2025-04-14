@@ -21,6 +21,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "chat_room_status")
 public class ChatRoomStatus {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roomStatusId;
@@ -41,7 +42,8 @@ public class ChatRoomStatus {
     @Column(nullable = false)
     private boolean hasNewMessages; // 새 메시지 여부
 
-    public static ChatRoomStatus of(ChatRoom chatRoom, boolean active, boolean mentorEntered, boolean menteeEntered, boolean hasNewMessages) {
+    public static ChatRoomStatus of(ChatRoom chatRoom, boolean active, boolean mentorEntered,
+        boolean menteeEntered, boolean hasNewMessages) {
         return ChatRoomStatus.builder()
             .chatRoom(chatRoom)
             .isActive(active)

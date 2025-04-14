@@ -40,15 +40,16 @@ public class ChatMessage {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(nullable = false)
-    private LocalDateTime sentAt;
 
     @Column(nullable = false)
     private boolean isRead;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(columnDefinition = "VARCHAR(20)", nullable = false)
     private MessageType type;
+
+    @Column(nullable = false)
+    private LocalDateTime sentAt;
 
     public static ChatMessage of(String roomUuid, Long senderId, Long receiverId, String content,
         MessageType type) {
@@ -57,9 +58,9 @@ public class ChatMessage {
             .senderId(senderId)
             .receiverId(receiverId)
             .content(content)
-            .sentAt(LocalDateTime.now())
             .isRead(false)
             .type(type)
+            .sentAt(LocalDateTime.now())
             .build();
     }
 }

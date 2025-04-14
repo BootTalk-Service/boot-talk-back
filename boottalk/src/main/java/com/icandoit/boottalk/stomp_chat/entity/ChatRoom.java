@@ -29,6 +29,7 @@ import lombok.Setter;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class ChatRoom {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long chatRoomId;
@@ -48,12 +49,6 @@ public class ChatRoom {
     @JoinColumn(name = "coffee_chat_app_id", nullable = false)
     private CoffeeChatApplication coffeeChatApplication;
 
-    // 양방향 관계 설정
-    @Setter
-    @OneToOne(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
-    private ChatRoomStatus roomStatus;
-
-
     @Column(nullable = false)
     private LocalDateTime reservationAt;
 
@@ -63,6 +58,10 @@ public class ChatRoom {
     @Column(nullable = false)
     private LocalDateTime expiresAt;
 
+    // 양방향 관계 설정
+    @Setter
+    @OneToOne(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
+    private ChatRoomStatus roomStatus;
 
     public static ChatRoom of(CoffeeChatApplication coffeeChatApplication) {
         LocalDateTime startTime = coffeeChatApplication.getCoffeeChatStartTime();
