@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
+import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.user.domain.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,4 +25,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	//테스트용
 	Optional<User> findByUserName(String userName);
+
+	// 관심직군에 해당하는 유저들 아이디 List 조회
+	@Query("SELECT u.userId FROM User u WHERE u.desiredCareer = :desiredCareer")
+	List<Long> findByIdsByDesiredCareer(@Param("desiredCareer") BootcampCategoryType category);
 }
