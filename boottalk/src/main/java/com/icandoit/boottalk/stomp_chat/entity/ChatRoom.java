@@ -4,10 +4,12 @@ import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatApplication;
 import com.icandoit.boottalk.user.domain.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
@@ -37,6 +39,14 @@ public class ChatRoom {
     @OneToOne
     @JoinColumn(name = "application_id", nullable = false)
     private CoffeeChatApplication coffeeChatApplication;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mentor_id", nullable = false)
+    private User mentor;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mentee_id", nullable = false)
+    private User mentee;
 
     @Column(nullable = false)
     private LocalDateTime reservationAt; // 커피챗 시작시간
@@ -72,7 +82,7 @@ public class ChatRoom {
             .reservationAt(startTime)
             .endAt(startTime.plusMinutes(30))
             .expiresAt(startTime.plusDays(7)) // 7일 후 삭제
-            .isActive(true)
+            .isActive(false)
             .mentorEntered(false)
             .menteeEntered(false)
             .hasNewMessages(false)
