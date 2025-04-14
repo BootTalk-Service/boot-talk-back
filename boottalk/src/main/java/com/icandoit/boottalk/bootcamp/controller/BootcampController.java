@@ -1,5 +1,7 @@
 package com.icandoit.boottalk.bootcamp.controller;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -11,8 +13,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.icandoit.boottalk.bootcamp.dto.BootcampAutocompleteDto;
+import com.icandoit.boottalk.bootcamp.dto.BootcampDetailResponseDto;
 import com.icandoit.boottalk.bootcamp.dto.BootcampResponseDto;
+import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
 import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
+import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
 import com.icandoit.boottalk.bootcamp.service.BootcampService;
 import com.icandoit.boottalk.common.dto.PagedResponseDto;
 import com.icandoit.boottalk.review.dto.ReviewResponseDto;
@@ -27,6 +33,7 @@ public class BootcampController {
 
 	private final BootcampService bootcampService;
 	private final ReviewService reviewService;
+	private final BootcampRepository bootcampRepository;
 
 	// 지역별(시), 카테고리별(BootcampCategory), 평균 평점 별(없음, 1, 2, 3, 4 이상), 기간별 (4주 미만, 4 ~ 12주, 12 주 이상)
 	// 전체 조회 or 필터 기반 조회 (키워드 없음)
@@ -75,7 +82,7 @@ public class BootcampController {
 
 	// 단일 부트캠프 조회
 	@GetMapping("/{bootcampId}")
-	public ResponseEntity<BootcampResponseDto> getBootcamp(@PathVariable Long bootcampId) {
+	public ResponseEntity<BootcampDetailResponseDto> getBootcamp(@PathVariable Long bootcampId) {
 		return ResponseEntity.ok(bootcampService.findById(bootcampId));
 	}
 
@@ -90,5 +97,17 @@ public class BootcampController {
 		Page<ReviewResponseDto> result = reviewService.getReviewsBootcampId(bootcampId, pageable);
 
 		return ResponseEntity.ok(PagedResponseDto.from(result));
+	}
+
+	@GetMapping("/autocomplete")
+	public ResponseEntity<List<BootcampAutocompleteDto>> autocomplete(
+		@RequestParam("query") String query
+	) {
+		Pageable pageable = PageRequest.of(0, 6);
+		List<Bootcamp> bootcamps = bootcampRepository.findByBootcampNameContainingIgnoreCase(query, pageable);
+		List<BootcampAutocompleteDto> result = bootcamps.stream()
+			.map(bootcamp -> new BootcampAutocompleteDto(bootcamp.getBootcampId(), bootcamp.getBootcampName()))
+			.toList();
+		return ResponseEntity.ok(result);
 	}
 }

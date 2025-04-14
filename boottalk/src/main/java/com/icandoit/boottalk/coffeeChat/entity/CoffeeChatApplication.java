@@ -23,6 +23,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
@@ -44,6 +45,7 @@ public class CoffeeChatApplication extends BaseEntity {
     @JoinColumn(name = "coffee_chat_info_id", nullable = false)
     private CoffeeChatInfo coffeeChatInfo;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "VARCHAR(20)", nullable = false)
     private StatusType status;
@@ -51,6 +53,7 @@ public class CoffeeChatApplication extends BaseEntity {
     @Column(nullable = false)
     private int usedPoint;
 
+    @Setter
     @Column(nullable = false)
     private String content;
 
@@ -70,14 +73,6 @@ public class CoffeeChatApplication extends BaseEntity {
             .coffeeChatEndTime(dto.coffeeChatEndTime())
             .status(StatusType.PENDING)
             .build();
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public void setStatus(StatusType status) {
-        this.status = status;
     }
 
     public boolean isNDaysOrMoreUntilStart(int days) {

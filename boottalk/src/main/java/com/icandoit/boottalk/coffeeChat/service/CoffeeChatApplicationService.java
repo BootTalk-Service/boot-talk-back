@@ -100,6 +100,9 @@ public class CoffeeChatApplicationService {
         return PagedResponseDto.from(page);
     }
 
+    public CoffeeChatApplicationResponseDto getCoffeeChatAppInfo(Long coffeeChatAppId) {
+        return CoffeeChatApplicationResponseDto.from(getCoffeeChatApplication(coffeeChatAppId));
+    }
 
     @Transactional
     public CoffeeChatApplicationResponseDto updateCoffeeChatApp(

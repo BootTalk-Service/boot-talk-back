@@ -83,23 +83,23 @@ class CoffeeChatApplicationServiceTest {
             LocalDateTime.of(2025, 4, 5, 11, 0)
         );
 
-        int currentPoint = 5;
         int deductionPoint  = 3;
 
-        CoffeeChatApplication mockApplication = CoffeeChatApplication.of(mockUser, mockChatInfo, request);
+        CoffeeChatApplication mockApplication = CoffeeChatApplication.of(mockUser, mockChatInfo, deductionPoint, request);
 
         // Mock 설정
         // 중복 신청이 아닌 경우 설정
-        when(coffeeChatAppRepository.existsByMentee_UserIdAndCoffeeChatInfo_CoffeeChatInfoId(userId,
-            coffeeChatInfoId)).thenReturn(false);
+        when(coffeeChatAppRepository.existsLatestPendingOrApprovedApplication(userId, coffeeChatInfoId)).thenReturn(false);
+        when(coffeeChatAppRepository.isTimeSlotAlreadyTaken(userId, request.coffeeChatStartTime())).thenReturn(false);
+
         // 유저와 커피챗 정보가 정상 조회 된다는 설정
         when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
         when(coffeeChatInfoRepository.findById(coffeeChatInfoId)).thenReturn(Optional.of(mockChatInfo));
-        // 현재 포인트 조회 결과 지정
-        when(createPointHistoryService.getCurrentPoint(userId)).thenReturn(currentPoint);
+
         // 포인트 차감
         when(createPointHistoryService.createPointHistory(
             EventType.COFFEE_CHAT_APPLY, userId, deductionPoint)).thenReturn(mock(PointHistoryDto.class));
+
         // 저장 후 반환될 커피챗 신청 객체 설정
         when(coffeeChatAppRepository.save(any(CoffeeChatApplication.class))).thenReturn(mockApplication);
 
@@ -112,38 +112,13 @@ class CoffeeChatApplicationServiceTest {
         assertEquals(userId, response.menteeUserId()); // 신청자 유저 ID 확인
         assertEquals(StatusType.PENDING, response.status()); // 신청 상태 확인
 
-    }
-
-    @Test
-    @DisplayName("커피챗 신청 실패 - 포인트 부족")
-    void createCoffeeChatApplication_LackOfPoint() {
-        // Given
-        Long userId = mockUser.getUserId();
-        Long coffeeChatInfoId = mockChatInfo.getCoffeeChatInfoId();
-
-        CoffeeChatApplicationCreateDto request = new CoffeeChatApplicationCreateDto(
-            coffeeChatInfoId,
-            "안녕하세요 백엔드 커피챗 신청합니다.",
-            LocalDateTime.of(2025, 4, 5, 10, 30),
-            LocalDateTime.of(2025, 4, 5, 11, 0)
+        // 현재 포인트 차감 확인
+        verify(createPointHistoryService).createPointHistory(
+            eq(EventType.COFFEE_CHAT_APPLY),
+            eq(userId),
+            eq(deductionPoint)  // deductionPoint가 정확하게 차감되었는지 확인
         );
 
-        int currentPoint = 1; // 차감 포인트보다 부족
-
-        // Mock 설정
-        // 중복 신청이 아닌 경우 설정
-        when(coffeeChatAppRepository.existsByMentee_UserIdAndCoffeeChatInfo_CoffeeChatInfoId(userId,
-            coffeeChatInfoId)).thenReturn(false);
-        // 유저와 커피챗 정보가 정상 조회 된다는 설정
-        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
-        when(coffeeChatInfoRepository.findById(coffeeChatInfoId)).thenReturn(Optional.of(mockChatInfo));
-        // 현재 포인트 조회 결과 지정
-        when(createPointHistoryService.getCurrentPoint(userId)).thenReturn(currentPoint);
-
-        // When & Then
-        assertThrows(CustomException.class, () -> {
-            coffeeChatApplicationService.createCoffeeChatApp(userId, request);
-        } );
     }
 
     @Test
@@ -159,10 +134,9 @@ class CoffeeChatApplicationServiceTest {
             LocalDateTime.of(2025, 4, 5, 10, 30),
             LocalDateTime.of(2025, 4, 5, 11, 0)
         );
-
-
-        when(coffeeChatAppRepository.existsByMentee_UserIdAndCoffeeChatInfo_CoffeeChatInfoId(userId,
-            coffeeChatInfoId)).thenReturn(true); // 이미 신청된 상태
+        
+        // 해당 커피챗에 대해 대기 상태의 신청이 이미 존재
+        when(coffeeChatAppRepository.existsLatestPendingOrApprovedApplication(userId, coffeeChatInfoId)).thenReturn(true);
 
         // When & Then
         assertThrows(CustomException.class, () -> {
@@ -171,49 +145,5 @@ class CoffeeChatApplicationServiceTest {
 
     }
 
-
-    @Test
-    @DisplayName("포인트 차감 후 커피챗 신청 실패 시 롤백되어야 함")
-    void createCoffeeChatApplication_SaveFails_ShouldRollback() {
-        // Given
-        Long userId = mockUser.getUserId();
-        Long coffeeChatInfoId = mockChatInfo.getCoffeeChatInfoId();
-
-        CoffeeChatApplicationCreateDto request = new CoffeeChatApplicationCreateDto(
-            coffeeChatInfoId,
-            "안녕하세요 백엔드 커피챗 신청합니다.",
-            LocalDateTime.of(2025, 4, 5, 10, 30),
-            LocalDateTime.of(2025, 4, 5, 11, 0)
-        );
-
-        int currentPoint = 5;
-        int deductionPoint  = 3;
-
-        // Mock 설정
-        // 중복 신청이 아닌 경우 설정
-        when(coffeeChatAppRepository.existsByMentee_UserIdAndCoffeeChatInfo_CoffeeChatInfoId(userId,
-            coffeeChatInfoId)).thenReturn(false);
-        // 유저와 커피챗 정보가 정상 조회 된다는 설정
-        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
-        when(coffeeChatInfoRepository.findById(coffeeChatInfoId)).thenReturn(Optional.of(mockChatInfo));
-        // 현재 포인트 조회 결과 지정
-        when(createPointHistoryService.getCurrentPoint(userId)).thenReturn(currentPoint);
-
-        // 포인트 차감 성공한 뒤
-        when(createPointHistoryService.createPointHistory(
-            EventType.COFFEE_CHAT_APPLY, userId, deductionPoint)).thenReturn(mock(PointHistoryDto.class));
-
-        // 커피챗 저장 시 예외 발생
-        when(coffeeChatAppRepository.save(any(CoffeeChatApplication.class))).thenThrow(new RuntimeException("저장 실패"));
-
-        // When: 저장 과정에서 예외 발생 유도
-        assertThrows(RuntimeException.class, () ->
-            coffeeChatApplicationService.createCoffeeChatApp(userId, request));
-
-        // Then: 포인트 히스토리가 저장되지 않았는지 확인
-        verify(createPointHistoryService, times(1)).
-            createPointHistory(EventType.COFFEE_CHAT_APPLY, userId, deductionPoint);
-
-    }
 
 }

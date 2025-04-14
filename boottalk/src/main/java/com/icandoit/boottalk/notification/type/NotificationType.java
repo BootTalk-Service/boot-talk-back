@@ -17,4 +17,5 @@ public enum NotificationType {
 
 	private final String urlFormat;
 	private final String message;
+
 }

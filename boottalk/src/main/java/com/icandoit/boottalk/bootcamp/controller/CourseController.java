@@ -32,7 +32,7 @@ public class CourseController {
 		List<Course> courses = courseRepository.findByCourseNameContainingIgnoreCase(query, pageable);
 		List<CourseAutocompleteDto> result = courses.stream()
 			.map(course -> new CourseAutocompleteDto(course.getCourseId(), course.getCourseName()))
-			.collect(Collectors.toList());
+			.toList();
 		return ResponseEntity.ok(result);
 	}
 }

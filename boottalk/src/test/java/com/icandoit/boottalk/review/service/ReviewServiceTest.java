@@ -23,9 +23,12 @@ import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
 import com.icandoit.boottalk.bootcamp.entity.Course;
 import com.icandoit.boottalk.bootcamp.entity.TrainingCenter;
 import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
+import com.icandoit.boottalk.bootcamp.entity.enums.CertificationStatus;
+import com.icandoit.boottalk.bootcamp.repository.BootcampCertificationRepository;
 import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
 import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
+import com.icandoit.boottalk.libs.exception.ErrorCode;
 import com.icandoit.boottalk.review.dto.ReviewCreateRequestDto;
 import com.icandoit.boottalk.review.dto.ReviewResponseDto;
 import com.icandoit.boottalk.review.dto.ReviewUpdateRequestDto;
@@ -51,6 +54,9 @@ class ReviewServiceTest {
 	@Mock
 	private UserRepository userRepository;
 
+	@Mock
+	private BootcampCertificationRepository certificationRepository;
+
 	@BeforeEach
 	void setUp() {
 		MockitoAnnotations.openMocks(this);
@@ -65,6 +71,11 @@ class ReviewServiceTest {
 
 		Course course = Course.of(trainingProgramId, "TestCourse", BootcampCategoryType.AI_SERVICE_IMPLEMENTATION,null);
 		User user = User.builder().userId(userId).userName("testUser").build();
+
+		given(reviewRepository.existsByCourse_TrainingProgramIdAndUser_UserId(trainingProgramId, userId))
+			.willReturn(false);
+		given(!certificationRepository.existsByUserAndCourseAndStatus(user, course, CertificationStatus.APPROVED))
+			.willReturn(true);
 
 		ReviewCreateRequestDto request = new ReviewCreateRequestDto(trainingProgramId, "this is review", 3);
 
@@ -96,6 +107,39 @@ class ReviewServiceTest {
 			() -> reviewService.createReview(request, userId));
 
 		assertEquals(DUPLICATE_REVIEW, exception.getErrorCode());
+	}
+
+	@Test
+	@DisplayName("리뷰 생성 실패 - 부트캠프 수료인증이 안된 유저")
+	void createReviewFailsWriteReviewForbidden() {
+	    //given
+		String trainingProgramId = "TP123";
+		Long userId = 1L;
+
+		User user = User.builder().userId(userId).userName("testUser").build();
+
+		Course course = Course.builder()
+			.courseId(1L)
+			.trainingCenter(TrainingCenter.builder().trainingCenterId(1L).build())
+			.trainingProgramId(trainingProgramId)
+			.build();
+
+
+		given(reviewRepository.existsByCourse_TrainingProgramIdAndUser_UserId(trainingProgramId, userId))
+			.willReturn(false);
+		given(!certificationRepository.existsByUserAndCourseAndStatus(user, course, CertificationStatus.APPROVED))
+			.willReturn(false);
+
+		when(courseRepository.findWithLockByTrainingProgramId(trainingProgramId)).thenReturn(Optional.of(course));
+
+		ReviewCreateRequestDto request = new ReviewCreateRequestDto(trainingProgramId, "승인 안된 리뷰", 4);
+
+
+	    //when & then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> reviewService.createReview(request, userId));
+
+		assertEquals(WRITE_REVIEW_FORBIDDEN, exception.getErrorCode());
 	}
 
 	@Test
