@@ -19,7 +19,6 @@ public class CoffeeChatInfoService {
     private final UserRepository userRepository;
     private final CoffeeChatInfoRepository coffeeChatInfoRepository;
 
-    @Transactional
     public CoffeeChatInfoResponseDto createCoffeeChatInfo(Long userId,
         CoffeeChatInfoRequestDto requestDto) {
 
@@ -41,7 +40,6 @@ public class CoffeeChatInfoService {
         return CoffeeChatInfoResponseDto.from(savedInfo);
     }
 
-    @Transactional
     public CoffeeChatInfoResponseDto getMyCoffeeChatInfo(Long userId) {
 
         CoffeeChatInfo coffeeChatInfo = getCoffeeChatInfoByUserId(userId);
@@ -55,7 +53,6 @@ public class CoffeeChatInfoService {
         );
     }
 
-    @Transactional
     public CoffeeChatInfoResponseDto updateMyCoffeeChatInfo(
         Long userId, CoffeeChatInfoRequestDto requestDto) {
 
@@ -65,7 +62,6 @@ public class CoffeeChatInfoService {
         return CoffeeChatInfoResponseDto.from(coffeeChatInfo);
     }
 
-    @Transactional
     public void deleteMyCoffeeChatInfo(Long userId) {
         CoffeeChatInfo coffeeChatInfo = getCoffeeChatInfoByUserId(userId);
 

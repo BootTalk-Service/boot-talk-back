@@ -40,7 +40,6 @@ public class CoffeeChatTimeService {
     private final CoffeeChatTimeRepository coffeeChatTimeRepository;
     private final CoffeeChatApplicationRepository coffeeChatAppRepository;
 
-    @Transactional
     public List<CoffeeChatTimeResponseDto> createCoffeeChatTimes(Long userId,
         CoffeeChatTimeMapDto requestDto) {
 
@@ -72,7 +71,6 @@ public class CoffeeChatTimeService {
     }
 
     // 자신의 멘토 가능 시간 조회
-    @Transactional(readOnly = true)
     public List<CoffeeChatTimeResponseDto> getMentorAvailableChatTimes(Long userId) {
         List<CoffeeChatTime> coffeeChatTimes = getMentorCoffeeChatTimesOrThrow(userId);
 
@@ -101,7 +99,6 @@ public class CoffeeChatTimeService {
         return new AvailableChatTimeDto(availableChatTimesByDate);
     }
 
-    @Transactional
     public List<CoffeeChatTimeResponseDto> updateCoffeeChatTimes(Long userId,
         CoffeeChatTimeMapDto requestDto) {
 
