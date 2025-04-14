@@ -1,22 +1,24 @@
 package com.icandoit.boottalk.coffeeChat.repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
+import org.springframework.stereotype.Repository;
+
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatListDto;
 import com.icandoit.boottalk.coffeeChat.entity.QCoffeeChatInfo;
 import com.icandoit.boottalk.coffeeChat.entity.enums.JobType;
 import com.icandoit.boottalk.coffeeChat.entity.enums.MentorType;
+import com.icandoit.boottalk.common.dto.PagedResponseDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import jakarta.annotation.Nullable;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.support.PageableExecutionUtils;
-import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
@@ -24,7 +26,7 @@ public class CoffeeChatQueryRepository {
 
     private final JPAQueryFactory queryFactory;
 
-    public Page<CoffeeChatListDto> getFilteredCoffeeChatResults(
+    public PagedResponseDto<CoffeeChatListDto> getFilteredCoffeeChatResults(
         @Nullable JobType jobType,
         @Nullable MentorType mentorType,
         Pageable pageable
@@ -61,7 +63,7 @@ public class CoffeeChatQueryRepository {
                 mentorTypeEq(mentorType)
             );
 
-        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+        return PagedResponseDto.from(PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne));
     }
 
     private BooleanExpression jobTypeEq(JobType jobType) {
