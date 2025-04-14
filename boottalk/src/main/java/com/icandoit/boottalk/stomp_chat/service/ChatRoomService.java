@@ -118,7 +118,7 @@ public class ChatRoomService {
             throw new CustomException(ErrorCode.CHAT_ROOM_NOT_ACTIVE);
         }
 
-        if (LocalDateTime.now().isAfter(chatRoom.getExpiresAt())) {
+        if (LocalDateTime.now().isAfter(chatRoom.getExpiresAt()) && chatRoom.isActive()) {
             chatRoom.setActive(false);
             chatRoomRepository.save(chatRoom);
         }
