@@ -78,16 +78,4 @@ public class ChatRoom {
             .hasNewMessages(false)
             .build();
     }
-
-    public User getMentor() {
-        return this.coffeeChatApplication.getCoffeeChatInfo().getMentor();
-    }
-
-    public User getMentee() {
-        return this.coffeeChatApplication.getMentee();
-    }
-
-    public boolean isParticipant(Long userId) {
-        return getMentor().getUserId().equals(userId) || getMentee().getUserId().equals(userId);
-    }
 }

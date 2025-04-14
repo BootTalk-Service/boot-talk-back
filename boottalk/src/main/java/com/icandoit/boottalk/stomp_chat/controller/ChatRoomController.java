@@ -49,6 +49,7 @@ public class ChatRoomController {
             user.getServiceUserId()));
     }
 
+    // 채팅 조회
     @GetMapping("/{roomUuid}/messages")
     public ResponseEntity<List<MessageResponseDto>> getUserChatMessages(
         @AuthenticationPrincipal CustomOAuth2User user,
