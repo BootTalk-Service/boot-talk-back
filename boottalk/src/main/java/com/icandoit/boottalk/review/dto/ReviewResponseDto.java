@@ -19,12 +19,21 @@ public record ReviewResponseDto(
 			review.getReviewId(),
 			review.getCourse().getTrainingProgramId(),
 			review.getCourse().getCourseName(),
-			review.getUser().getUserName(),
+			maskUserName(review.getUser().getUserName()),
 			review.getContent(),
 			review.getRating(),
 			review.getCreatedAt(),
 			review.getUpdatedAt()
 		);
+	}
+
+	public static String maskUserName(String name) {
+		if(name == null || name.isEmpty()) {
+			return "";
+		}
+
+		int maskLength = name.length() - 1;
+		return name.charAt(0) + "*".repeat(maskLength);
 	}
 }
 
