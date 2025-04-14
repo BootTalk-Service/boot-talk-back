@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import com.icandoit.boottalk.bootcamp.dto.BootcampDetailResponseDto;
 import com.icandoit.boottalk.bootcamp.dto.BootcampResponseDto;
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
 import com.icandoit.boottalk.bootcamp.entity.Course;
@@ -105,7 +106,7 @@ class BootcampServiceTest {
 		when(bootcampRepository.findById(1L)).thenReturn(Optional.of(bootcamp));
 
 		//when
-		BootcampResponseDto response = bootcampService.findById(1L);
+		BootcampDetailResponseDto response = bootcampService.findById(1L);
 		BootcampCategoryType categoryType = BootcampCategoryType.fromKoreanName(response.bootcampCategory());
 
 		//then
