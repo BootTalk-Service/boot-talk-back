@@ -13,7 +13,6 @@ import com.icandoit.boottalk.social_login.dto.CustomOAuth2User;
 import com.icandoit.boottalk.social_login.dto.UserRole;
 import com.icandoit.boottalk.social_login.jwt.JwtProvider;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
