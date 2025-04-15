@@ -106,7 +106,15 @@ public class CoffeeChatTimeService {
         // 신청된 시간 제외한 신청 가능한 시간 필터링
         Map<LocalDate, List<LocalTime>> availableChatTimesByDate  = getAvailableChatTimesByDate(mentoringTimeList, appliedDateTimes, startDate, endDate);
 
-        return new AvailableChatTimeDto(availableChatTimesByDate);
+        Map<LocalDate, List<String>> formattedAvailableChatTimes = availableChatTimesByDate.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                e -> e.getValue().stream()
+                    .map(time -> time.format(DateTimeFormatter.ofPattern("HH:mm")))
+                    .collect(Collectors.toList())
+            ));
+
+        return new AvailableChatTimeDto(formattedAvailableChatTimes);
     }
 
     public Map<String, List<String>> updateCoffeeChatTimes(Long userId,
