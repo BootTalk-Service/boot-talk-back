@@ -37,4 +37,27 @@ public class CoffeeChatTimeConverter {
         }
         return result;
     }
+
+    public static List<CoffeeChatTimeDto> mapToDtoList(Map<String, List<String>> times) {
+        List<CoffeeChatTimeDto> result = new ArrayList<>();
+
+        for (Map.Entry<String, List<String>> entry : times.entrySet()) {
+            DayOfWeek day;
+            try {
+                // key를 DayOfWeek enum으로 변환 (예: "MONDAY")
+                day = DayOfWeek.valueOf(entry.getKey());
+            } catch (IllegalArgumentException e) {
+                throw new CustomException(ErrorCode.INVALID_DAY_FORMAT);
+            }
+            for (String timeStr : entry.getValue()) {
+                try {
+                    LocalTime time = LocalTime.parse(timeStr, TIME_FORMATTER);
+                    result.add(new CoffeeChatTimeDto(day, time));
+                } catch (DateTimeParseException e) {
+                    throw new CustomException(ErrorCode.INVALID_TIME_FORMAT);
+                }
+            }
+        }
+        return result;
+    }
 }

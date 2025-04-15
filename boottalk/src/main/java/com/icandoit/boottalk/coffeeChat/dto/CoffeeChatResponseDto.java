@@ -1,13 +1,14 @@
 package com.icandoit.boottalk.coffeeChat.dto;
 
 import java.util.List;
+import java.util.Map;
 
 public record CoffeeChatResponseDto(
     CoffeeChatInfoResponseDto info,
-    List<CoffeeChatTimeResponseDto> times
+    Map<String, List<String>> time
 ) {
 
-    public static CoffeeChatResponseDto of(CoffeeChatInfoResponseDto info, List<CoffeeChatTimeResponseDto> times) {
-        return new CoffeeChatResponseDto(info, times);
+    public static CoffeeChatResponseDto of(CoffeeChatInfoResponseDto info, Map<String, List<String>> time) {
+        return new CoffeeChatResponseDto(info, time);
     }
 }
