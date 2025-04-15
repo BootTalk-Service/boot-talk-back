@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Builder
 @Getter
@@ -31,15 +32,19 @@ public class ChatRoomStatus {
     private ChatRoom chatRoom;
 
     @Column(nullable = false)
+    @Setter
     private boolean isActive; // 채팅방 활성화 여부
 
     @Column(nullable = false)
+    @Setter
     private boolean mentorEntered; // 멘토 접속 여부
 
     @Column(nullable = false)
+    @Setter
     private boolean menteeEntered; // 멘티 접속 여부
 
     @Column(nullable = false)
+    @Setter
     private boolean hasNewMessages; // 새 메시지 여부
 
     public static ChatRoomStatus of(ChatRoom chatRoom, boolean active, boolean mentorEntered,
