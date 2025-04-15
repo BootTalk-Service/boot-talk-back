@@ -3,6 +3,7 @@ package com.icandoit.boottalk.stomp_chat.service;
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
 import com.icandoit.boottalk.stomp_chat.dto.ChatMessageResponseDto;
+import com.icandoit.boottalk.stomp_chat.dto.ChatRoomResponseDto;
 import com.icandoit.boottalk.stomp_chat.dto.stompDto.ChatMessageRequestDto;
 import com.icandoit.boottalk.stomp_chat.dto.stompDto.ChatTypingRequestDto;
 import com.icandoit.boottalk.stomp_chat.dto.stompDto.ChatTypingResponseDto;
@@ -91,19 +92,22 @@ public class ChatWebsocketService {
 
     private void checkChatRoomWithinAllowedTime(String roomUuid) {
         // Redis에서 채팅방 정보 조회
-        ChatRoom chatRoom = redisRoomRepository.findChatRoomByRoomUuidFromCache(roomUuid);
-        if (chatRoom == null) {
-            chatRoom = chatRoomRepository.findByRoomUuid(roomUuid)
+        ChatRoomResponseDto chatRoomDto = redisRoomRepository.findChatRoomByRoomUuidFromCache(roomUuid);
+
+        if (chatRoomDto == null) {
+            ChatRoom chatRoomEntity = chatRoomRepository.findByRoomUuid(roomUuid)
                 .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
-            redisRoomRepository.saveChatRoomToCache(chatRoom);
+
+            chatRoomDto = ChatRoomResponseDto.from(chatRoomEntity); // 엔티티 → DTO 변환
+            redisRoomRepository.saveChatRoomToCache(chatRoomDto);   // Redis에 DTO 저장
         }
 
         // 채팅방 예약 시간 확인
-        if (LocalDateTime.now().isBefore(chatRoom.getReservationAt())) {
+        if (LocalDateTime.now().isBefore(chatRoomDto.reservationAt())) {
             throw new CustomException(ErrorCode.CHAT_ROOM_NOT_STARTED);
         }
 
-        if (LocalDateTime.now().isAfter(chatRoom.getEndAt())) {
+        if (LocalDateTime.now().isAfter(chatRoomDto.endAt())) {
             throw new CustomException(ErrorCode.CHAT_ROOM_ENDED);
         }
     }
