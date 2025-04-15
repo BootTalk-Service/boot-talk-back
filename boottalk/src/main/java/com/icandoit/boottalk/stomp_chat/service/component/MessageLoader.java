@@ -1,6 +1,6 @@
 package com.icandoit.boottalk.stomp_chat.service.component;
 
-import com.icandoit.boottalk.stomp_chat.dto.MessageResponseDto;
+import com.icandoit.boottalk.stomp_chat.dto.ChatMessageResponseDto;
 import com.icandoit.boottalk.stomp_chat.entity.ChatMessage;
 import com.icandoit.boottalk.stomp_chat.repository.ChatMessageRepository;
 import com.icandoit.boottalk.stomp_chat.repository.RedisChatMessageRepository;
@@ -21,25 +21,26 @@ public class MessageLoader {
 
     @Transactional(readOnly = true)
     public void loadAndSendMessages(Long userId, String roomUuid) {
-        // 캐시 조회
-        List<ChatMessage> chatMessages = redisRepository.getMessages(roomUuid);
+        // 1. 캐시 조회: DTO로 가져옴
+        List<ChatMessageResponseDto> cachedDtos = redisRepository.getMessages(roomUuid);
 
-        if (chatMessages.isEmpty()) {
-            // 캐시에 없다면 DB에서 조회
-            chatMessages = messageRepository.findByRoomUuid(roomUuid);
+        if (cachedDtos.isEmpty()) {
+            // 2. DB에서 조회: Entity로 가져옴
+            List<ChatMessage> dbMessages = messageRepository.findByRoomUuid(roomUuid);
 
-            if (!chatMessages.isEmpty()) {
-                // Redis에 캐싱 - 30분 TTL
-                redisRepository.saveAll(roomUuid, chatMessages, Duration.ofMinutes(30));
+            if (!dbMessages.isEmpty()) {
+                // 3. Entity -> DTO 변환
+                cachedDtos = dbMessages.stream()
+                    .map(ChatMessageResponseDto::from)
+                    .toList();
+
+                // 4. Redis에 DTO 저장
+                redisRepository.saveAll(roomUuid, cachedDtos, Duration.ofMinutes(30));
             }
         }
 
-        List<MessageResponseDto> responseDtos = chatMessages.stream()
-            .map(MessageResponseDto::from)
-            .toList();
-
-        // WebSocket으로 전송
+        // 5. WebSocket으로 전송 (항상 DTO 사용)
         String destination = "/queue/chat/" + roomUuid + "/" + userId;
-        template.convertAndSend(destination, responseDtos);
+        template.convertAndSend(destination, cachedDtos);
     }
 }

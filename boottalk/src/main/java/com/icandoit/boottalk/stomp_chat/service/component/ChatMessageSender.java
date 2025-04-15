@@ -2,19 +2,21 @@ package com.icandoit.boottalk.stomp_chat.service.component;
 
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
-import com.icandoit.boottalk.stomp_chat.dto.MessageResponseDto;
+import com.icandoit.boottalk.stomp_chat.dto.ChatMessageResponseDto;
 import com.icandoit.boottalk.stomp_chat.entity.ChatMessage;
 import com.icandoit.boottalk.stomp_chat.entity.ChatRoom;
 import com.icandoit.boottalk.stomp_chat.entity.enums.MessageType;
 import com.icandoit.boottalk.stomp_chat.repository.ChatMessageRepository;
 import com.icandoit.boottalk.stomp_chat.repository.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
 @Component
+@Slf4j
 public class ChatMessageSender {
 
     private final ChatMessageRepository messageRepository;
@@ -30,7 +32,7 @@ public class ChatMessageSender {
             redisTemplate.opsForValue().get(REDIS_CHAT_ENTERED_PREFIX + roomUuid + ":" + userId) != null;
 
         if (hasEntered) {
-            // 이미 입장한 경우 시스템 메시지 전송 안 함
+            log.info("이미 입장했던 유저 : {}, roomUuid : {}", userId, roomUuid);
             return;
         }
 
@@ -56,7 +58,7 @@ public class ChatMessageSender {
 
         // WebSocket 전송
         String destination = "/queue/chat/" + roomUuid + "/" + userId;
-        template.convertAndSend(destination, MessageResponseDto.from(enterMessage));
+        template.convertAndSend(destination, ChatMessageResponseDto.from(enterMessage));
 
         // Redis에 입장 정보 저장 (입장한 사용자 ID 기록)
         redisTemplate.opsForValue().set(REDIS_CHAT_ENTERED_PREFIX + roomUuid + ":" + userId, true);

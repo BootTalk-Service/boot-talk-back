@@ -2,7 +2,7 @@ package com.icandoit.boottalk.stomp_chat.service;
 
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
-import com.icandoit.boottalk.stomp_chat.dto.MessageResponseDto;
+import com.icandoit.boottalk.stomp_chat.dto.ChatMessageResponseDto;
 import com.icandoit.boottalk.stomp_chat.dto.stompDto.ChatMessageRequestDto;
 import com.icandoit.boottalk.stomp_chat.dto.stompDto.ChatTypingRequestDto;
 import com.icandoit.boottalk.stomp_chat.dto.stompDto.ChatTypingResponseDto;
@@ -17,13 +17,10 @@ import com.icandoit.boottalk.stomp_chat.service.component.ChatRoomStatusUpdater;
 import com.icandoit.boottalk.stomp_chat.service.component.MessageLoader;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,13 +59,15 @@ public class ChatWebsocketService {
         // 커피챗 예약 시간 내에만 채팅 가능하도록 체크
         checkChatRoomWithinAllowedTime(roomUuid);
 
-        // 메시지를 Redis에 먼저 저장 (TTL 30분)
-        ChatMessage messageToCache = ChatMessage.of(
+        // 메시지를 DTO로 변환
+        ChatMessageResponseDto messageToCache = new ChatMessageResponseDto(
             roomUuid,
             senderId,
             requestDto.receiverId(),
             requestDto.content(),
-            requestDto.type()
+            requestDto.type(),
+            LocalDateTime.now(),
+            false // isRead : 수신자가 읽음 여부
         );
 
         // Redis에 저장
@@ -76,10 +75,9 @@ public class ChatWebsocketService {
 
         // 메시지 WebSocket으로 전송
         String destination = "/queue/chat/" + roomUuid + "/" + requestDto.receiverId();
-        template.convertAndSend(destination, MessageResponseDto.from(messageToCache));
+        template.convertAndSend(destination, messageToCache);
 
-        log.info("메시지 Redis에 캐시됨. roomUuid={}, senderId={}, receiverId={}, message={}, type={}",
-            roomUuid, senderId, requestDto.receiverId(), requestDto.content(), requestDto.type());
+        log.info("메시지 Redis에 캐시됨: {}", messageToCache);
     }
 
     public void sendTypingStatus(Long senderId, ChatTypingRequestDto requestDto) {
@@ -93,11 +91,11 @@ public class ChatWebsocketService {
 
     private void checkChatRoomWithinAllowedTime(String roomUuid) {
         // Redis에서 채팅방 정보 조회
-        ChatRoom chatRoom = redisRoomRepository.findById(roomUuid);
+        ChatRoom chatRoom = redisRoomRepository.findChatRoomByRoomUuidFromCache(roomUuid);
         if (chatRoom == null) {
             chatRoom = chatRoomRepository.findByRoomUuid(roomUuid)
                 .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
-            redisRoomRepository.save(chatRoom);
+            redisRoomRepository.saveChatRoomToCache(chatRoom);
         }
 
         // 채팅방 예약 시간 확인
@@ -110,11 +108,12 @@ public class ChatWebsocketService {
         }
     }
 
-    public void saveMessageWithFallback(ChatMessage message) {
+    public void saveMessageWithFallback(ChatMessageResponseDto message) {
         try {
-            redisChatRepository.save(message.getRoomUuid(), message, Duration.ofMinutes(30));
+            redisChatRepository.save(message.roomUuid(), message, Duration.ofMinutes(30));
         } catch (RedisConnectionFailureException ex) {
-            chatMessageRepository.save(message); // Redis 장애 시 DB에만 저장
+            ChatMessage chatMessage = message.toEntity();
+            chatMessageRepository.save(chatMessage); // Redis 장애 시 DB에만 저장
             log.error("Redis 장애 발생, 메시지 DB로 저장됨: {}", message);
         }
     }
