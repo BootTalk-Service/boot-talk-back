@@ -4,6 +4,8 @@ import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
 import com.icandoit.boottalk.stomp_chat.dto.MessageResponseDto;
 import com.icandoit.boottalk.stomp_chat.dto.stompDto.ChatMessageRequestDto;
+import com.icandoit.boottalk.stomp_chat.dto.stompDto.ChatTypingRequestDto;
+import com.icandoit.boottalk.stomp_chat.dto.stompDto.ChatTypingResponseDto;
 import com.icandoit.boottalk.stomp_chat.entity.ChatMessage;
 import com.icandoit.boottalk.stomp_chat.entity.ChatRoom;
 import com.icandoit.boottalk.stomp_chat.repository.ChatMessageRepository;
@@ -88,6 +90,15 @@ public class ChatWebsocketService {
         log.info("메시지 Redis에 캐시됨. roomUuid={}, senderId={}, receiverId={}, message={}, type={}",
             roomUuid, senderId, requestDto.receiverId(), requestDto.content(), requestDto.type());
     }
+
+    public void sendTypingStatus(Long senderId, ChatTypingRequestDto requestDto) {
+
+        ChatTypingResponseDto response = new ChatTypingResponseDto(senderId, requestDto.typing());
+
+        String destination = "/queue/chat/" + requestDto.roomUuid() + "/" + requestDto.receiverId();
+        template.convertAndSend(destination, response);
+    }
+
 
     private void checkChatRoomWithinAllowedTime(String roomUuid) {
         // Redis에서 채팅방 정보 조회

@@ -1,6 +1,7 @@
 package com.icandoit.boottalk.stomp_chat.controller;
 
 import com.icandoit.boottalk.stomp_chat.dto.stompDto.ChatMessageRequestDto;
+import com.icandoit.boottalk.stomp_chat.dto.stompDto.ChatTypingRequestDto;
 import com.icandoit.boottalk.stomp_chat.service.ChatWebsocketService;
 import java.security.Principal;
 import lombok.RequiredArgsConstructor;
@@ -39,8 +40,9 @@ public class ChatWebSocketController {
         chatWebsocketService.handleUserEnter(userId, roomUuid);
     }
 
-//    @MessageMapping("/chat.typing")
-//    public void typing(@Payload ChatTypingRequestDto requestDto, Principal principal) {
-//        chatWebsocketService.
-//    }
+    @MessageMapping("/chat.typing")
+    public void typing(@Payload ChatTypingRequestDto requestDto, Principal principal) {
+        Long senderId = Long.parseLong(principal.getName());
+        chatWebsocketService.sendTypingStatus(senderId, requestDto);
+    }
 }
