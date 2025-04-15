@@ -39,8 +39,9 @@ public class ManageController {
 		UserDto userDto = manageService.getUser(userId);
 		List<GetCertificationResponseDto> myCertifications
 			= bootcampCertificationService.getMyCertifications(userId);
+		int currentPoint = createPointHistoryService.getCurrentPointToNavi(user.getServiceUserId());
 
-		return ResponseEntity.ok(UserInfoDto.from(userDto, myCertifications));
+		return ResponseEntity.ok(UserInfoDto.from(userDto, myCertifications, currentPoint));
 	}
 
 	@GetMapping("/navi")
