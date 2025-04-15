@@ -9,9 +9,9 @@ import com.icandoit.boottalk.stomp_chat.entity.enums.MessageType;
 import com.icandoit.boottalk.stomp_chat.repository.ChatMessageRepository;
 import com.icandoit.boottalk.stomp_chat.repository.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Component
@@ -20,9 +20,19 @@ public class ChatMessageSender {
     private final ChatMessageRepository messageRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final SimpMessageSendingOperations template;
+    private final RedisTemplate<String, Object> redisTemplate;
 
-    @Transactional
+    public static final String REDIS_CHAT_ENTERED_PREFIX = "chat:entered:";
+
     public void enterSystemMessage(Long userId, String roomUuid) {
+        // Redis에서 사용자가 이미 입장했는지 체크
+        boolean hasEntered =
+            redisTemplate.opsForValue().get(REDIS_CHAT_ENTERED_PREFIX + roomUuid + ":" + userId) != null;
+
+        if (hasEntered) {
+            // 이미 입장한 경우 시스템 메시지 전송 안 함
+            return;
+        }
 
         ChatRoom chatRoom = chatRoomRepository.findByRoomUuid(roomUuid)
             .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
@@ -41,12 +51,14 @@ public class ChatMessageSender {
             MessageType.SYSTEM
         );
 
-        // todo: 입장 메시지도 저장을 해야할까?
+        // 입장 메시지 저장
         messageRepository.save(enterMessage);
 
         // WebSocket 전송
         String destination = "/queue/chat/" + roomUuid + "/" + userId;
         template.convertAndSend(destination, MessageResponseDto.from(enterMessage));
-    }
 
+        // Redis에 입장 정보 저장 (입장한 사용자 ID 기록)
+        redisTemplate.opsForValue().set(REDIS_CHAT_ENTERED_PREFIX + roomUuid + ":" + userId, true);
+    }
 }
