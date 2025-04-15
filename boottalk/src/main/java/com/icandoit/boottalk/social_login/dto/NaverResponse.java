@@ -3,7 +3,6 @@ package com.icandoit.boottalk.social_login.dto;
 import java.util.Map;
 
 import lombok.Builder;
-import lombok.Getter;
 
 @Builder
 public record NaverResponse(
