@@ -7,7 +7,6 @@ import com.icandoit.boottalk.stomp_chat.repository.RedisChatMessageRepository;
 import java.time.Duration;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
