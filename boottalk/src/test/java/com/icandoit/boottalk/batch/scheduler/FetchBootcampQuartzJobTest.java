@@ -16,12 +16,12 @@ import org.quartz.JobExecutionException;
 import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.service.RedisService;
 import com.icandoit.boottalk.notification.dto.NotificationRequestDto;
-import com.icandoit.boottalk.notification.service.NotificationService;
+import com.icandoit.boottalk.notification.service.SseEmitterService;
 import com.icandoit.boottalk.user.domain.repository.UserRepository;
 
 class FetchBootcampQuartzJobTest {
 	private NotificationQuartzJob notificationQuartzJob;
-	private NotificationService notificationService;
+	private SseEmitterService sseEmitterService;
 	private RedisService redisService;
 	private UserRepository userRepository;
 	private JobExecutionContext context;
@@ -30,10 +30,10 @@ class FetchBootcampQuartzJobTest {
 
 	@BeforeEach
 	void setUp() {
-		notificationService = mock(NotificationService.class);
+		sseEmitterService = mock(SseEmitterService.class);
 		redisService = mock(RedisService.class);
 		userRepository = mock(UserRepository.class);
-		notificationQuartzJob = new NotificationQuartzJob(notificationService, redisService, userRepository);
+		notificationQuartzJob = new NotificationQuartzJob(sseEmitterService, redisService, userRepository);
 
 		// JobExecutionContext 도 목 객체로 설정
 		context = mock(JobExecutionContext.class);
@@ -63,7 +63,7 @@ class FetchBootcampQuartzJobTest {
 		notificationQuartzJob.executeInternal(context);
 
 		// 각 사용자와 각 부트캠프 ID 조합에 대해 알림 전송이 2 * 2 = 4번 호출되어야 함
-		verify(notificationService, times(4)).sendLiveNotification(anyLong(), any(NotificationRequestDto.class));
+		verify(sseEmitterService, times(4)).sendToClient(anyLong(), any(NotificationRequestDto.class));
 		// 전송 완료 후, 해당 Redis 키 삭제 호출 확인
 		verify(redisService, times(1)).deleteKey(redisKey);
 	}

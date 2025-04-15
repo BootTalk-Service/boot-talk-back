@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.service.RedisService;
 import com.icandoit.boottalk.notification.dto.NotificationRequestDto;
-import com.icandoit.boottalk.notification.service.NotificationService;
+import com.icandoit.boottalk.notification.service.SseEmitterService;
 import com.icandoit.boottalk.notification.type.NotificationType;
 import com.icandoit.boottalk.user.domain.repository.UserRepository;
 
@@ -25,10 +25,9 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class NotificationQuartzJob extends QuartzJobBean {
 
-	private final NotificationService notificationService;
+	private final SseEmitterService sseEmitterService;
 	private final RedisService redisService;
 	private final UserRepository userRepository;
-	private static final String BOOTCAMP_DETAIL_URL = "https://your-domain.com/api/bootcamps/";
 
 	@Override
 	protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
@@ -62,16 +61,13 @@ public class NotificationQuartzJob extends QuartzJobBean {
 					// 해당 직군 관련 데이터들 notification Service 로 전달
 					for(Long userId : targetUserIds) {
 						for(String bootcampId : bootcampIds) {
-							String bootcampDetailUrl = BOOTCAMP_DETAIL_URL + bootcampId;
-							String message = "관심 직군의 부트캠프가 오픈 되었습니다: " + bootcampDetailUrl;
 
 							NotificationRequestDto requestDto = new NotificationRequestDto(
-								NotificationType.BOOTCAMP_OPEN,
-								message,
-								bootcampDetailUrl
+								NotificationType.NEW_BOOT_CAMP,
+								Long.valueOf(bootcampId)
 							);
 
-							notificationService.sendLiveNotification(userId, requestDto);
+							sseEmitterService.sendToClient(userId, requestDto);
 						}
 					}
 
