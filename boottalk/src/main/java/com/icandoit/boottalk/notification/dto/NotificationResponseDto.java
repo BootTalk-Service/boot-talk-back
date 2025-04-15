@@ -16,12 +16,19 @@ public record NotificationResponseDto(
 	boolean checked,
 	LocalDateTime createdAt
 ) {
-	public static NotificationResponseDto from(Notification notification) {
+
+	public static NotificationResponseDto from(Notification notification, String baseUrl) {
+		String url = notification.getType().getUrlFormat();
+
+		if (notification.getTargetId() != null) {
+			url += "/" + notification.getTargetId();
+		}
+
 		return NotificationResponseDto.builder()
 			.notificationId(notification.getNotificationId())
 			.type(notification.getType())
-			.message(notification.getMessage())
-			.url(notification.getUrl())
+			.message(notification.getType().getMessage())
+			.url(baseUrl + url)
 			.checked(notification.isChecked())
 			.createdAt(notification.getCreatedAt())
 			.build();

@@ -28,7 +28,8 @@ import com.icandoit.boottalk.bootcamp.repository.BootcampCertificationRepository
 import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
 import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
-import com.icandoit.boottalk.libs.exception.ErrorCode;
+import com.icandoit.boottalk.point_history.domain.type.EventType;
+import com.icandoit.boottalk.point_history.service.CreatePointHistoryService;
 import com.icandoit.boottalk.review.dto.ReviewCreateRequestDto;
 import com.icandoit.boottalk.review.dto.ReviewResponseDto;
 import com.icandoit.boottalk.review.dto.ReviewUpdateRequestDto;
@@ -56,6 +57,9 @@ class ReviewServiceTest {
 
 	@Mock
 	private BootcampCertificationRepository certificationRepository;
+
+	@Mock
+	private CreatePointHistoryService createPointHistoryService;
 
 	@BeforeEach
 	void setUp() {
@@ -88,6 +92,8 @@ class ReviewServiceTest {
 		//then
 		assertEquals(3, course.getTotalScore());
 		assertEquals(1, course.getReviewCount());
+		verify(createPointHistoryService, times(1))
+			.createPointHistory(EventType.REVIEW, userId, 1);
 	}
 
 	@Test
@@ -292,6 +298,7 @@ class ReviewServiceTest {
 		assertEquals(0, course.getTotalScore());
 		assertEquals(0, course.getReviewCount());
 		verify(reviewRepository).delete(review);
+		verify(createPointHistoryService, times(1)).createPointHistory(EventType.REVIEW_DELETED, userId, 1);
 	}
 
 	@Test
@@ -329,5 +336,42 @@ class ReviewServiceTest {
 			() -> reviewService.deleteReview(reviewId, anotherUserId));
 
 		assertEquals(NOT_REVIEW_OWNER, exception.getErrorCode());
+	}
+
+	@Test
+	@DisplayName("리뷰 삭제 실패 - 포인트 부족 시 예외 발생")
+	void deleteReviewFailsWhenInsufficientPoints() {
+		// given
+		String trainingProgramId = "TP123";
+		Long userId = 1L;
+
+		// 코스 생성 (어떤 리뷰가 삭제될 때 Course의 평점 업데이트가 진행되지만, 포인트는 CreatePointHistoryService에서 결정됨)
+		Course course = Course.of(trainingProgramId, "TestCourse", BootcampCategoryType.APPLICATION_SW_ENGINEERING,
+			null);
+		course.updateReviewStats(4, 1); // 기존 평점 4점, 리뷰 수 1
+
+		// 사용자와 리뷰 생성
+		User user = User.builder().userId(userId).userName("testUser").build();
+		Review review = Review.builder()
+			.reviewId(1L)
+			.user(user)
+			.course(course)
+			.rating(4)
+			.build();
+
+		// 리뷰 조회, 락을 사용하는 코스 조회
+		when(reviewRepository.findById(1L)).thenReturn(Optional.of(review));
+		when(courseRepository.findWithLockByTrainingProgramId(trainingProgramId)).thenReturn(Optional.of(course));
+
+		// 리뷰 삭제 시, 포인트 회수 로직이 실행되는데 현재 포인트가 0이라고 가정하여
+		// createPointHistoryService.createPointHistory(EventType.REVIEW_DELETED, userId, 1)가
+		// INSUFFICIENT_POINT 예외를 발생하도록 설정
+		when(createPointHistoryService.createPointHistory(any(), eq(userId), eq(1)))
+			.thenThrow(new CustomException(INSUFFICIENT_POINT));
+
+		// when & then: 리뷰 삭제 시 포인트 부족 예외가 발생하는지 검증
+		CustomException exception = assertThrows(CustomException.class,
+			() -> reviewService.deleteReview(1L, userId));
+		assertEquals(INSUFFICIENT_POINT, exception.getErrorCode());
 	}
 }

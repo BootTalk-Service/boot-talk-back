@@ -1,18 +1,15 @@
 package com.icandoit.boottalk.notification.service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.icandoit.boottalk.notification.dto.AllNotificationResponseDto;
-import com.icandoit.boottalk.notification.dto.NotificationRequestDto;
 import com.icandoit.boottalk.notification.dto.NotificationResponseDto;
 import com.icandoit.boottalk.notification.entity.Notification;
 import com.icandoit.boottalk.notification.repository.NotificationRepository;
-import com.icandoit.boottalk.notification.util.DateTimeFormatterUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,45 +20,15 @@ import lombok.extern.slf4j.Slf4j;
 public class NotificationService {
 
 	private final NotificationRepository notificationRepository;
-	private final DateTimeFormatterUtil dateTimeFormatterUtil;
-	private final SseEmitterService emitterService;
 
-
-	//SSE 연결
-	public SseEmitter connect(long userId, String lastEventId) {
-
-		SseEmitter sseEmitter = emitterService.subscribe(userId);
-
-		//SSE 연결이 비정상적으로 종료되었을 때 lastEventId를 통해 놓친 알림 전송
-		//lastEventId 이후에 온 알림이 있다면 해당 알림을 다시 실시간으로 전송
-		if (lastEventId != null) {
-			List<Notification> notifications = notificationRepository.findByMissedNotifications(
-				userId, dateTimeFormatterUtil.parseTime(lastEventId));
-			if (!notifications.isEmpty()) {
-				for (Notification notification : notifications) {
-					emitterService.sendToClient(userId, NotificationResponseDto.from(notification));
-				}
-			}
-		}
-
-		return sseEmitter;
-	}
-
-
-	// 알림을 저장하고 알림 대상자에게 전송
-	public NotificationResponseDto sendLiveNotification(long userId, NotificationRequestDto requestDto) {
-		NotificationResponseDto responseDto = NotificationResponseDto
-			.from(notificationRepository.save(Notification.of(userId, requestDto)));
-
-		emitterService.sendToClient(userId, responseDto);
-
-		return responseDto;
-	}
+	@Value("${server.url}")
+	private String BASE_URL;
 
 	// 알림조회창에 들어갈 알림내역과 확인하지 않은 알림 개수 반환
 	public AllNotificationResponseDto getNotifications(long userId) {
 		return AllNotificationResponseDto.from(notificationRepository.findAllNotificationByUserId(userId)
-			.stream().map(NotificationResponseDto::from).collect(Collectors.toList()));
+			.stream().map((Notification notification) ->
+				NotificationResponseDto.from(notification, BASE_URL)).collect(Collectors.toList()));
 	}
 
 

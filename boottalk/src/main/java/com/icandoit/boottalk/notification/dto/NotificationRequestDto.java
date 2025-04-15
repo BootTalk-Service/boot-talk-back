@@ -1,8 +1,5 @@
 package com.icandoit.boottalk.notification.dto;
 
-import java.time.LocalDateTime;
-
-import com.icandoit.boottalk.notification.entity.Notification;
 import com.icandoit.boottalk.notification.type.NotificationType;
 
 import lombok.Builder;
@@ -10,7 +7,6 @@ import lombok.Builder;
 @Builder
 public record NotificationRequestDto(
 	NotificationType type,
-	String message,
-	String url
+	Long targetId // 부트캠프 알림 전송인 경우 targetId에 부트캠프 Id 삽입.
 ) {
 }

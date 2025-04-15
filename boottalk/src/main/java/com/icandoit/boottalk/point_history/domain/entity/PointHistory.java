@@ -37,11 +37,11 @@ public class PointHistory extends BaseEntity {
 	private int changedPoint;
 
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
+	@Column(columnDefinition = "VARCHAR(20)", nullable = false)
 	private PointType pointType;
 
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
+	@Column(columnDefinition = "VARCHAR(50)", nullable = false)
 	private EventType eventType;
 
 }

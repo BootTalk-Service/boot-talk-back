@@ -1,14 +1,27 @@
 package com.icandoit.boottalk.libs.exception;
 
+
 import com.icandoit.boottalk.libs.dto.ExceptionResponseDto;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ExceptionResponseDto<Void>> handleAccessDeniedException(AuthorizationDeniedException e) {
+        log.error("AuthorizationDeniedException 발생: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(ExceptionResponseDto.of(ErrorCode.FORBIDDEN.getHttpStatus(),
+                ErrorCode.FORBIDDEN.getMessage()));
+
+    }
 
     /**
      * CustomException 처리 - ErrorCode에 정의된 예외 반환
@@ -30,4 +43,6 @@ public class GlobalExceptionHandler {
             .body(ExceptionResponseDto.of(ErrorCode.INTERNAL_SERVER_ERROR.getHttpStatus(),
                 ErrorCode.INTERNAL_SERVER_ERROR.getMessage()));
     }
+
+
 }

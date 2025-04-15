@@ -52,11 +52,11 @@ public class CoffeeChatInfo extends BaseEntity {
     private String mentorName;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(columnDefinition = "VARCHAR(20)", nullable = false)
     private MentorType mentorType;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(columnDefinition = "VARCHAR(20)",nullable = false)
     private JobType jobType;
 
     @Column(nullable = false)

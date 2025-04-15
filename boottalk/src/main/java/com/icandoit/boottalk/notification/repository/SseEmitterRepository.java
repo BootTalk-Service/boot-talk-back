@@ -2,10 +2,13 @@ package com.icandoit.boottalk.notification.repository;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import com.icandoit.boottalk.point_history.domain.dto.PointHistoryDto;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SseEmitterRepository {
 	private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
+	private final Map<Long, Queue<PointHistoryDto>> pointEventCacheMap = new ConcurrentHashMap<>();
 
 	public Optional<SseEmitter> findById(long userId) {
 
@@ -45,6 +49,7 @@ public class SseEmitterRepository {
 		return emitters.get(userId);
 	}
 
+	// 안전하게 SseEmitter 객체 삭제
 	public void deleteById(long userId) {
 		SseEmitter emitter = emitters.get(userId);
 		if (emitter != null) {
@@ -57,4 +62,6 @@ public class SseEmitterRepository {
 			}
 		}
 	}
+
+
 }

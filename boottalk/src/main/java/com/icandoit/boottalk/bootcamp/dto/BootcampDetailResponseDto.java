@@ -1,13 +1,11 @@
 package com.icandoit.boottalk.bootcamp.dto;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
 
-public record BootcampResponseDto(
+public record BootcampDetailResponseDto(
 	Long bootcampId,
-	String trainingCenterName,
 	String bootcampName,
 	String bootcampRegion,
 	boolean bootcampCost,
@@ -18,12 +16,19 @@ public record BootcampResponseDto(
 	LocalDate bootcampStartDate,
 	LocalDate bootcampEndDate,
 	Double courseAverageRating,
-	Integer courseReviewCount
+	Integer courseReviewCount,
+	Long trainingCenterId,
+	String trainingCenterName,
+	String trainingCenterPhoneNumber,
+	String trainingCenterEmail,
+	String trainingCenterAddress,
+	String trainingCenterUrl
 ) {
-	public static BootcampResponseDto from(Bootcamp bootcamp) {
-		return new BootcampResponseDto(
+	public static BootcampDetailResponseDto from(
+		Bootcamp bootcamp
+	) {
+		return new BootcampDetailResponseDto(
 			bootcamp.getBootcampId(),
-			bootcamp.getTrainingCenter().getTrainingCenterName(),
 			bootcamp.getBootcampName(),
 			bootcamp.getBootcampRegion(),
 			bootcamp.isBootcampCost(),
@@ -34,13 +39,13 @@ public record BootcampResponseDto(
 			bootcamp.getBootcampStartDate(),
 			bootcamp.getBootcampEndDate(),
 			bootcamp.getCourse().getAverageRating(),
-			bootcamp.getCourse().getReviewCount()
+			bootcamp.getCourse().getReviewCount(),
+			bootcamp.getTrainingCenter().getTrainingCenterId(),
+			bootcamp.getTrainingCenter().getTrainingCenterName(),
+			bootcamp.getTrainingCenter().getTrainingCenterPhoneNumber(),
+			bootcamp.getTrainingCenter().getTrainingCenterEmail(),
+			bootcamp.getTrainingCenter().getTrainingCenterAddress(),
+			bootcamp.getTrainingCenter().getTrainingCenterUrl()
 		);
-	}
-
-	public static List<BootcampResponseDto> from(List<Bootcamp> bootcamps) {
-		return bootcamps.stream()
-			.map(BootcampResponseDto::from)
-			.toList();
 	}
 }

@@ -28,7 +28,7 @@ public class QuartzNotificationConfig {
 		CronTriggerFactoryBean triggerFactoryBean = new CronTriggerFactoryBean();
 		triggerFactoryBean.setJobDetail(notificationJobDetail);
 		// 매일 12시에 실행
-		triggerFactoryBean.setCronExpression("0 0 12 * * ?");
+		triggerFactoryBean.setCronExpression("0 59 23 * * ?");
 		triggerFactoryBean.setName("notificationTrigger");
 		triggerFactoryBean.afterPropertiesSet();
 		return triggerFactoryBean.getObject();

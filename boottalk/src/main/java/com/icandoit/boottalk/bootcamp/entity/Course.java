@@ -42,8 +42,8 @@ public class Course extends BaseEntity {
 	@Column(nullable = false)
 	private String courseName;
 
-	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
+	@Column(columnDefinition = "VARCHAR(50)", nullable = false)
 	private BootcampCategoryType bootcampCategoryType;
 
 	private int totalScore;
