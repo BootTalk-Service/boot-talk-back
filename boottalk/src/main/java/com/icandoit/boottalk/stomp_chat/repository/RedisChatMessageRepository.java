@@ -4,7 +4,6 @@ import com.icandoit.boottalk.stomp_chat.entity.ChatMessage;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -13,56 +12,44 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class RedisChatMessageRepository {
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, ChatMessage> redisTemplate;
 
     private static final String CHAT_MESSAGE_KEY_PREFIX = "chat:messages:";
 
+    // 채팅 메시지 전체 조회
     public List<ChatMessage> getMessages(String roomUuid) {
         String key = CHAT_MESSAGE_KEY_PREFIX + roomUuid;
-        List<Object> cached = redisTemplate.opsForList().range(key, 0, -1);
-        if (cached == null) return Collections.emptyList();
-
-        return cached.stream()
-            .filter(obj -> obj instanceof ChatMessage)
-            .map(obj -> (ChatMessage) obj)
-            .toList();
+        List<ChatMessage> cached = redisTemplate.opsForList().range(key, 0, -1);
+        return cached != null ? cached : Collections.emptyList();
     }
 
+    // 단일 메시지 저장 + TTL 설정
     public void save(String roomUuid, ChatMessage message, Duration ttl) {
         String key = CHAT_MESSAGE_KEY_PREFIX + roomUuid;
         redisTemplate.opsForList().rightPush(key, message);
         redisTemplate.expire(key, ttl);
     }
 
+    // 여러 메시지 저장 + TTL 설정
     public void saveAll(String roomUuid, List<ChatMessage> messages, Duration ttl) {
         String key = CHAT_MESSAGE_KEY_PREFIX + roomUuid;
 
         for (ChatMessage msg : messages) {
             redisTemplate.opsForList().rightPush(key, msg);
         }
-
         redisTemplate.expire(key, ttl);
     }
 
+    // 메시지 일부 삭제 (리스트 앞 부분 자르기)
     public void deleteMessages(List<ChatMessage> messages) {
-        // 예시로 Redis에서 메시지를 삭제하는 코드
         String key = CHAT_MESSAGE_KEY_PREFIX + messages.get(0).getRoomUuid();
-        redisTemplate.opsForList().trim(key, messages.size(), -1); // 삭제
+        redisTemplate.opsForList().trim(key, messages.size(), -1);
     }
 
-
-    public List<ChatMessage> getMessagesForBatch() {
-        // Redis에 저장된 메시지를 일정량 가져오는 로직
-        List<Object> cachedMessages = redisTemplate.opsForList().range("chat:messages", 0, 100);
-
-        if (cachedMessages == null || cachedMessages.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        // Object에서 ChatMessage로 변환
-        return cachedMessages.stream()
-            .filter(ChatMessage.class::isInstance) // ChatMessage 타입만 필터링
-            .map(ChatMessage.class::cast) // ChatMessage로 형변환
-            .collect(Collectors.toList());
+    // 특정 채팅방의 메시지를 일부 배치로 가져오는 메서드
+    public List<ChatMessage> getMessagesForBatch(String roomUuid) {
+        String key = CHAT_MESSAGE_KEY_PREFIX + roomUuid;
+        List<ChatMessage> cachedMessages = redisTemplate.opsForList().range(key, 0, 100);
+        return cachedMessages != null ? cachedMessages : Collections.emptyList();
     }
 }

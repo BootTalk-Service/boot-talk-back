@@ -18,6 +18,7 @@ import com.icandoit.boottalk.stomp_chat.service.component.MessageLoader;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.RedisConnectionFailureException;
@@ -41,16 +42,6 @@ public class ChatWebsocketService {
     private final MessageLoader messageLoader;
     private final SimpMessagingTemplate template;
 
-    @Scheduled(fixedRate = 5 * 60 * 1000) // 5분마다 실행
-    public void flushRedisToDatabase() {
-        List<ChatMessage> messagesToFlush = redisChatRepository.getMessagesForBatch();
-
-        if (!messagesToFlush.isEmpty()) {
-            chatMessageRepository.saveAll(messagesToFlush);
-            log.info("Redis에서 DB로 메시지 {}개 저장됨", messagesToFlush.size());
-            redisChatRepository.deleteMessages(messagesToFlush);
-        }
-    }
 
     @Transactional
     public void handleUserEnter(Long userId, String roomUuid) {
@@ -102,14 +93,12 @@ public class ChatWebsocketService {
 
     private void checkChatRoomWithinAllowedTime(String roomUuid) {
         // Redis에서 채팅방 정보 조회
-        ChatRoom chatRoom = redisRoomRepository.get(roomUuid)
-            .orElseGet(() -> {
-                // Redis에 캐시된 정보가 없으면 DB에서 조회 후 캐시 저장
-                ChatRoom dbChatRoom = chatRoomRepository.findByRoomUuid(roomUuid)
-                    .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
-                redisRoomRepository.save(dbChatRoom); // DB에서 조회한 채팅방을 Redis에 저장
-                return dbChatRoom;
-            });
+        ChatRoom chatRoom = redisRoomRepository.findById(roomUuid);
+        if (chatRoom == null) {
+            chatRoom = chatRoomRepository.findByRoomUuid(roomUuid)
+                .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+            redisRoomRepository.save(chatRoom);
+        }
 
         // 채팅방 예약 시간 확인
         if (LocalDateTime.now().isBefore(chatRoom.getReservationAt())) {
