@@ -28,7 +28,6 @@ public class NotificationQuartzJob extends QuartzJobBean {
 	private final SseEmitterService sseEmitterService;
 	private final RedisService redisService;
 	private final UserRepository userRepository;
-	private static final String BOOTCAMP_DETAIL_URL = "https://your-domain.com/api/bootcamps/";
 
 	@Override
 	protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
