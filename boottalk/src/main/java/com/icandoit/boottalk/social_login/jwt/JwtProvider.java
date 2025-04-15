@@ -100,4 +100,24 @@ public class JwtProvider {
 			.role(UserRole.valueOf(claims.get("role", String.class)))
 			.build();
 	}
+
+	// WebSocket 핸드셰이크를 위한 토큰 유효성 검증 메서드
+	public boolean validateToken(String token) {
+		try {
+			parseValidateToken(token);
+			return true;
+		} catch (ExpiredJwtException e) {
+			log.error("WebSocket 핸드셰이크 중 토큰이 만료되었습니다.: {}", e.getMessage());
+			return false;
+		} catch (Exception e) {
+			log.error("WebSocket 핸드셰이크 중 잘못된 토큰이 발생했습니다.: {}", e.getMessage());
+			return false;
+		}
+	}
+
+	// WebSocket 핸드셰이크를 위한 사용자 ID 추출 메서드
+	public String getUserIdFromToken(String token) {
+		UserAuthDto userAuthDto = getUserFromToken(token);
+		return userAuthDto.serviceUserId().toString();
+	}
 }
