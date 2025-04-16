@@ -1,8 +1,11 @@
 package com.icandoit.boottalk.common.config;
 
+import com.icandoit.boottalk.stomp_chat.dto.ChatMessageResponseDto;
+import com.icandoit.boottalk.stomp_chat.dto.ChatRoomResponseDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -33,13 +36,36 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, Object> chatRedisTemplate(
+    public RedisTemplate<String, ChatMessageResponseDto> chatMessageDtoRedisTemplate(
         LettuceConnectionFactory redisConnectionFactory) {
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
+
+        RedisTemplate<String, ChatMessageResponseDto> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
 
+        return template;
+    }
+
+    @Bean
+    public RedisTemplate<String, ChatRoomResponseDto> chatRoomDtoRedisTemplate(
+        LettuceConnectionFactory redisConnectionFactory) {
+
+        RedisTemplate<String, ChatRoomResponseDto> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+
+        return template;
+    }
+
+    @Bean
+    public RedisTemplate<String, Boolean> booleanRedisTemplate(
+        RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, Boolean> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer()); // JSON 직렬화
         return template;
     }
 }

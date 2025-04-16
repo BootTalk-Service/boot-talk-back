@@ -17,11 +17,10 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     FROM ChatRoom c
     JOIN c.coffeeChatApplication app
     JOIN app.coffeeChatInfo info
-    WHERE c.isActive = true AND (
-        app.mentee.userId = :userId OR info.mentor.userId = :userId
-    )
+    WHERE app.mentee.userId = :userId OR info.mentor.userId = :userId
+    
 """)
-    List<ChatRoom> findActiveChatRoomsByUserId(@Param("userId") Long userId);
+    List<ChatRoom> findChatRoomsByUserId(@Param("userId") Long userId);
 
     Optional<ChatRoom> findByRoomUuid(String roomUuid);
 

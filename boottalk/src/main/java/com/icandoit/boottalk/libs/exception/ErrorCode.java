@@ -34,7 +34,6 @@ public enum ErrorCode {
     WRITE_REVIEW_FORBIDDEN(403, "리뷰 작성할 권한이 없습니다."),
 
     /* 404 NOT_FOUND */
-    NOT_FOUND(404, "요청한 리소스를 찾을 수 없습니다."),
     USER_NOT_FOUND(404, "유저를 찾을 수 없습니다."),
     BOOTCAMP_NOT_FOUND(404, "부트캠프를 찾을 수 없습니다."),
     REVIEW_NOT_FOUND(404, "리뷰를 찾을 수 없습니다."),
@@ -45,6 +44,7 @@ public enum ErrorCode {
     CHAT_ROOM_NOT_FOUND(404, "채팅방을 찾을 수 없습니다."),
     TRAINING_CENTER_NOT_FOUND(404, "요청한 훈련 기관을 찾을 수 없습니다."),
     API_DATA_IS_EMPTY(404, "API 데이터가 비어 있습니다."),
+    CHAT_ROOM_STATUS_NOT_FOUND(404, "채팅방 상태를 찾을 수 없습니다."),
 
     /* 409 CONFLICT */
     DUPLICATE_REVIEW(409, "해당 부트캠프에 이미 리뷰를 작성하였습니다."),

@@ -3,14 +3,13 @@ package com.icandoit.boottalk.stomp_chat.service.component;
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
 import com.icandoit.boottalk.stomp_chat.dto.ChatMessageResponseDto;
-import com.icandoit.boottalk.stomp_chat.entity.ChatMessage;
 import com.icandoit.boottalk.stomp_chat.entity.ChatRoom;
 import com.icandoit.boottalk.stomp_chat.entity.enums.MessageType;
-import com.icandoit.boottalk.stomp_chat.repository.ChatMessageRepository;
 import com.icandoit.boottalk.stomp_chat.repository.ChatRoomRepository;
+import com.icandoit.boottalk.stomp_chat.repository.RedisChatUserRepository;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Component;
 
@@ -19,23 +18,17 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class ChatMessageSender {
 
-    private final ChatMessageRepository messageRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final RedisChatUserRepository redisChatUserRepository;
     private final SimpMessageSendingOperations template;
-    private final RedisTemplate<String, Object> redisTemplate;
 
-    public static final String REDIS_CHAT_ENTERED_PREFIX = "chat:entered:";
 
-    public void enterSystemMessage(Long userId, String roomUuid) {
-        // Redis에서 사용자가 이미 입장했는지 체크
-        boolean hasEntered =
-            redisTemplate.opsForValue().get(REDIS_CHAT_ENTERED_PREFIX + roomUuid + ":" + userId) != null;
-
-        if (hasEntered) {
-            log.info("이미 입장했던 유저 : {}, roomUuid : {}", userId, roomUuid);
+    // 입장 메시지 전송
+    public void sendEnterMessage(Long userId, String roomUuid) {
+        // Redis에서 사용자가 입장했는지 확인
+        if (!redisChatUserRepository.hasUserEntered(roomUuid, userId)) {
             return;
         }
-
         ChatRoom chatRoom = chatRoomRepository.findByRoomUuid(roomUuid)
             .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
 
@@ -44,23 +37,21 @@ public class ChatMessageSender {
             ? chatRoom.getMentee().getUserId()
             : chatRoom.getMentor().getUserId();
 
-        // 입장 메시지 생성
-        ChatMessage enterMessage = ChatMessage.of(
-            roomUuid,
-            userId,
-            receiverId,
-            "입장하였습니다.",
-            MessageType.SYSTEM
+        ChatMessageResponseDto enterMessage = new ChatMessageResponseDto(
+            roomUuid, 0L, receiverId, "님이 입장하였습니다.", MessageType.SYSTEM, LocalDateTime.now(), false
         );
 
-        // 입장 메시지 저장
-        messageRepository.save(enterMessage);
+        // 공통화된 메시지 전송 메서드 사용
+        sendMessage(receiverId, enterMessage);
+    }
 
-        // WebSocket 전송
-        String destination = "/queue/chat/" + roomUuid + "/" + userId;
-        template.convertAndSend(destination, ChatMessageResponseDto.from(enterMessage));
+    // WebSocket으로 전송하는 공통 로직
+    public void sendMessage(Long receiverId, ChatMessageResponseDto chatMessageResponseDto) {
+        String roomUuid = chatMessageResponseDto.roomUuid();
 
-        // Redis에 입장 정보 저장 (입장한 사용자 ID 기록)
-        redisTemplate.opsForValue().set(REDIS_CHAT_ENTERED_PREFIX + roomUuid + ":" + userId, true);
+        String destination = "/queue/chat/" + roomUuid + "/" + receiverId;
+        template.convertAndSend(destination, chatMessageResponseDto);
+
+        log.info("메시지 전송 완료. receiverId={}, roomUuid={}", receiverId, roomUuid);
     }
 }
