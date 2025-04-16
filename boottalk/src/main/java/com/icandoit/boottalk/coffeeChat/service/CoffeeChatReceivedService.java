@@ -37,7 +37,12 @@ public class CoffeeChatReceivedService {
         Long userId, Pageable pageable) {
 
         // 커피챗 정보 조회
-        CoffeeChatInfo coffeeChatInfo = coffeeChatCommonService.getCoffeeChatInfoByUserId(userId);
+        CoffeeChatInfo coffeeChatInfo = coffeeChatCommonService.getOptionalCoffeeChatInfoByUserId(userId).orElse(null);
+
+        if (coffeeChatInfo == null) {
+            Page<CoffeeChatApplicationResponseDto> emptyPage = Page.empty(pageable);
+            return PagedResponseDto.from(emptyPage);
+        }
 
         Page<CoffeeChatApplicationResponseDto> page =
             coffeeChatAppRepository.findByCoffeeChatInfo_CoffeeChatInfoId(coffeeChatInfo.getCoffeeChatInfoId(), pageable)

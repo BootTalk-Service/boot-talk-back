@@ -1,5 +1,7 @@
 package com.icandoit.boottalk.coffeeChat.service;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatApplication;
@@ -32,9 +34,14 @@ public class CoffeeChatCommonService {
         return coffeeChatInfoRepository.findById(coffeeChatInfoId)
             .orElseThrow(() -> new CustomException(ErrorCode.COFFEE_CHAT_NOT_FOUND));
     }
+
     protected CoffeeChatInfo getCoffeeChatInfoByUserId(Long userId) {
         return coffeeChatInfoRepository.findByMentor_UserId(userId)
             .orElseThrow(() -> new CustomException(ErrorCode.USER_COFFEE_CHAT_NOT_FOUND));
+    }
+
+    protected Optional<CoffeeChatInfo> getOptionalCoffeeChatInfoByUserId(Long userId) {
+        return coffeeChatInfoRepository.findByMentor_UserId(userId);
     }
 
     protected CoffeeChatApplication getCoffeeChatApplication(Long coffeeChatAppId) {
