@@ -54,9 +54,7 @@ public class ChatWebsocketService {
         // 채팅방 상태 갱신
         statusUpdater.updateChatRoomStatusOnEnter(userId, roomUuid);
 
-        CompletableFuture.runAsync(() -> {
-            messageSender.sendEnterMessage(userId, roomUuid);
-        }, taskExecutor);
+        CompletableFuture.runAsync(() -> messageSender.sendEnterMessage(userId, roomUuid), taskExecutor);
     }
 
     // Listener 호출(퇴장 시) 호출되는 매서드
