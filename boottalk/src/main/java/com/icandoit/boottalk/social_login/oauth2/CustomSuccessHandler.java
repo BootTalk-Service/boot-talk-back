@@ -64,6 +64,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 			.maxAge(60 * 60 * 60)
 			.path("/")
 			.httpOnly(true)
+			.secure(true)
 			.sameSite("None")
 			.build();
 
