@@ -1,5 +1,7 @@
 package com.icandoit.boottalk.stomp_chat.repository;
 
+import static com.icandoit.boottalk.stomp_chat.common.RedisKeyPrefix.roomInfo;
+
 import com.icandoit.boottalk.stomp_chat.dto.ChatRoomResponseDto;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
@@ -11,17 +13,18 @@ import org.springframework.stereotype.Repository;
 public class RedisChatRoomRepository {
 
     private final RedisTemplate<String, ChatRoomResponseDto> redisTemplate;
-    private static final String CHAT_ROOM_KEY_PREFIX = "chat:room:";
 
     // 채팅방 정보 Redis에 저장
     public void saveChatRoomToCache(ChatRoomResponseDto chatRoomDto) {
-        String key = CHAT_ROOM_KEY_PREFIX + chatRoomDto.roomUuid();
+        String key = roomInfo(chatRoomDto.roomUuid());
         redisTemplate.opsForValue().set(key, chatRoomDto, Duration.ofMinutes(30));
     }
 
     // Redis에서 채팅방 정보 조회
     public ChatRoomResponseDto findChatRoomByRoomUuidFromCache(String roomUuid) {
-        String key = CHAT_ROOM_KEY_PREFIX + roomUuid;
+        String key = roomInfo(roomUuid);
         return redisTemplate.opsForValue().get(key);
     }
 }
+
+
