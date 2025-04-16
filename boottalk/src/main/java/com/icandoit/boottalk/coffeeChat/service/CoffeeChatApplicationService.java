@@ -18,6 +18,9 @@ import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatInfoRepository;
 import com.icandoit.boottalk.common.dto.PagedResponseDto;
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
+import com.icandoit.boottalk.notification.dto.NotificationRequestDto;
+import com.icandoit.boottalk.notification.service.SseEmitterService;
+import com.icandoit.boottalk.notification.type.NotificationType;
 import com.icandoit.boottalk.point_history.domain.type.EventType;
 import com.icandoit.boottalk.point_history.service.CreatePointHistoryService;
 import com.icandoit.boottalk.user.domain.entity.User;
@@ -36,6 +39,7 @@ public class CoffeeChatApplicationService {
     private final UserRepository userRepository;
 
     private final CreatePointHistoryService createPointHistoryService;
+    private final SseEmitterService sseEmitterService;
 
     // 멘토 타입에 따른 포인트 차감액
     private final int GENERAL_COFFEE_CHAT_POINT = 1;
@@ -71,6 +75,12 @@ public class CoffeeChatApplicationService {
 
         CoffeeChatApplication coffeeChatApp = CoffeeChatApplication.of(user, coffeeChatInfo, deductionPoint, request);
         coffeeChatAppRepository.save(coffeeChatApp);
+
+        // 멘토에게 커피챗 신청 알림 전송
+        sseEmitterService.sendToClient(
+            coffeeChatInfo.getMentor().getUserId(),
+            NotificationRequestDto.ofType(NotificationType.COFFEE_CHAT_REQUEST_RECEIVED)
+        );
 
         return CoffeeChatApplicationResponseDto.from(coffeeChatApp);
 
@@ -132,19 +142,25 @@ public class CoffeeChatApplicationService {
         StatusType currentStatus = coffeeChatApp.getStatus();
 
         // 커피챗 취소는 상태가 대기 또는 수락 중일 때만 가능
-        if (!(currentStatus == StatusType.PENDING || currentStatus == StatusType.APPROVED)) {
+        if (!(currentStatus.isPending() || currentStatus.isApproved())) {
             throw new CustomException(ErrorCode.COFFEE_CHAT_CANNOT_CANCEL);
         }
 
         // 커피챗 취소시 환불 처리
         // 상태가 대기이거나, 상태가 승인이고 커피챗 시작 시간 2일 전까지는 환불 처리
-        if (currentStatus == StatusType.PENDING ||
-            currentStatus == StatusType.APPROVED && coffeeChatApp.isNDaysOrMoreUntilStart(2)
+        if (currentStatus.isPending() ||
+            currentStatus.isApproved() && coffeeChatApp.isNDaysOrMoreUntilStart(2)
         ) {
             createPointHistoryService.createPointHistory(EventType.COFFEE_CHAT_CANCEL_REFUND, userId, coffeeChatApp.getUsedPoint());
         }
 
         coffeeChatApp.setStatus(StatusType.CANCELED);
+
+        // 멘토에게 커피챗 취소 알린 전송
+        sseEmitterService.sendToClient(
+            userId,
+            NotificationRequestDto.ofType(NotificationType.COFFEE_CHAT_REQUEST_CANCELLED_FROM_MENTEE)
+        );
 
     }
 

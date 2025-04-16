@@ -24,13 +24,13 @@ public record NotificationResponseDto(
 			url += "/" + notification.getTargetId();
 		}
 
-		return NotificationResponseDto.builder()
-			.notificationId(notification.getNotificationId())
-			.type(notification.getType())
-			.message(notification.getType().getMessage())
-			.url(baseUrl + url)
-			.checked(notification.isChecked())
-			.createdAt(notification.getCreatedAt())
-			.build();
+		return new NotificationResponseDto(
+			notification.getNotificationId(),
+			notification.getType(),
+			notification.getType().getMessage(),
+			baseUrl + url,
+			notification.isChecked(),
+			notification.getCreatedAt()
+		);
 	}
 }
