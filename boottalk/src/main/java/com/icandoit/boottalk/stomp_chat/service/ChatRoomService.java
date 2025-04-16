@@ -51,7 +51,7 @@ public class ChatRoomService {
 
     // 채팅방 목록 조회
     public List<ChatRoomResponseDto> getUserChatRooms(Long userId) {
-        List<ChatRoom> chatRooms = chatRoomRepository.findActiveChatRoomsByUserId(userId);
+        List<ChatRoom> chatRooms = chatRoomRepository.findChatRoomsByUserId(userId);
         return chatRooms.stream()
             .map(ChatRoomResponseDto::from)
             .toList();
