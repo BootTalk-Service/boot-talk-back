@@ -60,7 +60,7 @@ public class SecurityConfiguration {
 			.authorizeHttpRequests(auth -> auth
 				// 경로에 대한 접근 권한 설정
 				// TODO  : 추후에 접근 가능한 페이지 설정
-				.requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**", "/api/oauth2/authorization/**", "/login/**").permitAll()
+				.requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**", "/api/oauth2/authorization/**", "/login/**", "/api/bootcamps/**", "/api/reviews/**").permitAll()
 				.anyRequest().authenticated())
 			.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
 			//oauth2 로그인 설정
