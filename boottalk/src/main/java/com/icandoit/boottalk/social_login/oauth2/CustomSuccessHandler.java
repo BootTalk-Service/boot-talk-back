@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -45,8 +43,10 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
 
 		//토큰 생성 후 쿠키에 담아 전달
-		createCookie(response ,"Authorization"
-			, jwtProvider.createToken(userDetails.getServiceUserId(), userDetails.getName(), role));
+		response.addCookie(createCookie("Authorization", jwtProvider.createToken(userDetails.getServiceUserId(), userDetails.getName(), role)));
+
+		// createCookie(response ,"Authorization"
+		// 	, jwtProvider.createToken(userDetails.getServiceUserId(), userDetails.getName(), role));
 
 		// 신규회원인 경우,추가정보 입력 url로 리다이렉션
 		if (UserRole.valueOf(role).equals(UserRole.NEW_USER)) {
@@ -58,22 +58,32 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 	}
 
 	// 쿠키 생성
-	private void createCookie(HttpServletResponse response, String key, String value) {
+	private Cookie createCookie(String key, String value) {
 
-		ResponseCookie responseCookie = ResponseCookie.from(key, value)
-			.maxAge(60 * 60 * 60)
-			.path("/")
-			.httpOnly(true)
-			.secure(true)
-			.sameSite("None")
-			.build();
+		Cookie cookie = new Cookie(key, value);
+		cookie.setMaxAge(60*60*60);
+		//cookie.setSecure(true);
+		cookie.setPath("/");
+		cookie.setHttpOnly(true);
 
-		// Cookie cookie = new Cookie(key, value);
-		// cookie.setMaxAge(60*60*60);
-		// // cookie.setSecure(true); 실제 서비스 배포시에 활성화 (https 에서만 해당 쿠키가 전달되게 함)
-		// cookie.setPath("/");
-		// cookie.setHttpOnly(true);
-
-		response.addHeader(HttpHeaders.SET_COOKIE, responseCookie.toString());
+		return cookie;
 	}
+	// private void createCookie(HttpServletResponse response, String key, String value) {
+	//
+	// 	ResponseCookie responseCookie = ResponseCookie.from(key, value)
+	// 		.maxAge(60 * 60 * 60)
+	// 		.path("/")
+	// 		.httpOnly(true)
+	// 		.domain("http://localhost:8080")
+	// 		.sameSite("None")
+	// 		.build();
+	//
+	// 	// Cookie cookie = new Cookie(key, value);
+	// 	// cookie.setMaxAge(60*60*60);
+	// 	// // cookie.setSecure(true); 실제 서비스 배포시에 활성화 (https 에서만 해당 쿠키가 전달되게 함)
+	// 	// cookie.setPath("/");
+	// 	// cookie.setHttpOnly(true);
+	//
+	// 	response.addHeader(HttpHeaders.SET_COOKIE, responseCookie.toString());
+	// }
 }

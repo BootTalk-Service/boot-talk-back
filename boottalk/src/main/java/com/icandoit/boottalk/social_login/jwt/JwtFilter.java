@@ -45,6 +45,7 @@ public class JwtFilter extends OncePerRequestFilter {
 			|| requestURI.startsWith("/v3/api-docs")
 			|| requestURI.startsWith("/login/")
 			|| requestURI.startsWith("/api/oauth2/")
+			|| requestURI.startsWith("/api/bootcamps")
 			) {
 			filterChain.doFilter(request, response);
 			return;
