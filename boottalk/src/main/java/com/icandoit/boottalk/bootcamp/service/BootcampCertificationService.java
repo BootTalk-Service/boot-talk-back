@@ -104,7 +104,6 @@ public class BootcampCertificationService {
 
 	// 수료증 인증 승인 거절 알림 발송
 	public void sendCertificationNotification(Long userId, NotificationType type) {
-		NotificationRequestDto requestDto = new NotificationRequestDto(type, null);
-		sseEmitterService.sendToClient(userId, requestDto);
+		sseEmitterService.sendToClient(userId, NotificationRequestDto.ofType(type));
 	}
 }
