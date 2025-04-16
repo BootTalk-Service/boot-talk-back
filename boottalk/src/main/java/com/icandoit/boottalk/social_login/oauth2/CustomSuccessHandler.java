@@ -32,7 +32,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
 		//CustomOAuth2UserService.loadUser 에서 반환된 사용자 정보 가져오기
 		CustomOAuth2User userDetails = (CustomOAuth2User) authentication.getPrincipal();
-		log.error("userDetails info : {}, {}, {}", userDetails.getServiceUserId(), userDetails.getName(), userDetails.getAuthorities());
+		log.error("소셜 로그인 성공 userDetails info : {}, {}, {}", userDetails.getServiceUserId(), userDetails.getName(), userDetails.getAuthorities());
 
 		//사용자 권한 가져오기
 		Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
@@ -51,7 +51,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 			response.sendRedirect("http://localhost:3000/social-register");
 		} else {
 			// 기존 회원의 경우, 메인페이지로 리다이렉션
-			response.sendRedirect("http://localhost:3000/");
+			response.sendRedirect("http://localhost:3000");
 		}
 	}
 
