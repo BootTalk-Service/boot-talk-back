@@ -18,10 +18,12 @@ import com.icandoit.boottalk.stomp_chat.service.component.ChatRoomStatusUpdater;
 import com.icandoit.boottalk.stomp_chat.service.component.MessageLoader;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,17 +42,27 @@ public class ChatWebsocketService {
     private final MessageLoader messageLoader;
     private final SimpMessagingTemplate template;
 
+    private ThreadPoolTaskExecutor taskExecutor;
+
 
     @Transactional
     public void handleUserEnter(Long userId, String roomUuid) {
-        // 1. 메시지 조회 및 전송
+
+        // 메시지 조회 및 전송
         messageLoader.loadAndSendMessages(userId, roomUuid);
 
-        // 2. 채팅방 상태 갱신
+        // 채팅방 상태 갱신
         statusUpdater.updateChatRoomStatusOnEnter(userId, roomUuid);
 
-        // 3. 유저 입장 메시지가 필요한 경우 전송
-        messageSender.enterSystemMessage(userId, roomUuid);
+        CompletableFuture.runAsync(() -> {
+            messageSender.sendEnterMessage(userId, roomUuid);
+        }, taskExecutor);
+    }
+
+    // Listener 호출(퇴장 시) 호출되는 매서드
+    @Transactional
+    public void handleUserLeave(Long userId) {
+        statusUpdater.updateChatRoomStatusOnLeave(userId);
     }
 
     @Transactional
@@ -73,12 +85,9 @@ public class ChatWebsocketService {
 
         // Redis에 저장
         saveMessageWithFallback(messageToCache);
-
-        // 메시지 WebSocket으로 전송
-        String destination = "/queue/chat/" + roomUuid + "/" + requestDto.receiverId();
-        template.convertAndSend(destination, messageToCache);
-
         log.info("메시지 Redis에 캐시됨: {}", messageToCache);
+        // 메시지 WebSocket으로 전송
+        messageSender.sendMessage(requestDto.receiverId(), messageToCache);
     }
 
     public void sendTypingStatus(Long senderId, ChatTypingRequestDto requestDto) {
@@ -92,17 +101,18 @@ public class ChatWebsocketService {
 
     private void checkChatRoomWithinAllowedTime(String roomUuid) {
         // Redis에서 채팅방 정보 조회
-        ChatRoomResponseDto chatRoomDto = redisRoomRepository.findChatRoomByRoomUuidFromCache(roomUuid);
+        ChatRoomResponseDto chatRoomDto = redisRoomRepository.findChatRoomByRoomUuidFromCache(
+            roomUuid);
 
+        // 없다면 redis 저장
         if (chatRoomDto == null) {
             ChatRoom chatRoomEntity = chatRoomRepository.findByRoomUuid(roomUuid)
                 .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
 
-            chatRoomDto = ChatRoomResponseDto.from(chatRoomEntity); // 엔티티 → DTO 변환
-            redisRoomRepository.saveChatRoomToCache(chatRoomDto);   // Redis에 DTO 저장
+            chatRoomDto = ChatRoomResponseDto.from(chatRoomEntity);
+            redisRoomRepository.saveChatRoomToCache(chatRoomDto);
         }
 
-        // 채팅방 예약 시간 확인
         if (LocalDateTime.now().isBefore(chatRoomDto.reservationAt())) {
             throw new CustomException(ErrorCode.CHAT_ROOM_NOT_STARTED);
         }
@@ -113,11 +123,17 @@ public class ChatWebsocketService {
     }
 
     public void saveMessageWithFallback(ChatMessageResponseDto message) {
+        boolean isSavedToRedis = false;
         try {
             redisChatRepository.save(message.roomUuid(), message, Duration.ofMinutes(30));
+            isSavedToRedis = true;
         } catch (RedisConnectionFailureException ex) {
+            log.error("Redis 장애 발생: 메시지를 Redis에 저장하지 못했습니다. DB에 저장합니다.");
+        }
+
+        if (!isSavedToRedis) {
             ChatMessage chatMessage = message.toEntity();
-            chatMessageRepository.save(chatMessage); // Redis 장애 시 DB에만 저장
+            chatMessageRepository.save(chatMessage);
             log.error("Redis 장애 발생, 메시지 DB로 저장됨: {}", message);
         }
     }
