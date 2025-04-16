@@ -4,25 +4,24 @@ import com.icandoit.boottalk.stomp_chat.entity.ChatRoom;
 import java.time.LocalDateTime;
 
 public record ChatRoomResponseDto(
+    Long chatRoomId,
     String roomUuid,
-    String mentorName,
-    Long mentorId,
-    String menteeName,
-    Long menteeId,
+    ChatUserDto mentor,
+    ChatUserDto mentee,
     LocalDateTime reservationAt,
-    LocalDateTime expiresAt,
-    boolean isActive
+    LocalDateTime endAt,
+    LocalDateTime expiresAt
 ) {
+
     public static ChatRoomResponseDto from(ChatRoom chatRoom) {
         return new ChatRoomResponseDto(
+            chatRoom.getChatRoomId(),
             chatRoom.getRoomUuid(),
-            chatRoom.getMentor().getUserName(),
-            chatRoom.getMentor().getUserId(),
-            chatRoom.getMentee().getUserName(),
-            chatRoom.getMentee().getUserId(),
+            ChatUserDto.from(chatRoom.getMentor()),
+            ChatUserDto.from(chatRoom.getMentee()),
             chatRoom.getReservationAt(),
             chatRoom.getEndAt(),
-            chatRoom.isActive()
+            chatRoom.getExpiresAt()
         );
     }
 }

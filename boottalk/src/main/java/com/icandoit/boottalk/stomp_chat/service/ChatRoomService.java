@@ -47,14 +47,6 @@ public class ChatRoomService {
 
         ChatRoom chatRoom = chatRoomRepository.save(ChatRoom.of(application));
 
-        // 시스템 메시지 생성 및 전송
-        MessageRequestDto systemMessage = messageFactory.createSystemMessage(
-            chatRoom.getRoomUuid(),
-            chatRoom.getMentee().getUserId(),
-            SystemMessageUtil.createSystemMessage(chatRoom.getReservationAt())
-        );
-
-        chatWebsocketService.saveAndSendMessage(systemMessage);
         return ChatRoomCreateResponse.from(chatRoom.getRoomUuid());
     }
 
@@ -68,13 +60,10 @@ public class ChatRoomService {
 
     // 채팅 메시지 기록 조회
     public List<MessageResponseDto> getMessages(Long userId, String roomUuid) {
-        ChatRoom chatRoom = chatRoomRepository.findByRoomUuid(roomUuid)
-            .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+        ChatRoom chatRoom = getChatRoom(roomUuid);
 
         // 해당 채팅방에 참여한 유저인지 체크
-        if (!chatRoom.isParticipant(userId)) {
-            throw new CustomException(ErrorCode.CHAT_ROOM_FORBIDDEN);
-        }
+        validateChatRoomEntry(chatRoom, userId);
 
         // 만료일 체크
         if (chatRoom.getExpiresAt().isBefore(LocalDateTime.now())) {
@@ -107,23 +96,43 @@ public class ChatRoomService {
         chatRoomRepository.save(chatRoom);
     }
 
+    // 채팅방 퇴장
+    public void leaveChatRoom(Long userId, String roomUuid) {
+        ChatRoom chatRoom = getChatRoom(roomUuid);
+        validateChatRoomEntry(chatRoom, userId);
+
+        if (isMentor(chatRoom, userId)) {
+            chatRoom.setMentorEntered(false);
+        }
+
+        if (isMentee(chatRoom, userId)) {
+            chatRoom.setMenteeEntered(false);
+        }
+        chatRoomRepository.save(chatRoom);
+    }
+
     private ChatRoom getValidChatRoom(String roomUuid) {
-        ChatRoom chatRoom = chatRoomRepository.findByRoomUuid(roomUuid)
-            .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+        ChatRoom chatRoom = getChatRoom(roomUuid);
 
         if (!chatRoom.isActive()) {
             throw new CustomException(ErrorCode.CHAT_ROOM_NOT_ACTIVE);
         }
 
-        if (LocalDateTime.now().isAfter(chatRoom.getExpiresAt())) {
+        if (LocalDateTime.now().isAfter(chatRoom.getExpiresAt()) && chatRoom.isActive()) {
             chatRoom.setActive(false);
             chatRoomRepository.save(chatRoom);
-            throw new CustomException(ErrorCode.CHAT_ROOM_EXPIRED);
         }
 
         return chatRoom;
     }
 
+    private ChatRoom getChatRoom(String roomUuid) {
+        ChatRoom chatRoom = chatRoomRepository.findByRoomUuid(roomUuid)
+            .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+        return chatRoom;
+    }
+
+    // 참여자인지 확인
     private void validateChatRoomEntry(ChatRoom chatRoom, Long userId) {
         boolean isMentor = isMentor(chatRoom, userId);
         boolean isMentee = isMentee(chatRoom, userId);

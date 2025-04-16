@@ -21,8 +21,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Table(name = "message")
-public class Message {
+@Table(name = "chat_message")
+public class ChatMessage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,19 +32,14 @@ public class Message {
     private String roomUuid;
 
     @Column(nullable = false)
-    private String senderName;
-
-    @Column(nullable = false)
     private Long senderId;
 
     @Column(nullable = false)
     private Long receiverId;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String message;
+    private String content;
 
-    @Column(nullable = false)
-    private LocalDateTime sentAt;
 
     @Column(nullable = false)
     private boolean isRead;
@@ -53,17 +48,19 @@ public class Message {
     @Column(columnDefinition = "VARCHAR(20)", nullable = false)
     private MessageType type;
 
-    public static Message of(String roomUuid, Long senderId, String senderName, Long receiverId, String message,
+    @Column(nullable = false)
+    private LocalDateTime sentAt;
+
+    public static ChatMessage of(String roomUuid, Long senderId, Long receiverId, String content,
         MessageType type) {
-        return Message.builder()
+        return ChatMessage.builder()
             .roomUuid(roomUuid)
             .senderId(senderId)
-            .senderName(senderName)
             .receiverId(receiverId)
-            .message(message)
-            .sentAt(LocalDateTime.now())
+            .content(content)
             .isRead(false)
             .type(type)
+            .sentAt(LocalDateTime.now())
             .build();
     }
 }
