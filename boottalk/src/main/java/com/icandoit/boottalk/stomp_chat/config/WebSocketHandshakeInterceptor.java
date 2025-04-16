@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
@@ -25,15 +27,19 @@ public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
 
             // 헤더에서 JWT 토큰 추출
             String token = extractToken(servletRequest);
-
-            if (token != null && jwtTokenProvider.validateToken(token)) {
-                // 토큰에서 사용자 ID 추출
-                String userId = jwtTokenProvider.getUserIdFromToken(token);
-
-                // WebSocket 세션 속성에 사용자 ID 저장
-                attributes.put("userId", userId);
-                return true;
+            if (token == null) {
+                throw new AuthenticationCredentialsNotFoundException("Authorization 헤더에 토큰이 없습니다.");
             }
+            if (!jwtTokenProvider.validateToken(token)) {
+                throw new BadCredentialsException("JWT 토큰이 유효하지 않습니다.");
+            }
+            // 토큰에서 사용자 ID 추출
+            String userId = jwtTokenProvider.getUserIdFromToken(token);
+
+            // WebSocket 세션 속성에 사용자 ID 저장
+            attributes.put("userId", userId);
+            return true;
+
         }
         return false;
     }
