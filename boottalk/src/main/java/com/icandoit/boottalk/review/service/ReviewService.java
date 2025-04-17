@@ -12,12 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
 import com.icandoit.boottalk.bootcamp.entity.Course;
 import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
-import com.icandoit.boottalk.bootcamp.entity.enums.CertificationStatus;
 import com.icandoit.boottalk.bootcamp.repository.BootcampCertificationRepository;
 import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
 import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
-import com.icandoit.boottalk.point_history.domain.type.EventType;
 import com.icandoit.boottalk.point_history.service.CreatePointHistoryService;
 import com.icandoit.boottalk.review.dto.ReviewCreateRequestDto;
 import com.icandoit.boottalk.review.dto.ReviewResponseDto;
@@ -43,35 +41,25 @@ public class ReviewService {
 	@Transactional
 	public ReviewResponseDto createReview(ReviewCreateRequestDto request, Long userId) {
 		String trainingProgramId = request.trainingProgramId();
-
-		validateCreateReview(trainingProgramId, userId);
+		assertNotReviewed(trainingProgramId, userId);
 
 		// 비관적 락으로 course 를 조회
 		Course course = getCourseWithLock(trainingProgramId);
 		User user = userRepository.getReferenceById(userId);
-
-
 		assertCertificationApproved(user, course);
 
 		Review saved = reviewRepository.save(Review.of(request, course, user));
-
-		// course 점수 업데이트
 		updateCourseReviewStats(course, request.rating(), 1);
 		createPointHistoryService.createPointHistory(REVIEW, userId, 1);
+
 		return ReviewResponseDto.from(saved);
 	}
 
 	public Page<ReviewResponseDto> getAllReviews(Pageable pageable, String category) {
 		if (category != null && !category.isBlank()) {
-			if (!BootcampCategoryType.isValidKoreanName(category)) {
-				throw new CustomException(INVALID_CATEGORY_NAME);
-			}
+			return filterByCategory(category, pageable);
 
-			BootcampCategoryType categoryType = BootcampCategoryType.fromKoreanName(category);
-			return reviewRepository.findByBootcampCategory(categoryType, pageable)
-				.map(ReviewResponseDto::from);
 		}
-
 		return reviewRepository.findAll(pageable)
 			.map(ReviewResponseDto::from);
 	}
@@ -83,17 +71,13 @@ public class ReviewService {
 	
 	@Transactional
 	public ReviewResponseDto updateReview(ReviewUpdateRequestDto request, Long reviewId, Long userId) {
-
 		Review review = getReview(reviewId);
-
-		validateReview(review.getUser().getUserId(), userId);
+		assertReviewOwner(review.getUser().getUserId(), userId);
 
 		// 비관적 락으로 코드 조회
 		Course course = getCourseWithLock(review.getCourse().getTrainingProgramId());
-
 		// 기존 평점 제거 후 새 평점 반영
 		updateCourseReviewStats(course, request.rating() - review.getRating(), 0);
-
 		review.update(request);
 
 		return ReviewResponseDto.from(review);
@@ -102,32 +86,22 @@ public class ReviewService {
 	@Transactional
 	public void deleteReview(Long reviewId, Long userId) {
 		Review review = getReview(reviewId);
-
-		validateReview(review.getUser().getUserId(), userId);
+		assertReviewOwner(review.getUser().getUserId(), userId);
 
 		Course course = getCourseWithLock(review.getCourse().getTrainingProgramId());
-
 		updateCourseReviewStats(course, -review.getRating(), -1);
-
 		createPointHistoryService.createPointHistory(REVIEW_DELETED, userId, 1);
 		reviewRepository.delete(review);
-
 	}
 
 	// 부트캠프 ID 로부터 Course 를 조회한 후, 해당 Course 에 작성된 리뷰를 페이징 처리하여 반환
 	public Page<ReviewResponseDto> getReviewsBootcampId(Long bootcampId, Pageable pageable) {
 		Bootcamp bootcamp = getBootcamp(bootcampId);
-
 		return reviewRepository.findByCourse(bootcamp.getCourse(), pageable)
 			.map(ReviewResponseDto::from);
 	}
 
-	private Review getReview(Long id) {
-		return reviewRepository.findById(id).
-			orElseThrow(() -> new CustomException(REVIEW_NOT_FOUND));
-	}
-
-	private void validateCreateReview(String trainingProgramId, Long userId) {
+	private void assertNotReviewed(String trainingProgramId, Long userId) {
 		if (reviewRepository.existsByCourse_TrainingProgramIdAndUser_UserId(trainingProgramId, userId)) {
 			throw new CustomException(DUPLICATE_REVIEW);
 		}
@@ -139,14 +113,29 @@ public class ReviewService {
 		}
 	}
 
-	private void validateReview(Long reviewUserId, Long userId) {
+	private void assertReviewOwner(Long reviewUserId, Long userId) {
 		if (!reviewUserId.equals(userId)) {
 			throw new CustomException(NOT_REVIEW_OWNER);
 		}
 	}
 
+	private Page<ReviewResponseDto> filterByCategory(String category, Pageable pageable) {
+		if (!BootcampCategoryType.isValidKoreanName(category)) {
+			throw new CustomException(INVALID_CATEGORY_NAME);
+		}
+
+		BootcampCategoryType categoryType = BootcampCategoryType.fromKoreanName(category);
+		return reviewRepository.findByBootcampCategory(categoryType, pageable)
+			.map(ReviewResponseDto::from);
+	}
+
 	private Bootcamp getBootcamp(Long id) {
 		return bootcampRepository.getReferenceById(id);
+	}
+
+	private Review getReview(Long id) {
+		return reviewRepository.findById(id).
+			orElseThrow(() -> new CustomException(REVIEW_NOT_FOUND));
 	}
 
 	// 비관적 락을 사용해 course 조회
