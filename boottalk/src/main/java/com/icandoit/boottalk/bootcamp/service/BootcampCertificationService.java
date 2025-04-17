@@ -1,5 +1,7 @@
 package com.icandoit.boottalk.bootcamp.service;
 
+import static com.icandoit.boottalk.notification.type.NotificationType.*;
+
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -18,6 +20,9 @@ import com.icandoit.boottalk.bootcamp.repository.BootcampCertificationRepository
 import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
+import com.icandoit.boottalk.notification.dto.NotificationRequestDto;
+import com.icandoit.boottalk.notification.service.SseEmitterService;
+import com.icandoit.boottalk.notification.type.NotificationType;
 import com.icandoit.boottalk.user.domain.entity.User;
 import com.icandoit.boottalk.user.domain.repository.UserRepository;
 
@@ -30,6 +35,7 @@ public class BootcampCertificationService {
 	private final UserRepository userRepository;
 	private final CourseRepository courseRepository;
 	private final BootcampCertificationRepository bootcampCertificationRepository;
+	private final SseEmitterService sseEmitterService;
 
 	// 수료증 등록
 	@Transactional
@@ -86,6 +92,18 @@ public class BootcampCertificationService {
 
 		BootcampCertification savedCertification = bootcampCertificationRepository.save(certification);
 
+		// 수료증 인증 알림 전송 부분
+		Long userId = savedCertification.getUser().getUserId();
+		NotificationType type = request.isTrue() ? CERTIFICATE_VERIFIED : CERTIFICATE_REJECTED;
+
+		sendCertificationNotification(userId, type);
+
+
 		return CertificationResponseDto.from(savedCertification);
+	}
+
+	// 수료증 인증 승인 거절 알림 발송
+	public void sendCertificationNotification(Long userId, NotificationType type) {
+		sseEmitterService.sendToClient(userId, NotificationRequestDto.ofType(type));
 	}
 }

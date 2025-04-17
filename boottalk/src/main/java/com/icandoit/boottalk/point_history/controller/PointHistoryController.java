@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/points/my")
+@RequestMapping("/api/points/my")
 public class PointHistoryController {
 
 	private final SearchPointHistoryService searchPointHistoryService;

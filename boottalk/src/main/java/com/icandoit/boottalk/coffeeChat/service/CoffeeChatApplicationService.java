@@ -14,14 +14,15 @@ import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatInfo;
 import com.icandoit.boottalk.coffeeChat.entity.enums.MentorType;
 import com.icandoit.boottalk.coffeeChat.entity.enums.StatusType;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatApplicationRepository;
-import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatInfoRepository;
 import com.icandoit.boottalk.common.dto.PagedResponseDto;
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
+import com.icandoit.boottalk.notification.dto.NotificationRequestDto;
+import com.icandoit.boottalk.notification.service.SseEmitterService;
+import com.icandoit.boottalk.notification.type.NotificationType;
 import com.icandoit.boottalk.point_history.domain.type.EventType;
 import com.icandoit.boottalk.point_history.service.CreatePointHistoryService;
 import com.icandoit.boottalk.user.domain.entity.User;
-import com.icandoit.boottalk.user.domain.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,11 +32,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CoffeeChatApplicationService {
 
-    private final CoffeeChatInfoRepository coffeeChatInfoRepository;
     private final CoffeeChatApplicationRepository coffeeChatAppRepository;
-    private final UserRepository userRepository;
 
+    private final CoffeeChatCommonService coffeeChatCommonService;
     private final CreatePointHistoryService createPointHistoryService;
+    private final SseEmitterService sseEmitterService;
 
     // 멘토 타입에 따른 포인트 차감액
     private final int GENERAL_COFFEE_CHAT_POINT = 1;
@@ -61,8 +62,8 @@ public class CoffeeChatApplicationService {
 
         log.debug("커피챗 신청 Lock 해제: userId: {}", userId);
 
-        User user = getUser(userId);
-        CoffeeChatInfo coffeeChatInfo = getCoffeeChatInfo(coffeChatInfoId);
+        User user = coffeeChatCommonService.getUser(userId);
+        CoffeeChatInfo coffeeChatInfo = coffeeChatCommonService.getCoffeeChatInfo(coffeChatInfoId);
 
         MentorType mentorType = coffeeChatInfo.getMentorType();
         int deductionPoint = getPointCostByMentorType (mentorType); // 멘토 타입에 따른 커피챗 포인트
@@ -71,6 +72,12 @@ public class CoffeeChatApplicationService {
 
         CoffeeChatApplication coffeeChatApp = CoffeeChatApplication.of(user, coffeeChatInfo, deductionPoint, request);
         coffeeChatAppRepository.save(coffeeChatApp);
+
+        // 멘토에게 커피챗 신청 알림 전송
+        sseEmitterService.sendToClient(
+            coffeeChatInfo.getMentor().getUserId(),
+            NotificationRequestDto.ofType(NotificationType.COFFEE_CHAT_REQUEST_RECEIVED)
+        );
 
         return CoffeeChatApplicationResponseDto.from(coffeeChatApp);
 
@@ -101,16 +108,17 @@ public class CoffeeChatApplicationService {
     }
 
     public CoffeeChatApplicationResponseDto getCoffeeChatAppInfo(Long coffeeChatAppId) {
-        return CoffeeChatApplicationResponseDto.from(getCoffeeChatApplication(coffeeChatAppId));
+        return CoffeeChatApplicationResponseDto.from(
+            coffeeChatCommonService.getCoffeeChatApplication(coffeeChatAppId));
     }
 
     @Transactional
     public CoffeeChatApplicationResponseDto updateCoffeeChatApp(
         Long userId, Long coffeeChatAppId, CoffeeChatApplicationUpdateDto request) {
-        CoffeeChatApplication coffeeChatApp = getCoffeeChatApplication(coffeeChatAppId);
+        CoffeeChatApplication coffeeChatApp = coffeeChatCommonService.getCoffeeChatApplication(coffeeChatAppId);
 
-        validateCoffeeChatApplicant(userId, coffeeChatApp.getMentee().getUserId());
-        validateCoffeeChatInfo(coffeeChatApp.getCoffeeChatInfo().getCoffeeChatInfoId());
+        coffeeChatCommonService.validateCoffeeChatApplicant(userId, coffeeChatApp.getMentee().getUserId());
+        coffeeChatCommonService.validateCoffeeChatInfo(coffeeChatApp.getCoffeeChatInfo().getCoffeeChatInfoId());
 
         // 상태가 대기 중일 때만 content 수정 가능
         if (coffeeChatApp.getStatus() != StatusType.PENDING) {
@@ -124,58 +132,34 @@ public class CoffeeChatApplicationService {
 
     @Transactional
     public void cancelCoffeeChatApp(Long userId, Long coffeeChatAppId) {
-        CoffeeChatApplication coffeeChatApp = getCoffeeChatApplication(coffeeChatAppId);
+        CoffeeChatApplication coffeeChatApp = coffeeChatCommonService.getCoffeeChatApplication(coffeeChatAppId);
 
-        validateCoffeeChatApplicant(userId, coffeeChatApp.getMentee().getUserId());
-        validateCoffeeChatInfo(coffeeChatApp.getCoffeeChatInfo().getCoffeeChatInfoId());
+        coffeeChatCommonService.validateCoffeeChatApplicant(userId, coffeeChatApp.getMentee().getUserId());
+        coffeeChatCommonService.validateCoffeeChatInfo(coffeeChatApp.getCoffeeChatInfo().getCoffeeChatInfoId());
 
         StatusType currentStatus = coffeeChatApp.getStatus();
 
         // 커피챗 취소는 상태가 대기 또는 수락 중일 때만 가능
-        if (!(currentStatus == StatusType.PENDING || currentStatus == StatusType.APPROVED)) {
+        if (!(currentStatus.isPending() || currentStatus.isApproved())) {
             throw new CustomException(ErrorCode.COFFEE_CHAT_CANNOT_CANCEL);
         }
 
         // 커피챗 취소시 환불 처리
         // 상태가 대기이거나, 상태가 승인이고 커피챗 시작 시간 2일 전까지는 환불 처리
-        if (currentStatus == StatusType.PENDING ||
-            currentStatus == StatusType.APPROVED && coffeeChatApp.isNDaysOrMoreUntilStart(2)
+        if (currentStatus.isPending() ||
+            currentStatus.isApproved() && coffeeChatApp.isNDaysOrMoreUntilStart(2)
         ) {
             createPointHistoryService.createPointHistory(EventType.COFFEE_CHAT_CANCEL_REFUND, userId, coffeeChatApp.getUsedPoint());
         }
 
         coffeeChatApp.setStatus(StatusType.CANCELED);
 
-    }
+        // 멘토에게 커피챗 취소 알린 전송
+        sseEmitterService.sendToClient(
+            userId,
+            NotificationRequestDto.ofType(NotificationType.COFFEE_CHAT_REQUEST_CANCELLED_FROM_MENTEE)
+        );
 
-
-    private User getUser(Long userId) { // TODO: 추후 공통 코드 관리하는 곳으로 분리하여 호출하도록 리팩토링 필요해보임
-        return userRepository.findById(userId)
-            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-    }
-
-    private CoffeeChatInfo getCoffeeChatInfo(Long coffeeChatInfoId) {
-        return coffeeChatInfoRepository.findById(coffeeChatInfoId)
-            .orElseThrow(() -> new CustomException(ErrorCode.COFFEE_CHAT_NOT_FOUND));
-    }
-
-    protected CoffeeChatApplication getCoffeeChatApplication(Long coffeeChatAppId) {
-        return coffeeChatAppRepository.findById(coffeeChatAppId)
-            .orElseThrow(() -> new CustomException(ErrorCode.COFFEE_CHAT_APPLICATION_NOT_FOUND));
-    }
-
-    // 해당 사용자가 작성한 커피챗 신청자인지 확인
-    private void validateCoffeeChatApplicant(Long userId, Long menteeId) {
-        if (!userId.equals(menteeId)) {
-            throw new CustomException(ErrorCode.NOT_COFFEE_CHAT_APPLICATION_OWNER);
-        }
-    }
-
-    // 존재하는 커피챗 정보인지 확인
-    protected void validateCoffeeChatInfo(Long coffeeChatInfoId) {
-        if(!coffeeChatInfoRepository.existsById(coffeeChatInfoId)) {
-            throw new CustomException(ErrorCode.COFFEE_CHAT_NOT_FOUND);
-        }
     }
 
 
