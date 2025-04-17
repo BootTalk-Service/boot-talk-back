@@ -1,5 +1,7 @@
 package com.icandoit.boottalk.bootcamp.service;
 
+import static com.icandoit.boottalk.bootcamp.entity.enums.CertificationStatus.*;
+import static com.icandoit.boottalk.libs.exception.ErrorCode.*;
 import static com.icandoit.boottalk.notification.type.NotificationType.*;
 
 import java.util.List;
@@ -19,7 +21,6 @@ import com.icandoit.boottalk.bootcamp.entity.enums.CertificationStatus;
 import com.icandoit.boottalk.bootcamp.repository.BootcampCertificationRepository;
 import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
-import com.icandoit.boottalk.libs.exception.ErrorCode;
 import com.icandoit.boottalk.notification.dto.NotificationRequestDto;
 import com.icandoit.boottalk.notification.service.SseEmitterService;
 import com.icandoit.boottalk.notification.type.NotificationType;
@@ -40,28 +41,29 @@ public class BootcampCertificationService {
 	// 수료증 등록
 	@Transactional
 	public CertificationResponseDto createCertification(Long userId, CertificationCreationRequestDto request) {
-		Course course = courseRepository.findById(request.courseId())
-			.orElseThrow(() -> new CustomException(ErrorCode.COURSE_NOT_FOUND));
 
+		Long courseId = request.courseId();
+
+		Course course = findCourseById(courseId);
 		User user = userRepository.getReferenceById(userId);
 
 		// 해당 부트캠프에 승인됐거나 요청한 적이 있으면 에러 발생, 거절되었을때는 다시 신청 가능
-		if (bootcampCertificationRepository.existsByUserAndCourseAndStatusNot(user, course, CertificationStatus.REJECTED)) {
-			throw new CustomException(ErrorCode.DUPLICATE_CERTIFICATION_EXIST);
+		if (hasActiveCertification(user, course)) {
+			throw new CustomException(DUPLICATE_CERTIFICATION_EXIST);
 		}
 
-		BootcampCertification certification =
-			BootcampCertification.of(user, course, request.fileUrl());
+		BootcampCertification certification = BootcampCertification.of(user, course, request.fileUrl());
 
-		BootcampCertification savedCertification = bootcampCertificationRepository.save(certification);
-
-		return CertificationResponseDto.from(savedCertification);
+		return CertificationResponseDto.from(bootcampCertificationRepository.save(certification));
 	}
+
+
 
 	public List<GetCertificationResponseDto> getMyCertifications(Long userId) {
 		User user = userRepository.getReferenceById(userId);
 
-		List<BootcampCertification> certifications = bootcampCertificationRepository.findAllByUserAndStatus(user, CertificationStatus.APPROVED);
+		List<BootcampCertification> certifications = bootcampCertificationRepository.findAllByUserAndStatus(user,
+			APPROVED);
 
 		return certifications.stream()
 			.map(GetCertificationResponseDto::from)
@@ -70,7 +72,8 @@ public class BootcampCertificationService {
 
 	// 승인 대기중인 요청 모두 조회
 	public List<GetPendingCertificationResponseDto> getPendingCertifications() {
-		List<BootcampCertification> certifications = bootcampCertificationRepository.findAllByStatus(CertificationStatus.PENDING);
+		List<BootcampCertification> certifications = bootcampCertificationRepository.findAllByStatus(PENDING);
+
 		return certifications.stream()
 			.map(GetPendingCertificationResponseDto::from)
 			.toList();
@@ -78,16 +81,14 @@ public class BootcampCertificationService {
 
 	// 수료증 정보 조회
 	public GetCertificationInfoDto findById(Long certificationId) {
-		BootcampCertification certification = bootcampCertificationRepository.getReferenceById(certificationId);
-
-		return GetCertificationInfoDto.from(certification);
+		return GetCertificationInfoDto.from(bootcampCertificationRepository.getReferenceById(certificationId));
 	}
 
 	// 수료증 승인 거절 로직
 	public CertificationResponseDto updateCertification(CertificationUpdateRequestDto request) {
 		BootcampCertification certification = bootcampCertificationRepository.getReferenceById(request.certificationId());
 
-		CertificationStatus newStatus = request.isTrue() ? CertificationStatus.APPROVED : CertificationStatus.REJECTED;
+		CertificationStatus newStatus = request.isTrue() ? APPROVED : REJECTED;
 		certification.updateStatus(newStatus);
 
 		BootcampCertification savedCertification = bootcampCertificationRepository.save(certification);
@@ -98,12 +99,20 @@ public class BootcampCertificationService {
 
 		sendCertificationNotification(userId, type);
 
-
 		return CertificationResponseDto.from(savedCertification);
 	}
 
 	// 수료증 인증 승인 거절 알림 발송
 	public void sendCertificationNotification(Long userId, NotificationType type) {
 		sseEmitterService.sendToClient(userId, NotificationRequestDto.ofType(type));
+	}
+
+	private Course findCourseById(Long courseId) {
+		return courseRepository.findById(courseId)
+			.orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
+	}
+
+	private boolean hasActiveCertification(User user, Course course) {
+		return bootcampCertificationRepository.existsByUserAndCourseAndStatusNot(user, course, REJECTED);
 	}
 }

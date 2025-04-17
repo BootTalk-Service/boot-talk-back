@@ -41,13 +41,15 @@ public enum BootcampCategoryType {
 	}
 
 	public static boolean isValidKoreanName(String koreanName) {
+		if(!koreanToEnumMap.containsKey(koreanName)) {
+			throw new CustomException(ErrorCode.INVALID_CATEGORY_NAME);
+		}
+
 		return koreanToEnumMap.containsKey(koreanName);
 	}
 
 	public static BootcampCategoryType fromKoreanName(String koreanName) {
-		if(!koreanToEnumMap.containsKey(koreanName)) {
-			throw new CustomException(ErrorCode.INVALID_CATEGORY_NAME);
-		}
+
 		return koreanToEnumMap.get(koreanName);
 	}
 }

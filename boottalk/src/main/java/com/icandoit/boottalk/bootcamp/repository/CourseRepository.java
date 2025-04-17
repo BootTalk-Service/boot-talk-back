@@ -21,8 +21,5 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 	@Query("SELECT c From Course c WHERE c.trainingProgramId = :trainingProgramId")
 	Optional<Course> findWithLockByTrainingProgramId(String trainingProgramId);
 
-	// course name 으로 코드 조회
-	Optional<Course> findByCourseName(String courseName);
-
 	List<Course> findByCourseNameContainingIgnoreCase(String query, Pageable pageable);
 }

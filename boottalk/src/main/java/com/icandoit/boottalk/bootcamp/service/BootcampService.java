@@ -1,9 +1,6 @@
 package com.icandoit.boottalk.bootcamp.service;
 
-import static com.icandoit.boottalk.libs.exception.ErrorCode.*;
-
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -17,7 +14,6 @@ import com.icandoit.boottalk.bootcamp.entity.Bootcamp;
 import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.bootcamp.repository.BootcampQueryRepository;
 import com.icandoit.boottalk.bootcamp.repository.BootcampRepository;
-import com.icandoit.boottalk.libs.exception.CustomException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,21 +24,17 @@ public class BootcampService {
 	private final BootcampRepository bootcampRepository;
 	private final BootcampQueryRepository bootcampQueryRepository;
 
+	// 부트캠프 저장
 	@Transactional
 	public Bootcamp save(Bootcamp bootcamp) {
 		return bootcampRepository.save(bootcamp);
 	}
 
 	// 부트캠프 단일 조회
-	@Transactional(readOnly = true)
 	public BootcampDetailResponseDto findById(Long id) {
-		Optional<Bootcamp> bootcamp = bootcampRepository.findById(id);
+		Bootcamp bootcamp = bootcampRepository.getReferenceById(id);
 
-		if (bootcamp.isEmpty()) {
-			throw new CustomException(BOOTCAMP_NOT_FOUND);
-		}
-
-		return BootcampDetailResponseDto.from(bootcamp.get());
+		return BootcampDetailResponseDto.from(bootcamp);
 	}
 
 	// 부트캠프 필터링, 검색 조회
