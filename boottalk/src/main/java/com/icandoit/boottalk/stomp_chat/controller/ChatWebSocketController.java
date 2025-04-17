@@ -1,14 +1,19 @@
 package com.icandoit.boottalk.stomp_chat.controller;
 
+import com.icandoit.boottalk.social_login.dto.CustomOAuth2User;
 import com.icandoit.boottalk.stomp_chat.dto.stompDto.ChatMessageRequestDto;
 import com.icandoit.boottalk.stomp_chat.dto.stompDto.ChatTypingRequestDto;
 import com.icandoit.boottalk.stomp_chat.service.ChatWebsocketService;
 import java.security.Principal;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 
 @Controller
@@ -25,20 +30,37 @@ public class ChatWebSocketController {
      */
 
     @MessageMapping("/chat.message")
-    public void send(@Payload ChatMessageRequestDto requstDto, Principal principal) {
-        Long senderId = Long.parseLong(principal.getName());
-//        Long senderId = 8050L;
-        log.info("parsing principal user = {}", senderId);
-        chatWebsocketService.saveAndSendMessage(senderId, requstDto);
+    public void send(@Payload ChatMessageRequestDto requestDto, Authentication authentication) {
+        if (authentication == null) {
+            log.error("인증 정보가 없습니다.");
+            throw new AccessDeniedException("인증되지 않은 사용자");
+        }
+
+        // Principal 대신 Authentication을 사용하여 더 많은 정보에 접근
+        String username = authentication.getName();
+        log.info("메시지 발신자: {}, 권한: {}", username, authentication.getAuthorities());
+
+        // CustomOAuth2User 타입인 경우 추가 정보 접근 가능
+        if (authentication.getPrincipal() instanceof CustomOAuth2User) {
+            CustomOAuth2User user = (CustomOAuth2User) authentication.getPrincipal();
+            log.info("사용자 ID: {}", user.getServiceUserId());
+        }
+
+        chatWebsocketService.saveAndSendMessage(requestDto.senderId(), requestDto);
     }
 
     @MessageMapping("/chat.enter/{roomUuid}")
-    public void enter(@DestinationVariable String roomUuid, Principal principal) {
-        Long userId = Long.parseLong(principal.getName());
-//        Long userId = 8050L;
-        log.info("parsing principal user = {}", userId);
-        // 이전 메시지 조회 및 전송
-        chatWebsocketService.handleUserEnter(userId, roomUuid);
+    public void enter(@DestinationVariable String roomUuid, StompHeaderAccessor accessor) {
+        Authentication auth = (Authentication) accessor.getSessionAttributes().get("auth");
+        if (auth != null) {
+            Long userId = Long.parseLong(Objects.requireNonNull(
+                ((CustomOAuth2User) auth.getPrincipal()).getAttribute("serviceUserId")));
+            log.info("parsing principal user = {}", userId);
+            chatWebsocketService.handleUserEnter(userId, roomUuid);
+
+        } else {
+            log.error("Authentication not found");
+        }
     }
 
     @MessageMapping("/chat.typing")

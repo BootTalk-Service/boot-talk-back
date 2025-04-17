@@ -1,43 +1,131 @@
 package com.icandoit.boottalk.stomp_chat.config;
 
+import com.icandoit.boottalk.social_login.jwt.JwtProvider;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.messaging.simp.stomp.StompCommand;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
+import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.web.socket.server.HandshakeInterceptor;
 
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSocketMessageBroker
+@Slf4j
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    private final WebSocketHandshakeInterceptor handshakeInterceptor;
+    private final JwtProvider jwtProvider;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // 클라이언트가 연결할 WebSocket 엔드포인트 정의
-        // 클라이언트는 이 엔드포인트로 연결하여 WebSocket 핸드셰이크를 해야 함
         registry.addEndpoint("/connection")
             .setAllowedOriginPatterns("*")
-            .setHandshakeHandler(new CustomHandshakeHandler())
-            .addInterceptors(handshakeInterceptor);
-        // .withSockJS(); // WebSocket 을 지원하지 않는 브라우저에서 SockJS 로 대체 연결을 사용하도록 할 수 있음
+            .addInterceptors(new HandshakeInterceptor() {
+                @Override
+                public boolean beforeHandshake(ServerHttpRequest request,
+                    ServerHttpResponse response,
+                    WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
+                    // URL 파라미터에서 토큰 추출
+                    String token = null;
+                    if (request instanceof ServletServerHttpRequest) {
+                        ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
+                        token = servletRequest.getServletRequest().getParameter("token");
+                        log.info("WebSocket 연결 시도: 토큰 = {}", token);
+
+                        if (token != null && jwtProvider.validateToken(token)) {
+                            // 토큰에서 사용자 ID 추출하여 WebSocket 세션에 저장
+                            String userId = jwtProvider.getUserIdFromToken(token);
+                            attributes.put("userId", userId);
+
+                            // *** 중요: 인증 객체 생성 및 저장 ***
+                            Authentication auth = jwtProvider.getAuthentication(token);
+                            SecurityContext securityContext = new SecurityContextImpl(auth);
+                            attributes.put("SPRING_SECURITY_CONTEXT", securityContext);
+
+                            log.info("WebSocket 연결 성공: 사용자 ID = {}, Auth = {}", userId, auth);
+                            return true;
+                        }
+                    }
+                    log.error("WebSocket 연결 실패: 유효하지 않은 토큰");
+                    return false;
+                }
+
+                @Override
+                public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response,
+                    WebSocketHandler wsHandler, Exception exception) {
+                    // 핸드셰이크 후 처리 (필요한 경우)
+                }
+            });
     }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-
-        // 클라이언트가 메시지를 보낼 때 사용하는 API의 prefix를 설정
-        // "/app" 으로 시작하는 STOMP 메시지는 이 설정에 따라 라우팅 됨
-        // 클라이언트에서 보낸 메시지의 주소가 /app 으로 시작하는 경우, 이 메시지는 서버에서 처리됨
-        // 즉, 애플리케이션 내부에서 메시지 처리를 위한 경로이다.
         registry.setApplicationDestinationPrefixes("/app");
-
-        // 메시지 브로커를 설정하여 클라이언트가 구독할 수 있는 주제를 지정
-        // 클라이언트는 "/queue" 로 시작하는 주제를 구독하고, 메시지가 이 주제에 전달되면
-        // 메시지 브로커가 이를 자동으로 구독한 클라이언트에게 전달함
-        // 즉, "/queue" 로 시작하는 주제는 브로커가 관리하고 여러 클라이언트에게 전달됨
         registry.enableSimpleBroker("/queue");
+    }
+
+    // WebSocket 연결 인증을 위한 채널 인터셉터 추가
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(new ChannelInterceptor() {
+            @Override
+            public Message<?> preSend(Message<?> message, MessageChannel channel) {
+                StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message,
+                    StompHeaderAccessor.class);
+
+                if (accessor != null && accessor.getSessionAttributes() != null) {
+                    // 모든 메시지 명령에 대해 처리 (CONNECT, SEND, SUBSCRIBE 등)
+                    SecurityContext securityContext = (SecurityContext) accessor.getSessionAttributes()
+                        .get("SPRING_SECURITY_CONTEXT");
+
+                    if (securityContext != null && securityContext.getAuthentication() != null) {
+                        // 현재 스레드에 SecurityContext 설정
+                        SecurityContextHolder.setContext(securityContext);
+
+                        // *** 중요: Principal 객체를 메시지 헤더에 설정 ***
+                        accessor.setUser(securityContext.getAuthentication());
+
+                        if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+                            log.info("STOMP 연결 설정: 인증 정보 설정 완료. userId = {}, auth = {}",
+                                accessor.getSessionAttributes().get("userId"),
+                                securityContext.getAuthentication());
+                        } else if (StompCommand.SEND.equals(accessor.getCommand()) ||
+                            StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
+                            log.info("메시지 전송/구독: 인증 정보 확인됨. user = {}",
+                                securityContext.getAuthentication().getName());
+                        }
+                    } else {
+                        log.warn("SecurityContext가 없거나 인증 정보가 없습니다.");
+                    }
+                }
+
+                return message;
+            }
+
+            @Override
+            public void afterSendCompletion(Message<?> message, MessageChannel channel,
+                boolean sent, Exception ex) {
+                // 메시지 처리 완료 후 SecurityContext 정리
+                SecurityContextHolder.clearContext();
+            }
+        });
     }
 }
