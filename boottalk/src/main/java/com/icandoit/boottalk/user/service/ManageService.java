@@ -36,7 +36,6 @@ public class ManageService {
 	public void deleteUser(Long userId) {
 
 		User user = getUserInfo(userId);
-
 		user.setDeletedAt(Timestamp.from(Instant.now()));
 	}
 

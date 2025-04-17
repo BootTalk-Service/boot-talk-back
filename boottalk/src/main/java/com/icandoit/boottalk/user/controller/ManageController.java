@@ -64,6 +64,4 @@ public class ManageController {
 
 		return ResponseEntity.ok("회원 탈퇴되었습니다.");
 	}
-
-
 }
