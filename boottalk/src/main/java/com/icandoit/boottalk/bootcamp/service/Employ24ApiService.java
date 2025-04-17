@@ -6,9 +6,7 @@ import static com.icandoit.boottalk.libs.exception.ErrorCode.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +25,6 @@ import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
 import com.icandoit.boottalk.bootcamp.repository.TrainingCenterRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -123,9 +120,7 @@ public class Employ24ApiService {
 	// Course 가 존재하지 않으면 저장, 있으면 조회해서 반환
 	private Course saveOrGetCourse(BootcampListResponseDto dto, TrainingCenter center, BootcampCategoryType category) {
 		return courseRepository.findByTrainingProgramId(dto.bootcampId())
-			.orElseGet(() -> courseRepository.save(
-				Course.of(dto.bootcampId(), dto.bootcampName(), category, center)
-			));
+			.orElseGet(() -> courseRepository.save(Course.of(dto.bootcampId(), dto.bootcampName(), category, center)));
 	}
 
 	// Bootcamp Entity 생성
