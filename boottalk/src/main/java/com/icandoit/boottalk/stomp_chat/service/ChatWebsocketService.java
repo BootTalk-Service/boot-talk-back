@@ -42,7 +42,7 @@ public class ChatWebsocketService {
     private final MessageLoader messageLoader;
     private final SimpMessagingTemplate template;
 
-    private ThreadPoolTaskExecutor taskExecutor;
+    private final ThreadPoolTaskExecutor taskExecutor;
 
 
     @Transactional
