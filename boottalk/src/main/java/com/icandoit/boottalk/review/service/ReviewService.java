@@ -1,6 +1,8 @@
 package com.icandoit.boottalk.review.service;
 
+import static com.icandoit.boottalk.bootcamp.entity.enums.CertificationStatus.*;
 import static com.icandoit.boottalk.libs.exception.ErrorCode.*;
+import static com.icandoit.boottalk.point_history.domain.type.EventType.*;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,23 +48,18 @@ public class ReviewService {
 
 		// 비관적 락으로 course 를 조회
 		Course course = getCourseWithLock(trainingProgramId);
-
 		User user = userRepository.getReferenceById(userId);
 
-		if (!certificationRepository.existsByUserAndCourseAndStatus(user, course, CertificationStatus.APPROVED)) {
+		if (!certificationRepository.existsByUserAndCourseAndStatus(user, course, APPROVED)) {
 			throw new CustomException(WRITE_REVIEW_FORBIDDEN);
 		}
 
-		Review review = Review.of(request, course, user);
+		Review saved = reviewRepository.save(Review.of(request, course, user));
 
 		// course 점수 업데이트
 		updateCourseReviewStats(course, request.rating(), 1);
-
-		reviewRepository.save(review);
-
-		createPointHistoryService.createPointHistory(EventType.REVIEW, userId, 1);
-
-		return ReviewResponseDto.from(review);
+		createPointHistoryService.createPointHistory(REVIEW, userId, 1);
+		return ReviewResponseDto.from(saved);
 	}
 
 	public Page<ReviewResponseDto> getAllReviews(Pageable pageable, String category) {
@@ -70,6 +67,7 @@ public class ReviewService {
 			if (!BootcampCategoryType.isValidKoreanName(category)) {
 				throw new CustomException(INVALID_CATEGORY_NAME);
 			}
+
 			BootcampCategoryType categoryType = BootcampCategoryType.fromKoreanName(category);
 			return reviewRepository.findByBootcampCategory(categoryType, pageable)
 				.map(ReviewResponseDto::from);
@@ -112,7 +110,7 @@ public class ReviewService {
 
 		updateCourseReviewStats(course, -review.getRating(), -1);
 
-		createPointHistoryService.createPointHistory(EventType.REVIEW_DELETED, userId, 1);
+		createPointHistoryService.createPointHistory(REVIEW_DELETED, userId, 1);
 		reviewRepository.delete(review);
 
 	}
