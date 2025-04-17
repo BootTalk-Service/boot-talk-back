@@ -49,7 +49,7 @@ public class ChatWebsocketService {
 
     @Transactional
     public void handleUserEnter(Long userId, String roomUuid) {
-
+        LocalDateTime enterTime = LocalDateTime.now();
         // 메시지 조회 및 전송
         messageLoader.loadAndSendMessages(userId, roomUuid);
 
@@ -57,7 +57,7 @@ public class ChatWebsocketService {
         statusUpdater.updateChatRoomStatusOnEnter(userId, roomUuid);
 
         // 읽음 처리
-        markUnreadMessagesAsRead(roomUuid, userId);
+        markUnreadMessagesAsRead(roomUuid, userId, enterTime);
 
         CompletableFuture.runAsync(() -> messageSender.sendEnterMessage(userId, roomUuid), taskExecutor);
     }
@@ -101,7 +101,7 @@ public class ChatWebsocketService {
         template.convertAndSend(destination, response);
     }
 
-    public void markUnreadMessagesAsRead(String roomUuid, Long userId) {
+    public void markUnreadMessagesAsRead(String roomUuid, Long userId, LocalDateTime enterTime) {
         String redisKey = "chat:messages:" + roomUuid;
 
         Map<Object, Object> messagesMap = redisChatRepository.findAllByRoomUuid(redisKey);
@@ -109,7 +109,9 @@ public class ChatWebsocketService {
         for (Map.Entry<Object, Object> entry : messagesMap.entrySet()) {
             ChatMessageResponseDto message = (ChatMessageResponseDto) entry.getValue();
 
-            if (Objects.equals(message.getReceiverId(), userId) && !message.isRead()) {
+            if (Objects.equals(message.getReceiverId(), userId)
+                && !message.isRead()
+                && message.getSentAt().isBefore(enterTime)) {
                 message.markAsRead();
                 redisChatRepository.updateMessage(redisKey, entry.getKey().toString(), message);
             }
