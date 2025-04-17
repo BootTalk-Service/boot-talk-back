@@ -13,8 +13,6 @@ import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatInfo;
 import com.icandoit.boottalk.coffeeChat.entity.enums.StatusType;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatApplicationRepository;
 import com.icandoit.boottalk.common.dto.PagedResponseDto;
-import com.icandoit.boottalk.libs.exception.CustomException;
-import com.icandoit.boottalk.libs.exception.ErrorCode;
 import com.icandoit.boottalk.notification.dto.NotificationRequestDto;
 import com.icandoit.boottalk.notification.service.SseEmitterService;
 import com.icandoit.boottalk.point_history.domain.type.EventType;
@@ -28,8 +26,7 @@ public class CoffeeChatReceivedService {
 
     private final CoffeeChatApplicationRepository coffeeChatAppRepository;
 
-    private final CoffeeChatInfoService coffeeChatInfoService;
-    private final CoffeeChatApplicationService coffeeChatAppService;
+    private final CoffeeChatCommonService coffeeChatCommonService;
     private final CreatePointHistoryService createPointHistoryService;
     private final SseEmitterService sseEmitterService;
 
@@ -40,7 +37,12 @@ public class CoffeeChatReceivedService {
         Long userId, Pageable pageable) {
 
         // 커피챗 정보 조회
-        CoffeeChatInfo coffeeChatInfo = coffeeChatInfoService.getCoffeeChatInfoByUserId(userId);
+        CoffeeChatInfo coffeeChatInfo = coffeeChatCommonService.getOptionalCoffeeChatInfoByUserId(userId).orElse(null);
+
+        if (coffeeChatInfo == null) {
+            Page<CoffeeChatApplicationResponseDto> emptyPage = Page.empty(pageable);
+            return PagedResponseDto.from(emptyPage);
+        }
 
         Page<CoffeeChatApplicationResponseDto> page =
             coffeeChatAppRepository.findByCoffeeChatInfo_CoffeeChatInfoId(coffeeChatInfo.getCoffeeChatInfoId(), pageable)
@@ -53,12 +55,12 @@ public class CoffeeChatReceivedService {
     public CoffeeChatAppStatusResponseDto changeCoffeeChatAppStatus(
         Long userId, Long coffeeChatAppId, CoffeeChatAppChangeStatusDto request) {
 
-        CoffeeChatApplication coffeeChatApp = coffeeChatAppService.getCoffeeChatApplication(coffeeChatAppId);
+        CoffeeChatApplication coffeeChatApp = coffeeChatCommonService.getCoffeeChatApplication(coffeeChatAppId);
 
         Long mentorId = coffeeChatApp.getCoffeeChatInfo().getMentor().getUserId();
         Long menteeId = coffeeChatApp.getMentee().getUserId();
 
-        validateCoffeeChatOwner(mentorId, userId);
+        coffeeChatCommonService.validateCoffeeChatOwner(mentorId, userId);
 
         StatusType changeStatus = request.changeStatus();
         StatusType currentStatus = coffeeChatApp.getStatus();
@@ -94,12 +96,6 @@ public class CoffeeChatReceivedService {
 
     }
 
-    // 커피챗 정보의 작성자가 요청한 사용자와 일치하는지 확인
-    private void validateCoffeeChatOwner(Long creatorId, Long requestUserId) {
-        if (!creatorId.equals(requestUserId)) {
-            throw new CustomException(ErrorCode.NOT_COFFEE_CHAT_INFO_OWNER);
-        }
-    }
 
 
 }
