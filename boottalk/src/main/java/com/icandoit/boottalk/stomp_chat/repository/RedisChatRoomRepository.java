@@ -1,6 +1,6 @@
 package com.icandoit.boottalk.stomp_chat.repository;
 
-import static com.icandoit.boottalk.stomp_chat.common.RedisKeyPrefix.roomInfo;
+import static com.icandoit.boottalk.common.RedisKeyPrefix.roomInfo;
 
 import com.icandoit.boottalk.stomp_chat.dto.ChatRoomResponseDto;
 import java.time.Duration;

@@ -24,5 +24,4 @@ public class TrainingCenterController {
 	{
 		return ResponseEntity.ok(trainingCenterService.findById(trainingCenterId));
 	}
-
 }
