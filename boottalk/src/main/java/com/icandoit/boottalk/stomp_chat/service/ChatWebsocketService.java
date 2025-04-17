@@ -20,12 +20,10 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,8 +42,6 @@ public class ChatWebsocketService {
     private final MessageLoader messageLoader;
     private final SimpMessagingTemplate template;
 
-    private final ThreadPoolTaskExecutor taskExecutor;
-
 
     @Transactional
     public void handleUserEnter(Long userId, String roomUuid) {
@@ -59,7 +55,7 @@ public class ChatWebsocketService {
         // 읽음 처리
         markUnreadMessagesAsRead(roomUuid, userId, enterTime);
 
-        CompletableFuture.runAsync(() -> messageSender.sendEnterMessage(userId, roomUuid), taskExecutor);
+        messageSender.sendEnterMessage(userId, roomUuid);
     }
 
     // Listener 호출(퇴장 시 호출되는 매서드)
@@ -119,7 +115,6 @@ public class ChatWebsocketService {
 
         log.info("입장 시 읽음 처리 완료 for userId={}, roomUuid={}", userId, roomUuid);
     }
-
 
 
     private void checkChatRoomWithinAllowedTime(String roomUuid) {
