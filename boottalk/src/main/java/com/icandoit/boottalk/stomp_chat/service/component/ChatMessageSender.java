@@ -47,7 +47,7 @@ public class ChatMessageSender {
 
     // WebSocket으로 전송하는 공통 로직
     public void sendMessage(Long receiverId, ChatMessageResponseDto chatMessageResponseDto) {
-        String roomUuid = chatMessageResponseDto.roomUuid();
+        String roomUuid = chatMessageResponseDto.getRoomUuid();
 
         String destination = "/queue/chat/" + roomUuid + "/" + receiverId;
         template.convertAndSend(destination, chatMessageResponseDto);
