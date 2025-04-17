@@ -18,6 +18,8 @@ import com.icandoit.boottalk.stomp_chat.service.component.ChatRoomStatusUpdater;
 import com.icandoit.boottalk.stomp_chat.service.component.MessageLoader;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,22 +44,25 @@ public class ChatWebsocketService {
     private final MessageLoader messageLoader;
     private final SimpMessagingTemplate template;
 
-    private ThreadPoolTaskExecutor taskExecutor;
+    private final ThreadPoolTaskExecutor taskExecutor;
 
 
     @Transactional
     public void handleUserEnter(Long userId, String roomUuid) {
-
+        LocalDateTime enterTime = LocalDateTime.now();
         // 메시지 조회 및 전송
         messageLoader.loadAndSendMessages(userId, roomUuid);
 
         // 채팅방 상태 갱신
         statusUpdater.updateChatRoomStatusOnEnter(userId, roomUuid);
 
+        // 읽음 처리
+        markUnreadMessagesAsRead(roomUuid, userId, enterTime);
+
         CompletableFuture.runAsync(() -> messageSender.sendEnterMessage(userId, roomUuid), taskExecutor);
     }
 
-    // Listener 호출(퇴장 시) 호출되는 매서드
+    // Listener 호출(퇴장 시 호출되는 매서드)
     @Transactional
     public void handleUserLeave(Long userId) {
         statusUpdater.updateChatRoomStatusOnLeave(userId);
@@ -96,6 +101,26 @@ public class ChatWebsocketService {
         template.convertAndSend(destination, response);
     }
 
+    public void markUnreadMessagesAsRead(String roomUuid, Long userId, LocalDateTime enterTime) {
+        String redisKey = "chat:messages:" + roomUuid;
+
+        Map<Object, Object> messagesMap = redisChatRepository.findAllByRoomUuid(redisKey);
+
+        for (Map.Entry<Object, Object> entry : messagesMap.entrySet()) {
+            ChatMessageResponseDto message = (ChatMessageResponseDto) entry.getValue();
+
+            if (Objects.equals(message.getReceiverId(), userId)
+                && !message.isRead()
+                && message.getSentAt().isBefore(enterTime)) {
+                message.markAsRead();
+                redisChatRepository.updateMessage(redisKey, entry.getKey().toString(), message);
+            }
+        }
+
+        log.info("입장 시 읽음 처리 완료 for userId={}, roomUuid={}", userId, roomUuid);
+    }
+
+
 
     private void checkChatRoomWithinAllowedTime(String roomUuid) {
         // Redis에서 채팅방 정보 조회
@@ -123,7 +148,7 @@ public class ChatWebsocketService {
     public void saveMessageWithFallback(ChatMessageResponseDto message) {
         boolean isSavedToRedis = false;
         try {
-            redisChatRepository.save(message.roomUuid(), message, Duration.ofMinutes(30));
+            redisChatRepository.save(message.getRoomUuid(), message, Duration.ofMinutes(30));
             isSavedToRedis = true;
         } catch (RedisConnectionFailureException ex) {
             log.error("Redis 장애 발생: 메시지를 Redis에 저장하지 못했습니다. DB에 저장합니다.");

@@ -10,7 +10,8 @@ public record ChatRoomResponseDto(
     ChatUserDto mentee,
     LocalDateTime reservationAt,
     LocalDateTime endAt,
-    LocalDateTime expiresAt
+    LocalDateTime expiresAt,
+    boolean isActive
 ) {
 
     public static ChatRoomResponseDto from(ChatRoom chatRoom) {
@@ -21,7 +22,8 @@ public record ChatRoomResponseDto(
             ChatUserDto.from(chatRoom.getMentee()),
             chatRoom.getReservationAt(),
             chatRoom.getEndAt(),
-            chatRoom.getExpiresAt()
+            chatRoom.getExpiresAt(),
+            chatRoom.getRoomStatus().isActive()
         );
     }
 }

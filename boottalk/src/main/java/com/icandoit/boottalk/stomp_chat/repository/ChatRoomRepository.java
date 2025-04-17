@@ -15,10 +15,10 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     @Query("""
     SELECT c
     FROM ChatRoom c
+    JOIN FETCH c.roomStatus
     JOIN c.coffeeChatApplication app
     JOIN app.coffeeChatInfo info
     WHERE app.mentee.userId = :userId OR info.mentor.userId = :userId
-    
 """)
     List<ChatRoom> findChatRoomsByUserId(@Param("userId") Long userId);
 
