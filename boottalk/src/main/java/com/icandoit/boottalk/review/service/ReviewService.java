@@ -143,8 +143,7 @@ public class ReviewService {
 	}
 
 	private Bootcamp getBootcamp(Long id) {
-		return bootcampRepository.findById(id)
-			.orElseThrow(() -> new CustomException(BOOTCAMP_NOT_FOUND));
+		return bootcampRepository.getReferenceById(id);
 	}
 
 	// 비관적 락을 사용해 course 조회
@@ -159,5 +158,4 @@ public class ReviewService {
 		int newReviewCount = course.getReviewCount() + deltaCount;
 		course.updateReviewStats(newTotalScore, newReviewCount);
 	}
-
 }

@@ -14,12 +14,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.icandoit.boottalk.coffeeChat.dto.AvailableChatTimeDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeDto;
-import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeMapDto;
-import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeResponseDto;
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatInfo;
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatTime;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatApplicationRepository;

@@ -1,6 +1,6 @@
 package com.icandoit.boottalk.stomp_chat.service.component;
 
-import com.icandoit.boottalk.stomp_chat.common.RedisKeyPrefix;
+import com.icandoit.boottalk.common.RedisKeyPrefix;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;

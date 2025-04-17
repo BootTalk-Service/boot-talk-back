@@ -6,11 +6,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.icandoit.boottalk.bootcamp.dto.CertificationCreationRequestDto;
+import com.icandoit.boottalk.bootcamp.dto.CertificationResponseDto;
 import com.icandoit.boottalk.bootcamp.dto.GetCertificationResponseDto;
 import com.icandoit.boottalk.bootcamp.service.BootcampCertificationService;
 import com.icandoit.boottalk.point_history.service.CreatePointHistoryService;
@@ -30,16 +33,15 @@ public class ManageController {
 
 	private final ManageService manageService;
 	private final CreatePointHistoryService createPointHistoryService;
-	private final BootcampCertificationService bootcampCertificationService;
+	private final BootcampCertificationService certificationService;
 
 	@GetMapping
 	public ResponseEntity<UserInfoDto> getUser(@AuthenticationPrincipal CustomOAuth2User user) {
 		Long userId = user.getServiceUserId();
 
+		int currentPoint = createPointHistoryService.getCurrentPointToNavi(userId);
 		UserDto userDto = manageService.getUser(userId);
-		List<GetCertificationResponseDto> myCertifications
-			= bootcampCertificationService.getMyCertifications(userId);
-		int currentPoint = createPointHistoryService.getCurrentPointToNavi(user.getServiceUserId());
+		List<GetCertificationResponseDto> myCertifications = certificationService.getMyCertifications(userId);
 
 		return ResponseEntity.ok(UserInfoDto.from(userDto, myCertifications, currentPoint));
 	}
@@ -63,5 +65,15 @@ public class ManageController {
 		manageService.deleteUser(user.getServiceUserId());
 
 		return ResponseEntity.ok("회원 탈퇴되었습니다.");
+	}
+
+	// 부트캠프 수료증 등록
+	@PostMapping("/certification")
+	public ResponseEntity<CertificationResponseDto> createCertification(
+		@AuthenticationPrincipal CustomOAuth2User user,
+		@RequestBody CertificationCreationRequestDto request
+	) {
+		Long userId = user.getServiceUserId();
+		return ResponseEntity.ok(certificationService.createCertification(userId, request));
 	}
 }
