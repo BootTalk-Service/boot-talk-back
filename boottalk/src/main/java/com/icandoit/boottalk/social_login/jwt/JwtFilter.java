@@ -39,13 +39,17 @@ public class JwtFilter extends OncePerRequestFilter {
 		// swagger 접근 시 필터 적용 X
 		String requestURI = request.getRequestURI();
 
+		log.info("requestURI: {}", requestURI);
+
 		if (requestURI.startsWith("/swagger-ui/")
-			|| requestURI.startsWith("/v3/api-docs"))
-		{
+			|| requestURI.startsWith("/v3/api-docs")
+			|| requestURI.startsWith("/login/")
+			|| requestURI.startsWith("/api/oauth2/")
+			|| requestURI.startsWith("/api/bootcamps")
+			) {
 			filterChain.doFilter(request, response);
 			return;
 		}
-
 
 		// 처음 로그인하고 나서 리다이렉트 된 url에서는 토큰이 헤더에 담겨져 있지 않고 쿠키에 담겨 있음.
 
@@ -62,16 +66,17 @@ public class JwtFilter extends OncePerRequestFilter {
 				for (Cookie cookie : cookies) {
 					if (cookie.getName().equals(TOKEN_HEADER)) {
 						token = cookie.getValue();
+						log.info("토큰 쿠키 확인");
 
 						// 쿠키에서 찾은 토큰을 다음 요청부터는 헤더에서 사용할 수 있도록
 						// 응답 헤더에 토큰 추가
 						response.setHeader(TOKEN_HEADER, TOKEN_PREFIX + token);
 
 						// 헤더에 토큰을 옮긴 후에 쿠키에서는 삭제
-						Cookie deleteCookie = new Cookie(TOKEN_HEADER, null);
-						deleteCookie.setMaxAge(0); // 쿠키 만료
-						deleteCookie.setPath("/"); // 쿠키의 경로를 원래 쿠키와 동일하게 설정
-						response.addCookie(deleteCookie);
+						// Cookie deleteCookie = new Cookie(TOKEN_HEADER, null);
+						// deleteCookie.setMaxAge(0); // 쿠키 만료
+						// deleteCookie.setPath("/"); // 쿠키의 경로를 원래 쿠키와 동일하게 설정
+						// response.addCookie(deleteCookie);
 
 						break;
 					}
