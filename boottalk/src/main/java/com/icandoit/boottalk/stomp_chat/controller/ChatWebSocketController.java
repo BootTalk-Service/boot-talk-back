@@ -26,16 +26,16 @@ public class ChatWebSocketController {
 
     @MessageMapping("/chat.message")
     public void send(@Payload ChatMessageRequestDto requstDto, Principal principal) {
-//        Long senderId = Long.parseLong(principal.getName());
-        Long senderId = 8050L;
+        Long senderId = Long.parseLong(principal.getName());
+//        Long senderId = 8050L;
         log.info("parsing principal user = {}", senderId);
         chatWebsocketService.saveAndSendMessage(senderId, requstDto);
     }
 
     @MessageMapping("/chat.enter/{roomUuid}")
     public void enter(@DestinationVariable String roomUuid, Principal principal) {
-//        Long userId = Long.parseLong(principal.getName());
-        Long userId = 8050L;
+        Long userId = Long.parseLong(principal.getName());
+//        Long userId = 8050L;
         log.info("parsing principal user = {}", userId);
         // 이전 메시지 조회 및 전송
         chatWebsocketService.handleUserEnter(userId, roomUuid);
@@ -43,8 +43,8 @@ public class ChatWebSocketController {
 
     @MessageMapping("/chat.typing")
     public void typing(@Payload ChatTypingRequestDto requestDto, Principal principal) {
-//        Long senderId = Long.parseLong(principal.getName());
-        Long senderId = 8050L;
+        Long senderId = Long.parseLong(principal.getName());
+//        Long senderId = 8050L;
         chatWebsocketService.sendTypingStatus(senderId, requestDto);
     }
 }

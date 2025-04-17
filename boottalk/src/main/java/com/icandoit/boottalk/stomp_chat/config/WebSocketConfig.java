@@ -12,15 +12,16 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-//    private final WebSocketHandshakeInterceptor handshakeInterceptor;
+    private final WebSocketHandshakeInterceptor handshakeInterceptor;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // 클라이언트가 연결할 WebSocket 엔드포인트 정의
         // 클라이언트는 이 엔드포인트로 연결하여 WebSocket 핸드셰이크를 해야 함
         registry.addEndpoint("/connection")
-            .setAllowedOriginPatterns("*"); // 모든 출처에서의 CORS 요청 허용
-//            .addInterceptors(handshakeInterceptor);
+            .setAllowedOriginPatterns("*")
+            .setHandshakeHandler(new CustomHandshakeHandler())
+            .addInterceptors(handshakeInterceptor);
         // .withSockJS(); // WebSocket 을 지원하지 않는 브라우저에서 SockJS 로 대체 연결을 사용하도록 할 수 있음
     }
 
