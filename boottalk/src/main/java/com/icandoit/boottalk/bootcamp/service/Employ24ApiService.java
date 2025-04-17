@@ -48,6 +48,7 @@ public class Employ24ApiService {
 	private final CourseRepository courseRepository;
 
 	private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+	private final BootcampService bootcampService;
 
 	// 주어진 카테고리와 NCS 코드로 리스트 조회 후 저장 처리
 	public void processCategoryAndNcs(String categoryCode, String ncsCode) {
@@ -88,7 +89,7 @@ public class Employ24ApiService {
 		Course course = saveOrGetCourse(dto, center, category);
 		Bootcamp bootcamp = createBootcampEntity(center, course, dto, category, detail);
 
-		bootcampRepository.save(bootcamp);
+		bootcampService.save(bootcamp);
 
 		try {
 			redisService.storeNewBootcampInfo(String.valueOf(bootcamp.getBootcampId()), bootcamp.getBootcampCategoryType());
