@@ -50,9 +50,8 @@ public class ReviewService {
 		Course course = getCourseWithLock(trainingProgramId);
 		User user = userRepository.getReferenceById(userId);
 
-		if (!certificationRepository.existsByUserAndCourseAndStatus(user, course, APPROVED)) {
-			throw new CustomException(WRITE_REVIEW_FORBIDDEN);
-		}
+
+		assertCertificationApproved(user, course);
 
 		Review saved = reviewRepository.save(Review.of(request, course, user));
 
@@ -131,6 +130,12 @@ public class ReviewService {
 	private void validateCreateReview(String trainingProgramId, Long userId) {
 		if (reviewRepository.existsByCourse_TrainingProgramIdAndUser_UserId(trainingProgramId, userId)) {
 			throw new CustomException(DUPLICATE_REVIEW);
+		}
+	}
+
+	private void assertCertificationApproved(User user, Course course) {
+		if (!certificationRepository.existsByUserAndCourseAndStatus(user, course, APPROVED)) {
+			throw new CustomException(WRITE_REVIEW_FORBIDDEN);
 		}
 	}
 
