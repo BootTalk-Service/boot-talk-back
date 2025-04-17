@@ -1,7 +1,5 @@
 package com.icandoit.boottalk.batch.scheduler;
 
-import static com.icandoit.boottalk.bootcamp.service.RedisService.*;
-
 import java.util.List;
 import java.util.Set;
 
@@ -15,6 +13,7 @@ import com.icandoit.boottalk.bootcamp.service.RedisService;
 import com.icandoit.boottalk.notification.dto.NotificationRequestDto;
 import com.icandoit.boottalk.notification.service.SseEmitterService;
 import com.icandoit.boottalk.notification.type.NotificationType;
+import com.icandoit.boottalk.common.RedisKeyPrefix;
 import com.icandoit.boottalk.user.domain.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -35,12 +34,12 @@ public class NotificationQuartzJob extends QuartzJobBean {
 			log.info("Notification Quartz Job 시작: 알림 전송 작업 실행...");
 
 			// redis 키값 받아오고
-			Set<String> keys = redisService.getKeys(BOOTCAMP_KEY_PREFIX + "*");
+			Set<String> keys = redisService.getKeys(RedisKeyPrefix.bootcamp() + "*");
 			// key 값이 존재한다면
 			if(keys != null && !keys.isEmpty()) {
 				for(String redisKey : keys) {
 					// key 값에서 데이터 parsing
-					String categoryString = redisKey.substring(BOOTCAMP_KEY_PREFIX.length());
+					String categoryString = redisKey.substring(RedisKeyPrefix.bootcamp().length());
 					BootcampCategoryType category;
 
 					// parsing 된 데이터 존재 값 확인

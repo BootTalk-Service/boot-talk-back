@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
+import com.icandoit.boottalk.common.RedisKeyPrefix;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,8 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 public class RedisService {
 
 	private final RedisTemplate<String, String> redisTemplate;
-
-	public static final String BOOTCAMP_KEY_PREFIX = "new:bootcamp:";
 
 	// redis 에서 pattern 에 해당하는 key 값 조회
 	public Set<String> getKeys(String pattern) {
@@ -42,7 +41,7 @@ public class RedisService {
 
 	// redis 에 key 와 value 값 저장
 	public void storeNewBootcampInfo(String bootcampId, BootcampCategoryType categoryType) {
-		String redisKey = BOOTCAMP_KEY_PREFIX + categoryType.name();
+		String redisKey = RedisKeyPrefix.bootcamp(categoryType.name());
 		redisTemplate.opsForList().rightPush(redisKey, bootcampId);
 		redisTemplate.expire(redisKey, Duration.ofHours(2));
 	}

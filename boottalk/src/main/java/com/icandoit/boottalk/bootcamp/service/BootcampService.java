@@ -32,9 +32,7 @@ public class BootcampService {
 
 	// 부트캠프 단일 조회
 	public BootcampDetailResponseDto findById(Long id) {
-		Bootcamp bootcamp = bootcampRepository.getReferenceById(id);
-
-		return BootcampDetailResponseDto.from(bootcamp);
+		return BootcampDetailResponseDto.from(bootcampRepository.getReferenceById(id));
 	}
 
 	// 부트캠프 필터링, 검색 조회
