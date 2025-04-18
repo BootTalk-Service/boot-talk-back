@@ -43,7 +43,7 @@ public class User extends BaseEntity {
 	private String resourceUserId;
 
 	@Enumerated(EnumType.STRING)
-	@Column(columnDefinition = "VARCHAR(50)", nullable = false)
+	@Column(columnDefinition = "VARCHAR(50)")
 	private BootcampCategoryType desiredCareer;
 
 	@Setter
