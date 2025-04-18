@@ -52,7 +52,6 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
 		Long userId = userDetails.getServiceUserId();
 
-
 		// 신규회원인 경우,추가정보 입력 url로 리다이렉션
 		if (UserRole.valueOf(role).equals(UserRole.NEW_USER)) {
 			response.sendRedirect("http://localhost:3000/social-register?token=" + token + "&userId=" + userId);

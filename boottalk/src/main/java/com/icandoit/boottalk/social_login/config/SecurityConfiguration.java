@@ -46,7 +46,16 @@ public class SecurityConfiguration {
 			.csrf(AbstractHttpConfigurer::disable)
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.formLogin(AbstractHttpConfigurer::disable)
-			// 세션 사용하지 않기 때문에
+			// .exceptionHandling(exception -> {
+			// 	log.info("Exception Handling triggered");
+			// 	exception.authenticationEntryPoint((request, response, authException) -> {
+			// 		log.info("Unauthorized access attempt: {}", request.getRequestURI());
+			// 		response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+			// 	});
+			// })
+
+
+		// 세션 사용하지 않기 때문에
 			.sessionManagement(session -> session
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
