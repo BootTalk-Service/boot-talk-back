@@ -18,6 +18,7 @@ import com.icandoit.boottalk.stomp_chat.service.component.ChatRoomStatusUpdater;
 import com.icandoit.boottalk.stomp_chat.service.component.MessageLoader;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -98,23 +99,22 @@ public class ChatWebsocketService {
     }
 
     public void markUnreadMessagesAsRead(String roomUuid, Long userId, LocalDateTime enterTime) {
-        String redisKey = "chat:messages:" + roomUuid;
+        List<ChatMessageResponseDto> cachedMessages = redisChatRepository.getMessages(roomUuid);
 
-        Map<Object, Object> messagesMap = redisChatRepository.findAllByRoomUuid(redisKey);
-
-        for (Map.Entry<Object, Object> entry : messagesMap.entrySet()) {
-            ChatMessageResponseDto message = (ChatMessageResponseDto) entry.getValue();
-
+        for (ChatMessageResponseDto message : cachedMessages) {
             if (Objects.equals(message.getReceiverId(), userId)
                 && !message.isRead()
                 && message.getSentAt().isBefore(enterTime)) {
                 message.markAsRead();
-                redisChatRepository.updateMessage(redisKey, entry.getKey().toString(), message);
             }
         }
 
+        // 수정된 리스트를 다시 덮어쓰기
+        redisChatRepository.saveAll(roomUuid, cachedMessages, Duration.ofMinutes(30));
+
         log.info("입장 시 읽음 처리 완료 for userId={}, roomUuid={}", userId, roomUuid);
     }
+
 
 
     private void checkChatRoomWithinAllowedTime(String roomUuid) {

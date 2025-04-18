@@ -50,16 +50,17 @@ public class ChatWebSocketController {
     }
 
     @MessageMapping("/chat.enter/{roomUuid}")
-    public void enter(@DestinationVariable String roomUuid, StompHeaderAccessor accessor) {
-        Authentication auth = (Authentication) accessor.getSessionAttributes().get("auth");
-        if (auth != null) {
-            Long userId = Long.parseLong(Objects.requireNonNull(
-                ((CustomOAuth2User) auth.getPrincipal()).getAttribute("serviceUserId")));
-            log.info("parsing principal user = {}", userId);
-            chatWebsocketService.handleUserEnter(userId, roomUuid);
-
+    public void enter(@DestinationVariable String roomUuid, Principal principal) {
+        if (principal instanceof Authentication authentication) {
+            if (authentication.getPrincipal() instanceof CustomOAuth2User user) {
+                Long userId = user.getServiceUserId();
+                log.info("채팅 입장: userId = {}", userId);
+                chatWebsocketService.handleUserEnter(userId, roomUuid);
+            } else {
+                log.error("CustomOAuth2User 타입이 아닙니다. principal: {}", authentication.getPrincipal());
+            }
         } else {
-            log.error("Authentication not found");
+            log.error("Authentication 객체가 아닙니다. principal: {}", principal);
         }
     }
 

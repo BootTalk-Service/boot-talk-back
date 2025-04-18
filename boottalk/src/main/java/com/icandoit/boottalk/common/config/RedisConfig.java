@@ -1,10 +1,5 @@
 package com.icandoit.boottalk.common.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.icandoit.boottalk.stomp_chat.dto.ChatMessageResponseDto;
-import com.icandoit.boottalk.stomp_chat.dto.ChatRoomResponseDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +9,14 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.icandoit.boottalk.stomp_chat.dto.ChatMessageResponseDto;
+import com.icandoit.boottalk.stomp_chat.dto.ChatRoomResponseDto;
 
 @Configuration
 public class RedisConfig {
@@ -47,28 +49,36 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, ChatMessageResponseDto> chatMessageDtoRedisTemplate(
+    public RedisTemplate<String, Object> chatMessageDtoRedisTemplate(
         LettuceConnectionFactory redisConnectionFactory,
         GenericJackson2JsonRedisSerializer serializer) {
 
-        RedisTemplate<String, ChatMessageResponseDto> template = new RedisTemplate<>();
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(serializer);
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(serializer);
+        template.afterPropertiesSet();
 
         return template;
     }
-
     @Bean
     public RedisTemplate<String, ChatRoomResponseDto> chatRoomDtoRedisTemplate(
-        LettuceConnectionFactory redisConnectionFactory,
-        GenericJackson2JsonRedisSerializer serializer) {
+        LettuceConnectionFactory redisConnectionFactory) {
 
         RedisTemplate<String, ChatRoomResponseDto> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        Jackson2JsonRedisSerializer<ChatRoomResponseDto> serializer =
+            new Jackson2JsonRedisSerializer<>(objectMapper, ChatRoomResponseDto.class);
+
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(serializer);
-
         return template;
     }
 
@@ -83,5 +93,14 @@ public class RedisConfig {
         template.setValueSerializer(serializer);
 
         return template;
+    }
+
+    // 직렬화를 위한 objectMapper 추가
+    @Bean
+    public ObjectMapper objectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        return objectMapper;
     }
 }
