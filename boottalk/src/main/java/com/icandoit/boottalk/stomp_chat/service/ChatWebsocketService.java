@@ -13,13 +13,13 @@ import com.icandoit.boottalk.stomp_chat.repository.ChatMessageRepository;
 import com.icandoit.boottalk.stomp_chat.repository.ChatRoomRepository;
 import com.icandoit.boottalk.stomp_chat.repository.RedisChatMessageRepository;
 import com.icandoit.boottalk.stomp_chat.repository.RedisChatRoomRepository;
+import com.icandoit.boottalk.stomp_chat.repository.RedisChatUserRepository;
 import com.icandoit.boottalk.stomp_chat.service.component.ChatMessageSender;
 import com.icandoit.boottalk.stomp_chat.service.component.ChatRoomStatusUpdater;
 import com.icandoit.boottalk.stomp_chat.service.component.MessageLoader;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +37,7 @@ public class ChatWebsocketService {
     private final ChatRoomRepository chatRoomRepository;
     private final RedisChatMessageRepository redisChatRepository;
     private final RedisChatRoomRepository redisRoomRepository;
+    private final RedisChatUserRepository redisChatUserRepository;
 
     private final ChatRoomStatusUpdater statusUpdater;
     private final ChatMessageSender messageSender;
@@ -47,6 +48,9 @@ public class ChatWebsocketService {
     @Transactional
     public void handleUserEnter(Long userId, String roomUuid) {
         LocalDateTime enterTime = LocalDateTime.now();
+
+        // 입장한 유저상태 저장
+        redisChatUserRepository.saveUserEnterStatus(roomUuid, userId);
         // 메시지 조회 및 전송
         messageLoader.loadAndSendMessages(userId, roomUuid);
 
@@ -71,8 +75,9 @@ public class ChatWebsocketService {
 
         // 커피챗 예약 시간 내에만 채팅 가능하도록 체크
         checkChatRoomWithinAllowedTime(roomUuid);
-
-        log.info("senderId: {}, receiverId: {}",senderId, requestDto.receiverId());
+        boolean isReceiverInRoom = redisChatUserRepository.hasUserEntered(roomUuid,
+            requestDto.receiverId());
+        log.info("senderId: {}, receiverId: {}", senderId, requestDto.receiverId());
 
         // 메시지를 DTO로 변환
         ChatMessageResponseDto messageToCache = new ChatMessageResponseDto(
@@ -82,7 +87,7 @@ public class ChatWebsocketService {
             requestDto.content(),
             requestDto.type(),
             LocalDateTime.now(),
-            false // isRead : 수신자가 읽음 여부
+            isReceiverInRoom
         );
 
         // Redis에 저장
@@ -103,20 +108,23 @@ public class ChatWebsocketService {
     public void markUnreadMessagesAsRead(String roomUuid, Long userId, LocalDateTime enterTime) {
         List<ChatMessageResponseDto> cachedMessages = redisChatRepository.getMessages(roomUuid);
 
+        boolean updated = false;
+
         for (ChatMessageResponseDto message : cachedMessages) {
             if (Objects.equals(message.getReceiverId(), userId)
                 && !message.isRead()
                 && message.getSentAt().isBefore(enterTime)) {
                 message.markAsRead();
+                updated = true;
             }
         }
 
-        // 수정된 리스트를 다시 덮어쓰기
-        redisChatRepository.saveAll(roomUuid, cachedMessages, Duration.ofMinutes(30));
+        if (updated) {
+            redisChatRepository.saveAll(roomUuid, cachedMessages, Duration.ofMinutes(30));
+        }
 
         log.info("입장 시 읽음 처리 완료 for userId={}, roomUuid={}", userId, roomUuid);
     }
-
 
 
     private void checkChatRoomWithinAllowedTime(String roomUuid) {

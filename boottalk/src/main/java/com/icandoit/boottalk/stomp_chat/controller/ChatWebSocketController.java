@@ -5,13 +5,11 @@ import com.icandoit.boottalk.stomp_chat.dto.stompDto.ChatMessageRequestDto;
 import com.icandoit.boottalk.stomp_chat.dto.stompDto.ChatTypingRequestDto;
 import com.icandoit.boottalk.stomp_chat.service.ChatWebsocketService;
 import java.security.Principal;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -41,8 +39,7 @@ public class ChatWebSocketController {
         log.info("메시지 발신자: {}, 권한: {}", username, authentication.getAuthorities());
 
         // CustomOAuth2User 타입인 경우 추가 정보 접근 가능
-        if (authentication.getPrincipal() instanceof CustomOAuth2User) {
-            CustomOAuth2User user = (CustomOAuth2User) authentication.getPrincipal();
+        if (authentication.getPrincipal() instanceof CustomOAuth2User user) {
             log.info("사용자 ID: {}", user.getServiceUserId());
         }
 
