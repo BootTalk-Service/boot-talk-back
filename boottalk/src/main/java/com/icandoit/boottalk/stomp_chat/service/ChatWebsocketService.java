@@ -2,6 +2,9 @@ package com.icandoit.boottalk.stomp_chat.service;
 
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
+import com.icandoit.boottalk.notification.dto.NotificationRequestDto;
+import com.icandoit.boottalk.notification.event.NotificationEvent;
+import com.icandoit.boottalk.notification.type.NotificationType;
 import com.icandoit.boottalk.stomp_chat.dto.ChatMessageResponseDto;
 import com.icandoit.boottalk.stomp_chat.dto.ChatRoomResponseDto;
 import com.icandoit.boottalk.stomp_chat.dto.stompDto.ChatMessageRequestDto;
@@ -23,6 +26,7 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -44,6 +48,7 @@ public class ChatWebsocketService {
     private final MessageLoader messageLoader;
     private final SimpMessagingTemplate template;
 
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public void handleUserEnter(Long userId, String roomUuid) {
@@ -61,6 +66,8 @@ public class ChatWebsocketService {
         markUnreadMessagesAsRead(roomUuid, userId, enterTime);
 
         messageSender.sendEnterMessage(userId, roomUuid);
+
+        redisChatUserRepository.resetNotificationStatus(roomUuid, userId);
     }
 
     // Listener 호출(퇴장 시 호출되는 매서드)
@@ -89,6 +96,15 @@ public class ChatWebsocketService {
             LocalDateTime.now(),
             isReceiverInRoom
         );
+
+        if (!isReceiverInRoom && redisChatUserRepository.shouldSendNotification(roomUuid,
+            requestDto.receiverId())) {
+
+            eventPublisher.publishEvent(new NotificationEvent(
+                requestDto.receiverId(),
+                NotificationRequestDto.ofType(NotificationType.CHAT_MESSAGE_RECEIVED)
+            ));
+        }
 
         // Redis에 저장
         saveMessageWithFallback(messageToCache);
