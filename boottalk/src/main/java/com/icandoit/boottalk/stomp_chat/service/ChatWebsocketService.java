@@ -72,6 +72,8 @@ public class ChatWebsocketService {
         // 커피챗 예약 시간 내에만 채팅 가능하도록 체크
         checkChatRoomWithinAllowedTime(roomUuid);
 
+        log.info("senderId: {}, receiverId: {}",senderId, requestDto.receiverId());
+
         // 메시지를 DTO로 변환
         ChatMessageResponseDto messageToCache = new ChatMessageResponseDto(
             roomUuid,

@@ -52,9 +52,13 @@ public class RedisChatMessageRepository {
 
     public void saveAll(String roomUuid, List<ChatMessageResponseDto> messages, Duration ttl) {
         String key = chatMessages(roomUuid);
-        for (ChatMessageResponseDto msg : messages) {
-            redisTemplate.opsForList().rightPush(key, msg);
+
+        redisTemplate.delete(key);
+
+        for(ChatMessageResponseDto message : messages) {
+            redisTemplate.opsForList().rightPush(key, message);
         }
+
         redisTemplate.expire(key, ttl);
     }
 

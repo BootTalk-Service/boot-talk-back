@@ -16,7 +16,7 @@ public class ChatMessageResponseDto {
     private String roomUuid;
     private Long senderId;
     private Long receiverId;
-    private String message;
+    private String content;
     private MessageType type;
     private LocalDateTime sentAt;
 
@@ -40,7 +40,7 @@ public class ChatMessageResponseDto {
             .roomUuid(roomUuid)
             .senderId(senderId)
             .receiverId(receiverId)
-            .content(message)
+            .content(content)
             .isRead(isRead)
             .type(type)
             .sentAt(sentAt)
