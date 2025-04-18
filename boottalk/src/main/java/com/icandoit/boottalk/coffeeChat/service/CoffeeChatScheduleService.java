@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CoffeeChatRefundService {
+public class CoffeeChatScheduleService {
 
     private final CoffeeChatApplicationRepository coffeeChatAppRepository;
     private final CreatePointHistoryService createPointHistoryService;
@@ -65,5 +65,33 @@ public class CoffeeChatRefundService {
         log.info("커피챗 자동 환불 완료");
 
     }
+
+    @Transactional
+    public void sendCoffeeChatRemindersNext30Minutes() {
+        log.info("커피챗 리마인더 알림 전송 시작");
+
+        List<CoffeeChatApplication> coffeeChatApplications =
+            coffeeChatAppRepository.findAllApprovedCoffeeChatsStartingIn30Minutes();
+
+        for (CoffeeChatApplication coffeeChatApp : coffeeChatApplications) {
+            try {
+                // 멘티와 멘토에게 리마인더 알림 전송
+                reminderNotification(coffeeChatApp.getMentee().getUserId());
+                reminderNotification(coffeeChatApp.getCoffeeChatInfo().getMentor().getUserId());
+            } catch (Exception e) {
+                log.error("커피챗 리마인더 알림 전송 중 오류 발생", e);
+            }
+        }
+
+        log.info("커피챗 리마인더 알림 전송 완료");
+    }
+
+    private void reminderNotification(Long userId) {
+        eventPublisher.publishEvent(new NotificationEvent(
+            userId,
+            NotificationRequestDto.ofType(NotificationType.COFFEE_CHAT_REMINDER_30_MINUTES_AHEAD)
+        ));
+    }
+
 
 }

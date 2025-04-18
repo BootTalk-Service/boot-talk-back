@@ -81,5 +81,12 @@ public interface CoffeeChatApplicationRepository extends JpaRepository<CoffeeCha
 		@Param("endTime") LocalDateTime endTime
 	);
 
+	@Query("""
+		SELECT ca FROM CoffeeChatApplication ca
+		WHERE ca.coffeeChatStartTime BETWEEN CURRENT_TIMESTAMP AND CURRENT_TIMESTAMP + 30 MINUTE
+		AND ca.status = 'APPROVED'
+	""")
+	List<CoffeeChatApplication> findAllApprovedCoffeeChatsStartingIn30Minutes();
+
 
 }

@@ -18,16 +18,16 @@ import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatApplication;
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatInfo;
 import com.icandoit.boottalk.coffeeChat.entity.enums.StatusType;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatApplicationRepository;
-import com.icandoit.boottalk.coffeeChat.service.CoffeeChatRefundService;
+import com.icandoit.boottalk.coffeeChat.service.CoffeeChatScheduleService;
 import com.icandoit.boottalk.point_history.domain.type.EventType;
 import com.icandoit.boottalk.point_history.service.CreatePointHistoryService;
 import com.icandoit.boottalk.user.domain.entity.User;
 
 @ExtendWith(MockitoExtension.class)
-class CoffeeChatRefundServiceTest {
+class CoffeeChatScheduleServiceTest {
 
     @InjectMocks
-    CoffeeChatRefundService coffeeChatRefundService;
+    CoffeeChatScheduleService coffeeChatScheduleService;
 
     @Mock
     private CoffeeChatApplicationRepository coffeeChatAppRepository;
@@ -73,7 +73,7 @@ class CoffeeChatRefundServiceTest {
 
         // when
         // 환불 처리 실행
-        coffeeChatRefundService.refundExpiredPendingChats();
+        coffeeChatScheduleService.refundExpiredPendingChats();
 
         // then
         // 포인트 히스토리가 잘 생성되었는지 확인
@@ -99,7 +99,7 @@ class CoffeeChatRefundServiceTest {
 
         // when
         // 환불 처리 실행
-        coffeeChatRefundService.refundExpiredPendingChats();
+        coffeeChatScheduleService.refundExpiredPendingChats();
 
         // then
         // 포인트 히스토리가 잘 생성되었는지 확인
