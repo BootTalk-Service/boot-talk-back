@@ -25,6 +25,8 @@ public class RedisChatUserRepository {
         redisTemplate.opsForValue().set(enteredStatus(roomUuid, userId), true);
     }
 
+
+    // 사용자 알림 수신
     public boolean shouldSendNotification(String roomUuid, Long receiverId) {
 
         Boolean alreadySent = redisTemplate.hasKey(chatNotice(roomUuid, receiverId));
@@ -37,6 +39,7 @@ public class RedisChatUserRepository {
         return true;
     }
 
+    // 사용자 수신 상태 제거
     public void resetNotificationStatus(String roomUuid, Long receiverId) {
         redisTemplate.delete(chatNotice(roomUuid, receiverId));
     }
