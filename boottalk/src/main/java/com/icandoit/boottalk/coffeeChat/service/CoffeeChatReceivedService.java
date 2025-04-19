@@ -27,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class CoffeeChatReceivedService {
 
     private final CoffeeChatApplicationRepository coffeeChatAppRepository;
-
+    private final ChatRoomService chatRoomService;
     private final CoffeeChatCommonService coffeeChatCommonService;
     private final CreatePointHistoryService createPointHistoryService;
     private final ApplicationEventPublisher eventPublisher;
