@@ -26,16 +26,12 @@ public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomStatusRepository chatRoomStatusRepository;
-    private final CoffeeChatApplicationRepository coffeeChatApplicationRepository;
     private final ChatMessageRepository chatMessageRepository;
 
     // 채팅방 생성
     // todo: 멘토가 커피챗 신청 승인 시 호출로 변경 시 삭제 예정
     @Transactional
-    public ChatRoomCreateResponse createChatRoom(Long applicationId) {
-
-        CoffeeChatApplication application = coffeeChatApplicationRepository.findById(applicationId)
-            .orElseThrow(() -> new CustomException(ErrorCode.COFFEE_CHAT_APPLICATION_NOT_FOUND));
+    public ChatRoomCreateResponse createChatRoom(CoffeeChatApplication application) {
 
         // 이미 생성된 방이 있는지 확인
         chatRoomRepository.findByCoffeeChatApplication(application)
