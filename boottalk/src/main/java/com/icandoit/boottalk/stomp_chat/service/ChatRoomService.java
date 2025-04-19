@@ -1,7 +1,6 @@
 package com.icandoit.boottalk.stomp_chat.service;
 
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatApplication;
-import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatApplicationRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
 import com.icandoit.boottalk.stomp_chat.dto.ChatMessageResponseDto;
