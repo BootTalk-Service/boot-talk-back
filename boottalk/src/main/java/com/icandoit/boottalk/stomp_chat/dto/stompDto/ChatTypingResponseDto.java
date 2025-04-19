@@ -1,6 +1,6 @@
 package com.icandoit.boottalk.stomp_chat.dto.stompDto;
 
 public record ChatTypingResponseDto(
-    Long senderId,
+    Long receiverId,
     boolean typing
 ) {}
