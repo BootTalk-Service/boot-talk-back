@@ -88,10 +88,7 @@ public class CoffeeChatTimeService {
 
     public AvailableChatTimeDto getAvailableChatTimes(Long coffeeChatInfoId) {
 
-        // 현재 시간과 신청 기간 설정
         LocalDateTime now = LocalDateTime.now();
-        LocalDate startDate = now.toLocalDate();
-        LocalDate endDate = startDate.plusDays(COFFEE_CHAT_APPLICATION_PERIOD_DAYS);
         
         // 멘토가 설정한 요일별 멘토링(커피챗) 시간 목록
         List<CoffeeChatTime> mentoringTimeList = coffeeChatTimeRepository.findAllWithCoffeeChatInfoByCoffeeChatInfoId(coffeeChatInfoId);
@@ -101,7 +98,7 @@ public class CoffeeChatTimeService {
                 coffeeChatInfoId, now, now.plusDays(COFFEE_CHAT_APPLICATION_PERIOD_DAYS));
 
         // 신청된 시간 제외한 신청 가능한 시간 필터링
-        Map<LocalDate, List<LocalTime>> availableChatTimesByDate  = getAvailableChatTimesByDate(mentoringTimeList, appliedDateTimes, startDate, endDate);
+        Map<LocalDate, List<LocalTime>> availableChatTimesByDate = getAvailableChatTimesByDate(mentoringTimeList, appliedDateTimes, now);
 
         Map<LocalDate, List<String>> formattedAvailableChatTimes = availableChatTimesByDate.entrySet().stream()
             .collect(Collectors.toMap(
@@ -188,8 +185,12 @@ public class CoffeeChatTimeService {
     private Map<LocalDate, List<LocalTime>> getAvailableChatTimesByDate(
         List<CoffeeChatTime> mentoringTimeList,
         List<LocalDateTime> appliedDateTimes,
-        LocalDate startDate, LocalDate endDate
+        LocalDateTime now
     ) {
+        // 현재 시간 기준으로 신청 기간 설정
+        LocalDate startDate = now.toLocalDate();
+        LocalDate endDate = startDate.plusDays(COFFEE_CHAT_APPLICATION_PERIOD_DAYS);
+
         // 신청일 기준 30일 내 멘토링 가능한 요일의 날짜를 key로, 해당 날짜의 신청 가능 시간을 리스트로 매핑
         Map<LocalDate, List<LocalTime>> availableChatTimesByDate = new HashMap<>();
 
@@ -199,6 +200,8 @@ public class CoffeeChatTimeService {
                 if (date.getDayOfWeek() == chatTime.getDayOfWeek()) { // 멘토링 시간의 요일과 일치하는 날짜라면
                     LocalTime startTime = chatTime.getStartTime();
                     LocalDateTime fullDateTime = LocalDateTime.of(date, startTime); // appliedDateTimes의 LocalDateTime 과 비교하기 위해 포맷팅
+
+                    if(fullDateTime.isBefore(now)) continue;
                     if (!appliedDateTimes.contains(fullDateTime)) { // 이미 신청된 시간이 아니라면 추가
                         availableTimes.add(startTime);
                     }

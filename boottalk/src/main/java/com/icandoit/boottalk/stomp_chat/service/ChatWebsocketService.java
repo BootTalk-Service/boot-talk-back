@@ -113,9 +113,9 @@ public class ChatWebsocketService {
         messageSender.sendMessage(requestDto.receiverId(), messageToCache);
     }
 
-    public void sendTypingStatus(Long senderId, ChatTypingRequestDto requestDto) {
+    public void sendTypingStatus(ChatTypingRequestDto requestDto) {
 
-        ChatTypingResponseDto response = new ChatTypingResponseDto(senderId, requestDto.typing());
+        ChatTypingResponseDto response = new ChatTypingResponseDto(requestDto.receiverId(), requestDto.typing());
 
         String destination = "/queue/chat/" + requestDto.roomUuid() + "/" + requestDto.receiverId();
         template.convertAndSend(destination, response);
