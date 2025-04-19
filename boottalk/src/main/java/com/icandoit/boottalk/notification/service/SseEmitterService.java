@@ -49,7 +49,7 @@ public class SseEmitterService {
 
 
 	// 클라이언트와 연결을 생성하는 메서드
-	public SseEmitter subscribe(long userId, String lastEventId) {
+	public SseEmitter subscribe(Long userId, String lastEventId) {
 		//기존 이미 연결이 되어있다면 끊고 다시 연결
 		emitterRepository.deleteById(userId);
 
