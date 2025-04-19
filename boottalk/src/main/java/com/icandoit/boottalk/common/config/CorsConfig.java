@@ -14,7 +14,7 @@ public class CorsConfig {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
 				registry.addMapping("/**")
-					.allowedOrigins("http://localhost:3000") // 정확한 Origin 명시
+					.allowedOrigins("http://localhost:3000", "http://localhost:4000") // 정확한 Origin 명시
 					.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
 					.allowedHeaders("Content-Type", "Authorization")
 					.exposedHeaders("Set-Cookie")

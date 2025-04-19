@@ -28,7 +28,7 @@ public class SocialClientRegistration {
 		return ClientRegistration.withRegistrationId("naver")
 			.clientId(clientId)
 			.clientSecret(clientSecret)
-			.redirectUri("http://43.200.67.27:8080/login/oauth2/code/naver")
+			.redirectUri("http://localhost:4000/api/login/oauth2/code/naver")
 			.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
 			.scope("name", "email")
 			.authorizationUri("https://nid.naver.com/oauth2.0/authorize")

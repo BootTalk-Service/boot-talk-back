@@ -39,4 +39,9 @@ spring:
 
 server:
   url: "http://localhost:3000"
+  forward-headers-strategy: native
 
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
