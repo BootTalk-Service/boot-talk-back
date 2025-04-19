@@ -88,7 +88,6 @@ public class CoffeeChatTimeService {
 
     public AvailableChatTimeDto getAvailableChatTimes(Long coffeeChatInfoId) {
 
-        // 현재 시간과 신청 기간 설정
         LocalDateTime now = LocalDateTime.now();
         
         // 멘토가 설정한 요일별 멘토링(커피챗) 시간 목록
@@ -188,6 +187,7 @@ public class CoffeeChatTimeService {
         List<LocalDateTime> appliedDateTimes,
         LocalDateTime now
     ) {
+        // 현재 시간 기준으로 신청 기간 설정
         LocalDate startDate = now.toLocalDate();
         LocalDate endDate = startDate.plusDays(COFFEE_CHAT_APPLICATION_PERIOD_DAYS);
 
