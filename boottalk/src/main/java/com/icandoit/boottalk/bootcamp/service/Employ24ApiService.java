@@ -6,9 +6,7 @@ import static com.icandoit.boottalk.libs.exception.ErrorCode.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +25,6 @@ import com.icandoit.boottalk.bootcamp.repository.CourseRepository;
 import com.icandoit.boottalk.bootcamp.repository.TrainingCenterRepository;
 import com.icandoit.boottalk.libs.exception.CustomException;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,9 +48,7 @@ public class Employ24ApiService {
 	private final CourseRepository courseRepository;
 
 	private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-
-	@Getter
-	private final Set<String> failedCategoryNames = new HashSet<>();
+	private final BootcampService bootcampService;
 
 	// 주어진 카테고리와 NCS 코드로 리스트 조회 후 저장 처리
 	public void processCategoryAndNcs(String categoryCode, String ncsCode) {
@@ -61,10 +56,10 @@ public class Employ24ApiService {
 			log.info("API 호출 시작 - categoryCode: {}, ncsCode: {}", categoryCode, ncsCode);
 			List<BootcampListResponseDto> list = fetchBootcampList(categoryCode, ncsCode);
 			log.info("API 호출 완료 - 수신된 항목 수: {}", list.size());
+
 			processBootcampList(list);
 		} catch (Exception e) {
 			log.warn("데이터 수집 실패: categoryCode={}, ncsCode={}, message={}", categoryCode, ncsCode, e.getMessage());
-			e.printStackTrace();
 		}
 	}
 
@@ -84,48 +79,49 @@ public class Employ24ApiService {
 		BootcampDetailResponseDto detail = fetchBootcampDetail(dto.bootcampId(), dto.bootcampDegree(), dto.trainingCenterId());
 
 		String categoryName = detail.ncsName();
+
 		if (!BootcampCategoryType.isValidKoreanName(categoryName)) {
-			failedCategoryNames.add(categoryName);
 			return;
 		}
 
 		TrainingCenter center = saveOrGetTrainingCenter(dto, detail);
 		BootcampCategoryType category = BootcampCategoryType.fromKoreanName(categoryName);
-
 		Course course = saveOrGetCourse(dto, center, category);
-
 		Bootcamp bootcamp = createBootcampEntity(center, course, dto, category, detail);
 
-		bootcampRepository.save(bootcamp);
+		bootcampService.save(bootcamp);
 
-		redisService.storeNewBootcampInfo(String.valueOf(bootcamp.getBootcampId()), bootcamp.getBootcampCategoryType());
+		try {
+			redisService.storeNewBootcampInfo(String.valueOf(bootcamp.getBootcampId()), bootcamp.getBootcampCategoryType());
+		} catch (Exception e) {
+			log.error("Redis 저장 실패: bootcampId={}, category={}, 원인={}", bootcamp.getBootcampId(), categoryName, e.getMessage());
+		}
+
 		log.info("저장 성공: {}", bootcamp.getBootcampName());
 	}
 
-	// TrainingCenter가 존재하지 않으면 저장, 있으면 조회해서 반환
+	// TrainingCenter 가 존재하지 않으면 저장, 있으면 조회해서 반환
 	private TrainingCenter saveOrGetTrainingCenter(BootcampListResponseDto dto, BootcampDetailResponseDto detail) {
 		String address1 = (detail.address1() != null) ? detail.address1() : "";
 		String address2 = (detail.address2() != null) ? detail.address2() : "";
 		String fullAddress = address1 + " " + address2;
 
+		TrainingCenter trainingCenter = TrainingCenter.of(
+			dto.trainingCenterName(),
+			detail.trainingCenterEmail(),
+			fullAddress,
+			detail.trainingCenterUrl(),
+			detail.trainingCenterTelephoneNumber()
+		);
+
 		return trainingCenterRepository.findByTrainingCenterName(dto.trainingCenterName())
-			.orElseGet(() -> trainingCenterRepository.save(
-				TrainingCenter.of(
-					dto.trainingCenterName(),
-					detail.trainingCenterEmail(),
-					fullAddress,
-					detail.trainingCenterUrl(),
-					detail.trainingCenterTelephoneNumber()
-				)
-			));
+			.orElseGet(() -> trainingCenterRepository.save(trainingCenter));
 	}
 
 	// Course 가 존재하지 않으면 저장, 있으면 조회해서 반환
 	private Course saveOrGetCourse(BootcampListResponseDto dto, TrainingCenter center, BootcampCategoryType category) {
 		return courseRepository.findByTrainingProgramId(dto.bootcampId())
-			.orElseGet(() -> courseRepository.save(
-				Course.of(dto.bootcampId(), dto.bootcampName(), category, center)
-			));
+			.orElseGet(() -> courseRepository.save(Course.of(dto.bootcampId(), dto.bootcampName(), category, center)));
 	}
 
 	// Bootcamp Entity 생성

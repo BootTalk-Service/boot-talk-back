@@ -18,6 +18,7 @@ import com.icandoit.boottalk.notification.dto.NotificationRequestDto;
 import com.icandoit.boottalk.notification.event.NotificationEvent;
 import com.icandoit.boottalk.point_history.domain.type.EventType;
 import com.icandoit.boottalk.point_history.service.CreatePointHistoryService;
+import com.icandoit.boottalk.stomp_chat.service.ChatRoomService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,6 +31,7 @@ public class CoffeeChatReceivedService {
     private final CoffeeChatCommonService coffeeChatCommonService;
     private final CreatePointHistoryService createPointHistoryService;
     private final ApplicationEventPublisher eventPublisher;
+
 
     private static final int MENTORING_BAN_DAYS = 30;
 
@@ -83,7 +85,7 @@ public class CoffeeChatReceivedService {
         }
 
         if (changeStatus.isApproved()) {
-            // TODO: 채팅룸 생성 (커피챗 시작 시간이 되면 채팅방 활성화)
+            chatRoomService.createChatRoom(coffeeChatApp);
         }
 
         coffeeChatApp.setStatus(changeStatus); // 상태 변경

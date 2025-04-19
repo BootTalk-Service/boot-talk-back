@@ -1,6 +1,6 @@
 package com.icandoit.boottalk.stomp_chat.repository;
 
-import static com.icandoit.boottalk.stomp_chat.common.RedisKeyPrefix.enteredStatus;
+import static com.icandoit.boottalk.common.RedisKeyPrefix.enteredStatus;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;

@@ -1,4 +1,4 @@
-package com.icandoit.boottalk.stomp_chat.common;
+package com.icandoit.boottalk.common;
 
 public class RedisKeyPrefix {
     // Prefix constants
@@ -7,6 +7,7 @@ public class RedisKeyPrefix {
     private static final String CHAT_MESSAGES_PREFIX = "chat:messages:";
     private static final String ROOM_INFO_PREFIX = "chat:room:info:";
     private static final String ENTERED_STATUS_PREFIX = "chat:entered:";
+    private static final String BOOTCAMP_KEY_PREFIX = "new:bootcamp:";
 
     // 채팅방에 속한 유저들 (Set)
     public static String roomUsers(String roomUuid) {
@@ -31,5 +32,14 @@ public class RedisKeyPrefix {
     // 사용자의 입장 상태 저장
     public static String enteredStatus(String roomUuid, Long userId) {
         return ENTERED_STATUS_PREFIX + roomUuid + ":" + userId;
+    }
+
+    // 신규 부트캠프 저장
+    public static String bootcamp(String categoryName) {
+        return BOOTCAMP_KEY_PREFIX + categoryName;
+    }
+
+    public static String bootcamp(){
+        return BOOTCAMP_KEY_PREFIX;
     }
 }

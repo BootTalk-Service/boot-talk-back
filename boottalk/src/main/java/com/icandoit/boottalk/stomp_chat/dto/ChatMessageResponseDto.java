@@ -3,16 +3,22 @@ package com.icandoit.boottalk.stomp_chat.dto;
 import com.icandoit.boottalk.stomp_chat.entity.ChatMessage;
 import com.icandoit.boottalk.stomp_chat.entity.enums.MessageType;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-public record ChatMessageResponseDto(
-    String roomUuid,
-    Long senderId,
-    Long receiverId,
-    String message,
-    MessageType type,
-    LocalDateTime sentAt,
-    boolean isRead
-) {
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+public class ChatMessageResponseDto {
+
+    private String roomUuid;
+    private Long senderId;
+    private Long receiverId;
+    private String message;
+    private MessageType type;
+    private LocalDateTime sentAt;
+    private boolean isRead;
 
     public static ChatMessageResponseDto from(ChatMessage chatMessage) {
         return new ChatMessageResponseDto(
@@ -36,5 +42,9 @@ public record ChatMessageResponseDto(
             .type(type)
             .sentAt(sentAt)
             .build();
+    }
+
+    public void markAsRead() {
+        this.isRead = true;
     }
 }
