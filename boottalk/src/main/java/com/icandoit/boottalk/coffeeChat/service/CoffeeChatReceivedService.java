@@ -1,5 +1,6 @@
 package com.icandoit.boottalk.coffeeChat.service;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,7 @@ import com.icandoit.boottalk.coffeeChat.entity.enums.StatusType;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatApplicationRepository;
 import com.icandoit.boottalk.common.dto.PagedResponseDto;
 import com.icandoit.boottalk.notification.dto.NotificationRequestDto;
-import com.icandoit.boottalk.notification.service.SseEmitterService;
+import com.icandoit.boottalk.notification.event.NotificationEvent;
 import com.icandoit.boottalk.point_history.domain.type.EventType;
 import com.icandoit.boottalk.point_history.service.CreatePointHistoryService;
 import com.icandoit.boottalk.stomp_chat.service.ChatRoomService;
@@ -29,8 +30,8 @@ public class CoffeeChatReceivedService {
 
     private final CoffeeChatCommonService coffeeChatCommonService;
     private final CreatePointHistoryService createPointHistoryService;
-    private final SseEmitterService sseEmitterService;
-    private final ChatRoomService chatRoomService;
+    private final ApplicationEventPublisher eventPublisher;
+
 
     private static final int MENTORING_BAN_DAYS = 30;
 
@@ -47,7 +48,8 @@ public class CoffeeChatReceivedService {
         }
 
         Page<CoffeeChatApplicationResponseDto> page =
-            coffeeChatAppRepository.findByCoffeeChatInfo_CoffeeChatInfoId(coffeeChatInfo.getCoffeeChatInfoId(), pageable)
+            coffeeChatAppRepository.findByCoffeeChatInfo_CoffeeChatInfoId(coffeeChatInfo.getCoffeeChatInfoId(),
+                    pageable)
                 .map(CoffeeChatApplicationResponseDto::from);
 
         return PagedResponseDto.from(page);
@@ -89,15 +91,13 @@ public class CoffeeChatReceivedService {
         coffeeChatApp.setStatus(changeStatus); // 상태 변경
 
         // 멘토에게 커피챗 수락/거절/취소 알림 전송
-        sseEmitterService.sendToClient(
+        eventPublisher.publishEvent(new NotificationEvent(
             menteeId,
             NotificationRequestDto.ofType(changeStatus.toNotificationType())
-        );
+        ));
 
         return CoffeeChatAppStatusResponseDto.from(coffeeChatApp);
 
     }
-
-
 
 }

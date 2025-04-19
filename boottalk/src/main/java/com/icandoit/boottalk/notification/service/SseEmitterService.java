@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -93,6 +95,7 @@ public class SseEmitterService {
 	}
 
 	@Async
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
 	public void HandleNotificationEvent(NotificationEvent notificationEvent) {
 		sendToClient(notificationEvent.userId(), notificationEvent.notificationRequestDto());
@@ -174,7 +177,7 @@ public class SseEmitterService {
 
 	// 클라이언트들의 연결을 유지하기 위한 하트비트 1분마다 전송
 	@Scheduled(fixedRate = 60 * 1000)
-	private void sendHeartbeats() {
+	public void sendHeartbeats() {
 		emitterRepository.getEmitters().forEach((userId, emitter) -> {
 			try {
 				emitter.send(
