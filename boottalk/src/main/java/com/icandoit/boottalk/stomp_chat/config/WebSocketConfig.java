@@ -1,42 +1,73 @@
 package com.icandoit.boottalk.stomp_chat.config;
 
+import com.icandoit.boottalk.social_login.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.messaging.simp.stomp.StompCommand;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
-@Configuration
+@Slf4j
 @RequiredArgsConstructor
 @EnableWebSocketMessageBroker
+@Configuration
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    private final WebSocketHandshakeInterceptor handshakeInterceptor;
+    private final JwtProvider jwtProvider;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // 클라이언트가 연결할 WebSocket 엔드포인트 정의
-        // 클라이언트는 이 엔드포인트로 연결하여 WebSocket 핸드셰이크를 해야 함
         registry.addEndpoint("/connection")
-            .setAllowedOriginPatterns("*") // 모든 출처에서의 CORS 요청 허용
-            .addInterceptors(handshakeInterceptor);
-        // .withSockJS(); // WebSocket 을 지원하지 않는 브라우저에서 SockJS 로 대체 연결을 사용하도록 할 수 있음
+            .addInterceptors(new AuthHandshakeInterceptor(jwtProvider)) // 이걸 사용
+            .setAllowedOriginPatterns("*");
     }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-
-        // 클라이언트가 메시지를 보낼 때 사용하는 API의 prefix를 설정
-        // "/app" 으로 시작하는 STOMP 메시지는 이 설정에 따라 라우팅 됨
-        // 클라이언트에서 보낸 메시지의 주소가 /app 으로 시작하는 경우, 이 메시지는 서버에서 처리됨
-        // 즉, 애플리케이션 내부에서 메시지 처리를 위한 경로이다.
         registry.setApplicationDestinationPrefixes("/app");
-
-        // 메시지 브로커를 설정하여 클라이언트가 구독할 수 있는 주제를 지정
-        // 클라이언트는 "/queue" 로 시작하는 주제를 구독하고, 메시지가 이 주제에 전달되면
-        // 메시지 브로커가 이를 자동으로 구독한 클라이언트에게 전달함
-        // 즉, "/queue" 로 시작하는 주제는 브로커가 관리하고 여러 클라이언트에게 전달됨
         registry.enableSimpleBroker("/queue");
+    }
+
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(new ChannelInterceptor() {
+            @Override
+            public Message<?> preSend(Message<?> message, MessageChannel channel) {
+                StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+                if (accessor != null && accessor.getSessionAttributes() != null) {
+                    Authentication auth = (Authentication) accessor.getSessionAttributes().get("auth");
+
+                    if (auth != null) {
+                        SecurityContextHolder.getContext().setAuthentication(auth);
+                        accessor.setUser(auth);
+
+                        if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+                            log.info("STOMP 연결 인증 완료: userId = {}", auth.getName());
+                        } else if (StompCommand.SEND.equals(accessor.getCommand()) || StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
+                            log.info("메시지 전송/구독 인증 완료: user = {}", auth.getName());
+                        }
+                    } else {
+                        log.warn("WebSocket 메시지 처리 시 인증 정보가 없습니다.");
+                    }
+                }
+                return message;
+            }
+
+            @Override
+            public void afterSendCompletion(Message<?> message, MessageChannel channel, boolean sent, Exception ex) {
+                SecurityContextHolder.clearContext();
+            }
+        });
     }
 }

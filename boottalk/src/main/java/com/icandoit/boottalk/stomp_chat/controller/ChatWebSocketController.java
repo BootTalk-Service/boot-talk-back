@@ -1,5 +1,8 @@
 package com.icandoit.boottalk.stomp_chat.controller;
 
+import com.icandoit.boottalk.libs.exception.CustomException;
+import com.icandoit.boottalk.libs.exception.ErrorCode;
+import com.icandoit.boottalk.social_login.dto.CustomOAuth2User;
 import com.icandoit.boottalk.stomp_chat.dto.stompDto.ChatMessageRequestDto;
 import com.icandoit.boottalk.stomp_chat.dto.stompDto.ChatTypingRequestDto;
 import com.icandoit.boottalk.stomp_chat.service.ChatWebsocketService;
@@ -9,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 
 @Controller
@@ -18,31 +23,46 @@ public class ChatWebSocketController {
 
     private final ChatWebsocketService chatWebsocketService;
 
-    /*
-      1:1 채팅 메시지 처리 (메시지를 처리하고 특정 사용자에게 전송)
-        - /app: 클라이언트가 WebSocket 을 통해 서버에 메시지를 보낼 때 사용되는 기본 경로로, 서버에서 @MessageMapping 을 처리하는 메소드로 라우팅됨
-        - /queue: 서버가 클라이언트에게 메시지를 보낼 때 사용하는 경로로, 주로 특정 클라이언트나 사용자에게 메시지를 전송하는데 사용됨
-     */
-
     @MessageMapping("/chat.message")
-    public void send(@Payload ChatMessageRequestDto requstDto, Principal principal) {
-        Long senderId = Long.parseLong(principal.getName());
-        log.info("parsing principal user = {}", senderId);
-        chatWebsocketService.saveAndSendMessage(senderId, requstDto);
+    public void send(@Payload ChatMessageRequestDto requestDto, Authentication authentication) {
+        if (authentication == null) {
+            log.error("인증 정보가 없습니다.");
+            throw new AccessDeniedException("인증되지 않은 사용자");
+        }
 
+        Long userId = extractUserId(authentication);
+        log.info("메시지 발신자: {}, userId: {}", authentication.getName(), userId);
+
+        chatWebsocketService.saveAndSendMessage(requestDto.senderId(), requestDto);
     }
 
     @MessageMapping("/chat.enter/{roomUuid}")
-    public void enter(@DestinationVariable String roomUuid, Principal principal) {
-        Long userId = Long.parseLong(principal.getName());
-        log.info("parsing principal user = {}", userId);
-        // 이전 메시지 조회 및 전송
+    public void enter(@DestinationVariable String roomUuid, Authentication authentication) {
+        if (authentication == null) {
+            log.error("인증 정보가 없습니다.");
+            throw new AccessDeniedException("인증되지 않은 사용자");
+        }
+
+        Long userId = extractUserId(authentication);
+        log.info("채팅 입장: userId = {}", userId);
         chatWebsocketService.handleUserEnter(userId, roomUuid);
     }
 
+    // todo: 테스트 해보고 인증 Principal -> Authentication 변경 예정
     @MessageMapping("/chat.typing")
     public void typing(@Payload ChatTypingRequestDto requestDto, Principal principal) {
         Long senderId = Long.parseLong(principal.getName());
+
         chatWebsocketService.sendTypingStatus(senderId, requestDto);
+    }
+
+    // 사용자 ID를 추출하는 공통 메서드
+    private Long extractUserId(Authentication authentication) {
+        if (authentication.getPrincipal() instanceof CustomOAuth2User user) {
+            return user.getServiceUserId();
+        }
+        log.warn("CustomOAuth2User 타입이 아닙니다. 기본 인증 방식 사용");
+
+        throw new CustomException(ErrorCode.INVALID_AUTHENTICATION_TYPE);
     }
 }

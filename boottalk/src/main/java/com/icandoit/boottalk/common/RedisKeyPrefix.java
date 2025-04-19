@@ -8,6 +8,7 @@ public class RedisKeyPrefix {
     private static final String ROOM_INFO_PREFIX = "chat:room:info:";
     private static final String ENTERED_STATUS_PREFIX = "chat:entered:";
     private static final String BOOTCAMP_KEY_PREFIX = "new:bootcamp:";
+    private static final String CHAT_NOTICE_KEY_PREFIX = "chat:notification:sent:";
 
     // 채팅방에 속한 유저들 (Set)
     public static String roomUsers(String roomUuid) {
@@ -41,5 +42,9 @@ public class RedisKeyPrefix {
 
     public static String bootcamp(){
         return BOOTCAMP_KEY_PREFIX;
+    }
+
+    public static String chatNotice(String roomUuid, Long receiverId) {
+        return CHAT_NOTICE_KEY_PREFIX + roomUuid + ":" + receiverId;
     }
 }

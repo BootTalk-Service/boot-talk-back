@@ -2,6 +2,7 @@ package com.icandoit.boottalk.notification.controller;
 
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +21,7 @@ public class SseController {
 
 	private final SseEmitterService sseEmitterService;
 
-	@PostMapping(value = "/sse-connect", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+	@GetMapping(value = "/sse-connect", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public SseEmitter sseConnect (@AuthenticationPrincipal CustomOAuth2User user,
 		@RequestHeader(value = "Last-Event-ID", required = false) String lastEventId) {
 

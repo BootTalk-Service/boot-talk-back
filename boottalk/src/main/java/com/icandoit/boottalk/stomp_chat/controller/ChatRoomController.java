@@ -22,13 +22,6 @@ public class ChatRoomController {
 
     private final ChatRoomService chatRoomService;
 
-    // 채팅방 생성
-    // todo: 멘토가 커피챗 신청 승인 시 호출로 변경 시 삭제 예정
-    @PostMapping("/{applicationId}")
-    public ResponseEntity<ChatRoomCreateResponse> createRoom(@PathVariable Long applicationId) {
-        return ResponseEntity.ok(chatRoomService.createChatRoom(applicationId));
-    }
-
     // 참여중인 채팅방 리스트조회
     @GetMapping
     public ResponseEntity<List<ChatRoomResponseDto>> getUserChatRooms(

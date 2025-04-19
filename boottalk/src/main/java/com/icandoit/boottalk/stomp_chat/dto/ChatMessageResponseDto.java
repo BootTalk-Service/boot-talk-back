@@ -1,5 +1,6 @@
 package com.icandoit.boottalk.stomp_chat.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.icandoit.boottalk.stomp_chat.entity.ChatMessage;
 import com.icandoit.boottalk.stomp_chat.entity.enums.MessageType;
 import java.time.LocalDateTime;
@@ -15,9 +16,11 @@ public class ChatMessageResponseDto {
     private String roomUuid;
     private Long senderId;
     private Long receiverId;
-    private String message;
+    private String content;
     private MessageType type;
     private LocalDateTime sentAt;
+
+    @JsonProperty("read")
     private boolean isRead;
 
     public static ChatMessageResponseDto from(ChatMessage chatMessage) {
@@ -37,7 +40,7 @@ public class ChatMessageResponseDto {
             .roomUuid(roomUuid)
             .senderId(senderId)
             .receiverId(receiverId)
-            .content(message)
+            .content(content)
             .isRead(isRead)
             .type(type)
             .sentAt(sentAt)

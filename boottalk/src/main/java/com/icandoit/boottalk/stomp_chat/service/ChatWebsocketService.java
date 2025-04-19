@@ -2,6 +2,9 @@ package com.icandoit.boottalk.stomp_chat.service;
 
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
+import com.icandoit.boottalk.notification.dto.NotificationRequestDto;
+import com.icandoit.boottalk.notification.event.NotificationEvent;
+import com.icandoit.boottalk.notification.type.NotificationType;
 import com.icandoit.boottalk.stomp_chat.dto.ChatMessageResponseDto;
 import com.icandoit.boottalk.stomp_chat.dto.ChatRoomResponseDto;
 import com.icandoit.boottalk.stomp_chat.dto.stompDto.ChatMessageRequestDto;
@@ -13,15 +16,17 @@ import com.icandoit.boottalk.stomp_chat.repository.ChatMessageRepository;
 import com.icandoit.boottalk.stomp_chat.repository.ChatRoomRepository;
 import com.icandoit.boottalk.stomp_chat.repository.RedisChatMessageRepository;
 import com.icandoit.boottalk.stomp_chat.repository.RedisChatRoomRepository;
+import com.icandoit.boottalk.stomp_chat.repository.RedisChatUserRepository;
 import com.icandoit.boottalk.stomp_chat.service.component.ChatMessageSender;
 import com.icandoit.boottalk.stomp_chat.service.component.ChatRoomStatusUpdater;
 import com.icandoit.boottalk.stomp_chat.service.component.MessageLoader;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Map;
+import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -36,16 +41,21 @@ public class ChatWebsocketService {
     private final ChatRoomRepository chatRoomRepository;
     private final RedisChatMessageRepository redisChatRepository;
     private final RedisChatRoomRepository redisRoomRepository;
+    private final RedisChatUserRepository redisChatUserRepository;
 
     private final ChatRoomStatusUpdater statusUpdater;
     private final ChatMessageSender messageSender;
     private final MessageLoader messageLoader;
     private final SimpMessagingTemplate template;
 
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public void handleUserEnter(Long userId, String roomUuid) {
         LocalDateTime enterTime = LocalDateTime.now();
+
+        // 입장한 유저상태 저장
+        redisChatUserRepository.saveUserEnterStatus(roomUuid, userId);
         // 메시지 조회 및 전송
         messageLoader.loadAndSendMessages(userId, roomUuid);
 
@@ -56,6 +66,8 @@ public class ChatWebsocketService {
         markUnreadMessagesAsRead(roomUuid, userId, enterTime);
 
         messageSender.sendEnterMessage(userId, roomUuid);
+
+        redisChatUserRepository.resetNotificationStatus(roomUuid, userId);
     }
 
     // Listener 호출(퇴장 시 호출되는 매서드)
@@ -70,6 +82,9 @@ public class ChatWebsocketService {
 
         // 커피챗 예약 시간 내에만 채팅 가능하도록 체크
         checkChatRoomWithinAllowedTime(roomUuid);
+        boolean isReceiverInRoom = redisChatUserRepository.hasUserEntered(roomUuid,
+            requestDto.receiverId());
+        log.info("senderId: {}, receiverId: {}", senderId, requestDto.receiverId());
 
         // 메시지를 DTO로 변환
         ChatMessageResponseDto messageToCache = new ChatMessageResponseDto(
@@ -79,8 +94,17 @@ public class ChatWebsocketService {
             requestDto.content(),
             requestDto.type(),
             LocalDateTime.now(),
-            false // isRead : 수신자가 읽음 여부
+            isReceiverInRoom
         );
+
+        if (!isReceiverInRoom && redisChatUserRepository.shouldSendNotification(roomUuid,
+            requestDto.receiverId())) {
+
+            eventPublisher.publishEvent(new NotificationEvent(
+                requestDto.receiverId(),
+                NotificationRequestDto.ofType(NotificationType.CHAT_MESSAGE_RECEIVED)
+            ));
+        }
 
         // Redis에 저장
         saveMessageWithFallback(messageToCache);
@@ -98,19 +122,21 @@ public class ChatWebsocketService {
     }
 
     public void markUnreadMessagesAsRead(String roomUuid, Long userId, LocalDateTime enterTime) {
-        String redisKey = "chat:messages:" + roomUuid;
+        List<ChatMessageResponseDto> cachedMessages = redisChatRepository.getMessages(roomUuid);
 
-        Map<Object, Object> messagesMap = redisChatRepository.findAllByRoomUuid(redisKey);
+        boolean updated = false;
 
-        for (Map.Entry<Object, Object> entry : messagesMap.entrySet()) {
-            ChatMessageResponseDto message = (ChatMessageResponseDto) entry.getValue();
-
+        for (ChatMessageResponseDto message : cachedMessages) {
             if (Objects.equals(message.getReceiverId(), userId)
                 && !message.isRead()
                 && message.getSentAt().isBefore(enterTime)) {
                 message.markAsRead();
-                redisChatRepository.updateMessage(redisKey, entry.getKey().toString(), message);
+                updated = true;
             }
+        }
+
+        if (updated) {
+            redisChatRepository.saveAll(roomUuid, cachedMessages, Duration.ofMinutes(30));
         }
 
         log.info("입장 시 읽음 처리 완료 for userId={}, roomUuid={}", userId, roomUuid);

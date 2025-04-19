@@ -175,7 +175,7 @@ public class CoffeeChatTimeService {
     private String generateKey(DayOfWeek dayOfWeek, LocalTime startTime) {
         return dayOfWeek.toString() + "-" + startTime.format(DateTimeFormatter.ofPattern("HH:mm"));
     }
-
+//*******************
     private List<CoffeeChatTime> getMentorCoffeeChatTimesOrThrow(Long userId) {
 
         return Optional.ofNullable(

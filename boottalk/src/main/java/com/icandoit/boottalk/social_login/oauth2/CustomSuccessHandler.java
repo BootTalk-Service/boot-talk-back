@@ -46,9 +46,11 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
 		//토큰 생성 후 쿠키에 담아 전달
 		// response.addCookie(createCookie("Authorization", jwtProvider.createToken(userDetails.getServiceUserId(), userDetails.getName(), role)));
-
+		String token = jwtProvider.createToken(userDetails.getServiceUserId(), userDetails.getName(), role);
 		createCookie(response ,"Authorization"
-			, jwtProvider.createToken(userDetails.getServiceUserId(), userDetails.getName(), role));
+			, token);
+
+		Long userId = userDetails.getServiceUserId();
 
 		// 신규회원인 경우,추가정보 입력 url로 리다이렉션
 		if (UserRole.valueOf(role).equals(UserRole.NEW_USER)) {

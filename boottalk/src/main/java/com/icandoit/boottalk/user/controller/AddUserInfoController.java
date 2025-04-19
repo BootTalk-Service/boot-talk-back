@@ -19,15 +19,15 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/users/signup")
 public class AddUserInfoController {
 
-	private final AddUserInfoService addUserInfoService;
+  private final AddUserInfoService addUserInfoService;
 
-	@PostMapping
-	public ResponseEntity<String> addUserInfo(@RequestBody UpdateForm form,
-		@AuthenticationPrincipal CustomOAuth2User user) {
+  @PostMapping
+  public ResponseEntity<String> addUserInfo(@RequestBody UpdateForm form,
+      @AuthenticationPrincipal CustomOAuth2User user) {
 
-		addUserInfoService.addUserInfo(form, user.getServiceUserId());
+    addUserInfoService.addUserInfo(form, user.getServiceUserId());
 
-		return ResponseEntity.ok("부트톡 회원이 되신 것을 축하드립니다.");
-	}
+    return ResponseEntity.ok("부트톡 회원이 되신 것을 축하드립니다.");
+  }
 
 }
