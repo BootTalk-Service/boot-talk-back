@@ -36,11 +36,19 @@ public class MessageLoader {
 
                 // 4. Redis에 DTO 저장
                 redisRepository.saveAll(roomUuid, cachedDtos, Duration.ofMinutes(30));
+                System.out.println("[Server] DB에서 메시지 가져와 Redis 저장 완료: " + cachedDtos.size() + "건");
+            }
+            else {
+                System.out.println("[Server] Redis 에서 메시지 조회 성공: " + cachedDtos.size() + "건");
             }
         }
 
         // 5. WebSocket으로 전송 (항상 DTO 사용)
         String destination = "/queue/chat/" + roomUuid + "/" + userId;
-        template.convertAndSend(destination, cachedDtos);
+        System.out.println("[Server] WebSocket 메시지 전송 시도: destination=" + destination + ", 메시지 수=" + cachedDtos.size());
+        for (ChatMessageResponseDto dto : cachedDtos) {
+            template.convertAndSend(destination, dto);
+        }
+        // template.convertAndSend(destination, cachedDtos);
     }
 }
