@@ -50,10 +50,13 @@ public class ChatWebSocketController {
 
     // todo: 테스트 해보고 인증 Principal -> Authentication 변경 예정
     @MessageMapping("/chat.typing")
-    public void typing(@Payload ChatTypingRequestDto requestDto, Principal principal) {
-        Long senderId = Long.parseLong(principal.getName());
+    public void typing(@Payload ChatTypingRequestDto requestDto, Authentication authentication) {
+        if (authentication == null) {
+            log.error("인증 정보가 없습니다.");
+            throw new AccessDeniedException("인증되지 않은 사용자");
+        }
 
-        chatWebsocketService.sendTypingStatus(senderId, requestDto);
+        chatWebsocketService.sendTypingStatus(requestDto);
     }
 
     // 사용자 ID를 추출하는 공통 메서드
