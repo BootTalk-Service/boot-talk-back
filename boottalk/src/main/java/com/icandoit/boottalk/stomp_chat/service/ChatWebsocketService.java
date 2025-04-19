@@ -82,11 +82,12 @@ public class ChatWebsocketService {
 
         // 커피챗 예약 시간 내에만 채팅 가능하도록 체크
         checkChatRoomWithinAllowedTime(roomUuid);
-        boolean isReceiverInRoom = redisChatUserRepository.isUserEnteredInCache(roomUuid,
-            requestDto.receiverId());
+
+        boolean isReceiverInRoom = isUserInChatRoom(roomUuid, requestDto.receiverId());
+        boolean isNotificationNeeded = handleNotificationForUser(roomUuid, requestDto.receiverId());
+
         log.info("senderId: {}, receiverId: {}", senderId, requestDto.receiverId());
 
-        // 메시지를 DTO로 변환
         ChatMessageResponseDto messageToCache = new ChatMessageResponseDto(
             roomUuid,
             senderId,
@@ -97,9 +98,8 @@ public class ChatWebsocketService {
             isReceiverInRoom
         );
 
-        if (!isReceiverInRoom && redisChatUserRepository.shouldSendNotification(roomUuid,
-            requestDto.receiverId())) {
-
+        // 유저가 입장하지 않고, 알림을 처음 받는 경우 
+        if (!isReceiverInRoom && isNotificationNeeded) {
             eventPublisher.publishEvent(new NotificationEvent(
                 requestDto.receiverId(),
                 NotificationRequestDto.ofType(NotificationType.CHAT_MESSAGE_RECEIVED)
@@ -115,10 +115,21 @@ public class ChatWebsocketService {
 
     public void sendTypingStatus(ChatTypingRequestDto requestDto) {
 
-        ChatTypingResponseDto response = new ChatTypingResponseDto(requestDto.receiverId(), requestDto.typing());
+        ChatTypingResponseDto response = new ChatTypingResponseDto(requestDto.receiverId(),
+            requestDto.typing());
 
         String destination = "/queue/chat/" + requestDto.roomUuid() + "/" + requestDto.receiverId();
         template.convertAndSend(destination, response);
+    }
+
+    // 사용자가 해당 채팅방에 입장했는지 확인하는 함수
+    private boolean isUserInChatRoom(String roomUuid, Long receiverId) {
+        return redisChatUserRepository.isUserEnteredInCache(roomUuid, receiverId);
+    }
+
+    // 알림 전송 필요 여부와 상태를 확인하고 처리하는 함수
+    private boolean handleNotificationForUser(String roomUuid, Long receiverId) {
+        return redisChatUserRepository.isNotificationNecessaryAndSend(roomUuid, receiverId);
     }
 
     public void markUnreadMessagesAsRead(String roomUuid, Long userId, LocalDateTime enterTime) {
@@ -126,6 +137,7 @@ public class ChatWebsocketService {
 
         boolean updated = false;
 
+        // 새로 받은 알림이 있다면 updated = true 
         for (ChatMessageResponseDto message : cachedMessages) {
             if (Objects.equals(message.getReceiverId(), userId)
                 && !message.isRead()
