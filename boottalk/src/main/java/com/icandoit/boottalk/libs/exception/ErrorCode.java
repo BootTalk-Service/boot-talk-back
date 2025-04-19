@@ -27,6 +27,7 @@ public enum ErrorCode {
 
     /* 403 FORBIDDEN */
     FORBIDDEN(403, "권한이 없습니다."),
+    UNAUTHORIZED_USER(403, "사용자 인증 정보가 없습니다."),
     INVALID_AUTHENTICATION_TYPE(403,"oAuth2 인증 방식이 아닙니다." ),
     NOT_REVIEW_OWNER(403, "사용자가 작성한 리뷰가 아닙니다."),
     NOT_COFFEE_CHAT_APPLICATION_OWNER(403, "사용자가 작성한 커피챗 신청 내역이 아닙니다."),
