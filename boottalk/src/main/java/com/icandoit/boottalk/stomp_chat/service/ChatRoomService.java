@@ -56,11 +56,6 @@ public class ChatRoomService {
         ChatRoomStatus chatRoomStatus = getChatRoomStatus(roomUuid);
         ChatRoom chatRoom = chatRoomStatus.getChatRoom();
 
-        // 비활성화된 채팅방인 경우 예외 발생
-        if (!chatRoomStatus.isActive()) {
-            throw new CustomException(ErrorCode.CHAT_ROOM_NOT_ACTIVE);
-        }
-
         validateChatRoomEntry(chatRoom, userId);
 
         List<ChatMessage> chatMessages = chatMessageRepository.findByRoomUuid(roomUuid);
