@@ -21,14 +21,11 @@ public class NotificationService {
 
 	private final NotificationRepository notificationRepository;
 
-	@Value("${server.url}")
-	private String BASE_URL;
-
 	// 알림조회창에 들어갈 알림내역과 확인하지 않은 알림 개수 반환
 	public AllNotificationResponseDto getNotifications(long userId) {
 		return AllNotificationResponseDto.from(notificationRepository.findAllNotificationByUserId(userId)
-			.stream().map((Notification notification) ->
-				NotificationResponseDto.from(notification, BASE_URL)).collect(Collectors.toList()));
+			.stream().map(NotificationResponseDto::from)
+			.toList());
 	}
 
 
