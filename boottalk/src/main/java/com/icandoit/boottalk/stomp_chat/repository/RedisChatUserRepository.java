@@ -29,14 +29,19 @@ public class RedisChatUserRepository {
     // 사용자 알림 수신
     public boolean shouldSendNotification(String roomUuid, Long receiverId) {
 
-        Boolean alreadySent = redisTemplate.hasKey(chatNotice(roomUuid, receiverId));
-        if (Boolean.TRUE.equals(alreadySent)) {
-            return false; // 이미 알림 보냄
+        try {
+            Boolean alreadySent = redisTemplate.hasKey(chatNotice(roomUuid, receiverId));
+            if (Boolean.TRUE.equals(alreadySent)) {
+                return false; // 이미 알림 보냄
+            }
+
+            // 알림 전송 상태 저장 (커피챗이 진행되는 동안만 유지)
+            redisTemplate.opsForValue().set(chatNotice(roomUuid, receiverId), true, Duration.ofMinutes(30));
+            return true;
+        } catch (Exception e) {
+            return true;
         }
 
-        // 알림 전송 상태 저장 (커피챗이 진행되는 동안만 유지)
-        redisTemplate.opsForValue().set(chatNotice(roomUuid, receiverId), true, Duration.ofMinutes(30));
-        return true;
     }
 
     // 사용자 수신 상태 제거

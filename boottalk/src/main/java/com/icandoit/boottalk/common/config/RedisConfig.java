@@ -15,7 +15,6 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.icandoit.boottalk.stomp_chat.dto.ChatMessageResponseDto;
 import com.icandoit.boottalk.stomp_chat.dto.ChatRoomResponseDto;
 
 @Configuration
@@ -27,19 +26,23 @@ public class RedisConfig {
     @Value("${spring.data.redis.port}")
     private int redisPort;
 
+    // 서버 연결 설정
     @Bean
     public LettuceConnectionFactory redisConnectionFactory() {
-        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(redisHost,
-            redisPort);
+        RedisStandaloneConfiguration config =
+            new RedisStandaloneConfiguration(redisHost, redisPort);
+
         return new LettuceConnectionFactory(config);
     }
 
+    // 키, 벨류를 저장 String 변환 저장 -> Spring 스케줄러에서 사용
     @Bean
     public StringRedisTemplate stringRedisTemplate(
         LettuceConnectionFactory redisConnectionFactory) {
         return new StringRedisTemplate(redisConnectionFactory);
     }
 
+    // Dto -> LDT 직렬화
     @Bean
     public GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer() {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -48,6 +51,7 @@ public class RedisConfig {
         return new GenericJackson2JsonRedisSerializer(objectMapper);
     }
 
+    // 채팅 메시지 복합 객체를 redis 저장 하기위해
     @Bean
     public RedisTemplate<String, Object> chatMessageDtoRedisTemplate(
         LettuceConnectionFactory redisConnectionFactory,
@@ -63,6 +67,8 @@ public class RedisConfig {
 
         return template;
     }
+
+    // RedisChatRoomRepository 에서 사용중 위랑 병합 가능 여부 체크
     @Bean
     public RedisTemplate<String, ChatRoomResponseDto> chatRoomDtoRedisTemplate(
         LettuceConnectionFactory redisConnectionFactory) {
