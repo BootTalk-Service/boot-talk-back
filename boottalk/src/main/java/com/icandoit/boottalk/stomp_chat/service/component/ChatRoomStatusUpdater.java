@@ -24,20 +24,25 @@ public class ChatRoomStatusUpdater {
 
     @Transactional
     public void updateChatRoomStatusOnEnter(Long userId, String roomUuid) {
-
         ChatRoom chatRoom = chatRoomRepository.findByRoomUuid(roomUuid)
             .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
 
-        // 예약 시간이 아직 안됐으면 예외 발생 (입장 불가)
+        // 예약 시간이 안됐으면 예외 발생 (입장 불가)
         if (chatRoom.getReservationAt().isAfter(LocalDateTime.now())) {
             throw new CustomException(ErrorCode.CHAT_ROOM_NOT_STARTED);
         }
 
+        // 사용자가 채팅방 참여자인지 확인
+        if (!chatRoom.isParticipant(userId)) {
+            throw new CustomException(ErrorCode.CHAT_ROOM_FORBIDDEN);
+        }
+
         ChatRoomStatus status = chatRoom.getRoomStatus();
 
-        if (Objects.equals(chatRoom.getMentor().getUserId(), userId)) {
+        // 유저 입장 상태 변경
+        if (chatRoom.isMentor(userId)) {
             status.setMentorEntered(true);
-        } else if (Objects.equals(chatRoom.getMentee().getUserId(), userId)) {
+        } else if (chatRoom.isMentee(userId)) {
             status.setMenteeEntered(true);
         }
 
@@ -47,7 +52,6 @@ public class ChatRoomStatusUpdater {
     }
 
     public void updateChatRoomStatusOnLeave(Long userId) {
-
         // 유저가 속한 방 정보 조회
         String roomUuid = redisManager.findUserRoom(userId);
 
@@ -60,10 +64,10 @@ public class ChatRoomStatusUpdater {
 
         ChatRoom chatRoom = status.getChatRoom();
 
-        // 유저가 멘토인지 멘티인지 확인하고 상태값 업데이트(입장 -> 퇴장)
-        if (chatRoom.getMentor().getUserId().equals(userId)) {
+        // 엔티티의 isMentor, isMentee 메서드 활용
+        if (chatRoom.isMentor(userId)) {
             status.setMentorEntered(false);
-        } else {
+        } else if (chatRoom.isMentee(userId)) {
             status.setMenteeEntered(false);
         }
 
