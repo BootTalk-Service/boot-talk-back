@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -40,9 +39,6 @@ public class SseEmitterService {
 	//SSE eventId를 LocalDateTime 으로 설정하기 위한 포맷
 	private final DateTimeFormatterUtil dateTimeFormatter;
 
-	@Value("${server.url}")
-	private String BASE_URL;
-
 	private final SseEmitterRepository emitterRepository;
 	private final NotificationRepository notificationRepository;
 	private final CreatePointHistoryService createPointHistoryService;
@@ -70,7 +66,7 @@ public class SseEmitterService {
 							SseEmitter.event()
 								.id(dateTimeFormatter.formatTime(notification.getCreatedAt()))
 								.name("notification")
-								.data(NotificationResponseDto.from(notification, BASE_URL))
+								.data(NotificationResponseDto.from(notification))
 						);
 					} catch (IOException e) {
 						log.error("SSE 알림 전송 실패: 대상자 Id: {}, 원인: {}", userId, e.getMessage());
@@ -105,7 +101,7 @@ public class SseEmitterService {
 	public void sendToClient(Long userId, NotificationRequestDto requestDto) {
 		// 먼저 알림을 보내기 전 알림 저장
 		NotificationResponseDto responseDto = NotificationResponseDto
-			.from(notificationRepository.save(Notification.of(userId, requestDto)), BASE_URL);
+			.from(notificationRepository.save(Notification.of(userId, requestDto)));
 
 		SseEmitter sseEmitter = findById(userId);
 		if (sseEmitter == null) {

@@ -17,7 +17,7 @@ public record NotificationResponseDto(
 	LocalDateTime createdAt
 ) {
 
-	public static NotificationResponseDto from(Notification notification, String baseUrl) {
+	public static NotificationResponseDto from(Notification notification) {
 		String url = notification.getType().getUrlFormat();
 
 		if (notification.getTargetId() != null) {
@@ -28,7 +28,7 @@ public record NotificationResponseDto(
 			notification.getNotificationId(),
 			notification.getType(),
 			notification.getType().getMessage(),
-			baseUrl + url,
+			url,
 			notification.isChecked(),
 			notification.getCreatedAt()
 		);

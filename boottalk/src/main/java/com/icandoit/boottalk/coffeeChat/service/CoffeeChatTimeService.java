@@ -20,7 +20,6 @@ import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatTimeDto;
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatInfo;
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatTime;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatApplicationRepository;
-import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatInfoRepository;
 import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatTimeRepository;
 import com.icandoit.boottalk.coffeeChat.service.converter.CoffeeChatTimeConverter;
 import com.icandoit.boottalk.libs.exception.CustomException;
@@ -33,20 +32,10 @@ import lombok.RequiredArgsConstructor;
 public class CoffeeChatTimeService {
     private static final int COFFEE_CHAT_APPLICATION_PERIOD_DAYS = 30;
 
-    private final CoffeeChatInfoRepository coffeeChatInfoRepository;
     private final CoffeeChatTimeRepository coffeeChatTimeRepository;
     private final CoffeeChatApplicationRepository coffeeChatAppRepository;
 
-    public Map<String, List<String>> createCoffeeChatTimes(Long userId,
-        Map<String, List<String>> times) {
-
-        CoffeeChatInfo coffeeChatInfo = coffeeChatInfoRepository.findByMentor_UserId(userId)
-            .orElseThrow(() -> new CustomException(ErrorCode.USER_COFFEE_CHAT_NOT_FOUND));
-
-        // 이미 시간이 존재한다면 예외처리
-        if (coffeeChatTimeRepository.existsByCoffeeChatInfo(coffeeChatInfo)) {
-            throw new CustomException(ErrorCode.ALREADY_CREATED_COFFEE_CHAT_TIME);
-        }
+    public Map<String, List<String>> createCoffeeChatTimes(Map<String, List<String>> times, CoffeeChatInfo coffeeChatInfo) {
 
         // 시 : 분 파싱
         List<CoffeeChatTimeDto> timeDtos = CoffeeChatTimeConverter.mapToDtoList(times);
@@ -62,28 +51,12 @@ public class CoffeeChatTimeService {
 
         coffeeChatTimeRepository.saveAll(chatTimes);
 
-        return chatTimes.stream()
-            .collect(Collectors.groupingBy(
-                time -> time.getDayOfWeek().toString(),
-                Collectors.mapping(
-                    time -> time.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")),
-                    Collectors.toList()
-                )
-            ));
+        return getTimeSlotsByDay(chatTimes);
     }
 
     // 자신의 멘토 가능 시간 조회
     public Map<String, List<String>> getMentorAvailableChatTimes(Long userId) {
-        List<CoffeeChatTime> coffeeChatTimes = getMentorCoffeeChatTimesOrThrow(userId);
-
-        return coffeeChatTimes.stream()
-            .collect(Collectors.groupingBy(
-                time -> time.getDayOfWeek().toString(),
-                Collectors.mapping(
-                    time -> time.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")),
-                    Collectors.toList()
-                )
-            ));
+        return getTimeSlotsByDay(getMentorCoffeeChatTimesOrThrow(userId));
     }
 
     public AvailableChatTimeDto getAvailableChatTimes(Long coffeeChatInfoId) {
@@ -111,11 +84,7 @@ public class CoffeeChatTimeService {
         return new AvailableChatTimeDto(formattedAvailableChatTimes);
     }
 
-    public Map<String, List<String>> updateCoffeeChatTimes(Long userId,
-        Map<String, List<String>> times) {
-
-        CoffeeChatInfo coffeeChatInfo = coffeeChatInfoRepository.findByMentor_UserId(userId)
-            .orElseThrow(() -> new CustomException(ErrorCode.USER_COFFEE_CHAT_NOT_FOUND));
+    public Map<String, List<String>> updateCoffeeChatTimes(Long userId, Map<String, List<String>> times, CoffeeChatInfo coffeeChatInfo) {
 
         List<CoffeeChatTime> existingTimes =
             coffeeChatTimeRepository.findAllWithCoffeeChatInfoByUserId(userId);
@@ -157,9 +126,23 @@ public class CoffeeChatTimeService {
         }
 
         // 최종 조회된 전체 시간 목록 반환
-        List<CoffeeChatTime> finalList = coffeeChatTimeRepository.findAllWithCoffeeChatInfoByUserId(
-            userId);
-        return finalList.stream()
+        return getTimeSlotsByDay(coffeeChatTimeRepository.findAllWithCoffeeChatInfoByUserId(userId));
+    }
+
+    private String generateKey(DayOfWeek dayOfWeek, LocalTime startTime) {
+        return dayOfWeek.toString() + "-" + startTime.format(DateTimeFormatter.ofPattern("HH:mm"));
+    }
+
+    private List<CoffeeChatTime> getMentorCoffeeChatTimesOrThrow(Long userId) {
+
+        return Optional.ofNullable(
+                coffeeChatTimeRepository.findAllWithCoffeeChatInfoByUserId(userId))
+            .filter(list -> !list.isEmpty())
+            .orElseThrow(() -> new CustomException(ErrorCode.USER_COFFEE_CHAT_NOT_FOUND));
+    }
+
+    private Map<String, List<String>> getTimeSlotsByDay(List<CoffeeChatTime> coffeeChatTimes) {
+        return coffeeChatTimes.stream()
             .collect(Collectors.groupingBy(
                 time -> time.getDayOfWeek().toString(),
                 Collectors.mapping(
@@ -167,18 +150,6 @@ public class CoffeeChatTimeService {
                     Collectors.toList()
                 )
             ));
-    }
-
-    private String generateKey(DayOfWeek dayOfWeek, LocalTime startTime) {
-        return dayOfWeek.toString() + "-" + startTime.format(DateTimeFormatter.ofPattern("HH:mm"));
-    }
-//*******************
-    private List<CoffeeChatTime> getMentorCoffeeChatTimesOrThrow(Long userId) {
-
-        return Optional.ofNullable(
-                coffeeChatTimeRepository.findAllWithCoffeeChatInfoByUserId(userId))
-            .filter(list -> !list.isEmpty())
-            .orElseThrow(() -> new CustomException(ErrorCode.USER_COFFEE_CHAT_NOT_FOUND));
     }
 
     // 멘토링 가능한 시간과 신청된 시간을 필터링하여 신청 가능한 시간을 구함

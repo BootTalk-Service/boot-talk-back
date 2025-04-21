@@ -40,4 +40,3 @@ spring:
 #추 후 프록시 서버로 변경
 server:
   url: "http://localhost:4000"
-
