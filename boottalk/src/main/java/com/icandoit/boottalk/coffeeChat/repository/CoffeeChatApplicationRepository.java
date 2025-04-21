@@ -73,7 +73,7 @@ public interface CoffeeChatApplicationRepository extends JpaRepository<CoffeeCha
 		WHERE ca.coffeeChatInfo.coffeeChatInfoId = :coffeeChatInfoId
 		AND ca.coffeeChatStartTime BETWEEN
 		:startTime AND :endTime
-		AND ca.status != "CANCELED"
+		AND ca.status NOT IN ('CANCELED', 'REJECTED')
 	""")
 	List<LocalDateTime> findStartTimesByCoffeeChatInfoIdAndPeriod(
 		@Param("coffeeChatInfoId") Long coffeeChatInfoId,
