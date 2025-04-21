@@ -6,9 +6,6 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
-
 //
 @Component
 public class SocialClientRegistration {
