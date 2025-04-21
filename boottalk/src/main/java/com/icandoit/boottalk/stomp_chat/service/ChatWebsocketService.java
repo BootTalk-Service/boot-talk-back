@@ -82,9 +82,15 @@ public class ChatWebsocketService {
 
         // 커피챗 예약 시간 내에만 채팅 가능하도록 체크
         checkChatRoomWithinAllowedTime(roomUuid);
-        boolean isReceiverInRoom = redisChatUserRepository.hasUserEntered(roomUuid,
-            requestDto.receiverId());
-        log.info("senderId: {}, receiverId: {}", senderId, requestDto.receiverId());
+
+        boolean isReceiverInRoom = false;
+
+        try {
+            isReceiverInRoom = redisChatUserRepository.hasUserEntered(roomUuid,
+                requestDto.receiverId());
+        } catch (RedisConnectionFailureException e) {
+            log.warn("redis 서버 연결 오류");
+        }
 
         // 메시지를 DTO로 변환
         ChatMessageResponseDto messageToCache = new ChatMessageResponseDto(
@@ -97,6 +103,8 @@ public class ChatWebsocketService {
             isReceiverInRoom
         );
 
+        // 알림 받을 유저가 방 이탈 후 최초 1회만 알림을 보냄.
+        // 단기간 많은 알림 전송 방지
         if (!isReceiverInRoom && redisChatUserRepository.shouldSendNotification(roomUuid,
             requestDto.receiverId())) {
 
@@ -108,14 +116,13 @@ public class ChatWebsocketService {
 
         // Redis에 저장
         saveMessageWithFallback(messageToCache);
-        log.info("메시지 Redis에 캐시됨: {}", messageToCache);
-        // 메시지 WebSocket으로 전송
         messageSender.sendMessage(requestDto.receiverId(), messageToCache);
     }
 
     public void sendTypingStatus(ChatTypingRequestDto requestDto) {
 
-        ChatTypingResponseDto response = new ChatTypingResponseDto(requestDto.receiverId(), requestDto.typing());
+        ChatTypingResponseDto response = new ChatTypingResponseDto(requestDto.receiverId(),
+            requestDto.typing());
 
         String destination = "/queue/chat/" + requestDto.roomUuid() + "/" + requestDto.receiverId();
         template.convertAndSend(destination, response);
@@ -171,6 +178,7 @@ public class ChatWebsocketService {
         try {
             redisChatRepository.save(message.getRoomUuid(), message, Duration.ofMinutes(30));
             isSavedToRedis = true;
+            log.info("메시지 Redis 에 캐시됨");
         } catch (RedisConnectionFailureException ex) {
             log.error("Redis 장애 발생: 메시지를 Redis에 저장하지 못했습니다. DB에 저장합니다.");
         }
