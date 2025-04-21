@@ -71,7 +71,9 @@ public enum ErrorCode {
     TOKEN_PARSING_ERROR(500, "토큰 파싱 과정에서 오류가 발생했습니다."),
     DATA_FETCH_ERROR(500, "데이터 요청 중 오류가 발생했습니다."),
     DATA_PARSING_ERROR(500, "API 응답 데이터 파싱에 실패했습니다."),
-    FILE_UPLOAD_FAILED(500, "파일 업로드에 실패했습니다.");
+    FILE_UPLOAD_FAILED(500, "파일 업로드에 실패했습니다."),
+    SCHEDULER_START_JOB_ERROR(500, "시작 스케줄러 작업 중 오류가 발생했습니다."),
+    SCHEDULER_END_JOB_ERROR(500, "종료 스케쥴러 작업 중 오류가 발생했습니다.");
 
     private final Integer httpStatus;
     private final String message;
