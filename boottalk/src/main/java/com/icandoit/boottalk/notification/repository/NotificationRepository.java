@@ -23,6 +23,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 	@Modifying
 	@Transactional
 	@Query("UPDATE Notification n SET n.checked = true " +
-		"WHERE n.userId = :userId AND n.checked = false AND n.createdAt < :time")
+		"WHERE n.userId = :userId AND n.checked = false AND n.createdAt <= :time")
 	int checkedAllNotification(@Param("userId") long userId, @Param("time") LocalDateTime time);
 }
