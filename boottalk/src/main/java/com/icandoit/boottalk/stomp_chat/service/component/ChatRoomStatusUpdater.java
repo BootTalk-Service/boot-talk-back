@@ -7,7 +7,6 @@ import com.icandoit.boottalk.stomp_chat.entity.ChatRoomStatus;
 import com.icandoit.boottalk.stomp_chat.repository.ChatRoomRepository;
 import com.icandoit.boottalk.stomp_chat.repository.ChatRoomStatusRepository;
 import java.time.LocalDateTime;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
