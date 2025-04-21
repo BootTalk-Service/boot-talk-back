@@ -28,21 +28,10 @@ public class ChatRoomService {
     private final ChatRoomStatusRepository chatRoomStatusRepository;
     private final ChatMessageRepository chatMessageRepository;
 
-    // 채팅방 생성
-    // todo: 멘토가 커피챗 신청 승인 시 호출로 변경 시 삭제 예정
+    // 채팅방 생성(커피챗 승인 시 생성)
     @Transactional
-    public ChatRoomCreateResponse createChatRoom(CoffeeChatApplication application) {
-
-        // 이미 생성된 방이 있는지 확인
-        chatRoomRepository.findByCoffeeChatApplication(application)
-            .ifPresent(room -> {
-                log.warn("이미 채팅방이 존재합니다: {}", room.getRoomUuid());
-                throw new CustomException(ErrorCode.COFFEE_CHAT_ALREADY_EXISTS);
-            });
-
-        ChatRoom chatRoom = chatRoomRepository.save(ChatRoom.of(application));
-
-        return ChatRoomCreateResponse.from(chatRoom.getRoomUuid());
+    public void createChatRoom(CoffeeChatApplication application) {
+        chatRoomRepository.save(ChatRoom.of(application));
     }
 
     // 채팅방 목록 조회
