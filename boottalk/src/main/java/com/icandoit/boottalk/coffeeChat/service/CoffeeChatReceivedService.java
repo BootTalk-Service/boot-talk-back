@@ -90,11 +90,13 @@ public class CoffeeChatReceivedService {
 
         coffeeChatApp.setStatus(changeStatus); // 상태 변경
 
-        // 멘토에게 커피챗 수락/거절/취소 알림 전송
-        eventPublisher.publishEvent(new NotificationEvent(
-            menteeId,
-            NotificationRequestDto.ofType(changeStatus.toNotificationType())
-        ));
+        if (!changeStatus.isCompleted()) {
+            // 멘토에게 커피챗 수락/거절/취소 알림 전송
+            eventPublisher.publishEvent(new NotificationEvent(
+                menteeId,
+                NotificationRequestDto.ofType(changeStatus.toNotificationType())
+            ));
+        }
 
         return CoffeeChatAppStatusResponseDto.from(coffeeChatApp);
 
