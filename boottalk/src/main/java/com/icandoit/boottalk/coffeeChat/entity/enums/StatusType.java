@@ -27,6 +27,10 @@ public enum StatusType {
         return this == APPROVED;
     }
 
+    public boolean isCompleted() {
+        return this == COMPLETED;
+    }
+
     public NotificationType toNotificationType() {
         return switch (this) {
             case APPROVED -> NotificationType.COFFEE_CHAT_REQUEST_APPROVED;
