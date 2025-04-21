@@ -81,7 +81,7 @@ public class CoffeeChatApplicationController {
     }
 
     // 커피챗 신청 취소
-    @DeleteMapping("/{coffeeChatAppId}")
+    @PutMapping("/{coffeeChatAppId}/cancel")
     public ResponseEntity<Void> cancelCoffeeChatApp(
         @AuthenticationPrincipal CustomOAuth2User user,
         @PathVariable Long coffeeChatAppId
