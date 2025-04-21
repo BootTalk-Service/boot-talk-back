@@ -176,7 +176,7 @@ public class ChatWebsocketService {
     public void saveMessageWithFallback(ChatMessageResponseDto message) {
         boolean isSavedToRedis = false;
         try {
-            redisChatRepository.save(message.getRoomUuid(), message, Duration.ofMinutes(30));
+            redisChatRepository.save(message.getRoomUuid(), message);
             isSavedToRedis = true;
             log.info("메시지 Redis 에 캐시됨");
         } catch (RedisConnectionFailureException ex) {
