@@ -37,3 +37,6 @@ spring:
       host: 43.200.67.27
       port: 6379
 
+#추 후 프록시 서버로 변경
+server:
+  url: "http://localhost:4000"
