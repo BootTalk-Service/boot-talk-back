@@ -1,5 +1,7 @@
 package com.icandoit.boottalk.stomp_chat.service;
 
+import static com.icandoit.boottalk.common.RedisKeyPrefix.*;
+
 import com.icandoit.boottalk.stomp_chat.dto.ChatMessageResponseDto;
 import com.icandoit.boottalk.stomp_chat.entity.ChatMessage;
 import com.icandoit.boottalk.stomp_chat.repository.ChatMessageRepository;
@@ -40,21 +42,23 @@ public class ChatMessageSchedulerService {
             List<ChatMessageResponseDto> messagesToFlushDto = redisChatRepository.getMessagesForBatch(
                 roomUuid);
 
-            if (!messagesToFlushDto.isEmpty()) {
-                // DTO → Entity 변환
-                List<ChatMessage> messagesToFlush = messagesToFlushDto.stream()
-                    .map(ChatMessageResponseDto::toEntity)
-                    .toList();
-
-                // DB 저장
-                chatMessageRepository.saveAll(messagesToFlush);
-
-                // Redis에서 앞부분 잘라내기 (DTO 기준으로)
-                redisChatRepository.deleteMessages(roomUuid, messagesToFlushDto.size());
-
-                log.info("Scheduled : [roomUuid: {}] Redis에서 DB로 메시지 {}개 저장됨", roomUuid,
-                    messagesToFlush.size());
+            if (messagesToFlushDto.isEmpty()) {
+                log.info("flushRoomMessages: [{}] 저장할 메시지 없음", roomUuid);
+                continue;
             }
+
+            List<ChatMessage> messagesToFlush = messagesToFlushDto.stream()
+                .map(ChatMessageResponseDto::toEntity)
+                .toList();
+
+            // DB 저장
+            chatMessageRepository.saveAll(messagesToFlush);
+
+            // Redis에서 앞부분 잘라내기 (DTO 기준으로)
+            redisTemplate.delete(chatMessages(roomUuid));
+
+            log.info("Scheduled : [roomUuid: {}] Redis에서 DB로 메시지 {}개 저장됨", roomUuid,
+                messagesToFlush.size());
         }
     }
 }
