@@ -3,6 +3,7 @@ package com.icandoit.boottalk.common.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.icandoit.boottalk.stomp_chat.dto.ChatMessageResponseDto;
 import com.icandoit.boottalk.stomp_chat.dto.ChatRoomResponseDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -12,7 +13,6 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -25,7 +25,6 @@ public class RedisConfig {
     @Value("${spring.data.redis.port}")
     private int redisPort;
 
-    // 서버 연결 설정
     @Bean
     public LettuceConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration config =
@@ -41,23 +40,27 @@ public class RedisConfig {
         return new StringRedisTemplate(redisConnectionFactory);
     }
 
-    // Dto -> LDT 직렬화
+    // 직렬화를 위한 objectMapper 추가
     @Bean
-    public GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer() {
+    public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        return new GenericJackson2JsonRedisSerializer(objectMapper);
+        return objectMapper;
     }
 
-    // 채팅 메시지 복합 객체를 redis 저장 하기위해
+    // 채팅 메시지 전용 RedisTemplate
     @Bean
-    public RedisTemplate<String, Object> chatMessageDtoRedisTemplate(
+    public RedisTemplate<String, ChatMessageResponseDto> chatMessageRedisTemplate(
         LettuceConnectionFactory redisConnectionFactory,
-        GenericJackson2JsonRedisSerializer serializer) {
+        ObjectMapper objectMapper) {
 
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        RedisTemplate<String, ChatMessageResponseDto> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
+
+        Jackson2JsonRedisSerializer<ChatMessageResponseDto> serializer =
+            new Jackson2JsonRedisSerializer<>(objectMapper, ChatMessageResponseDto.class);
+
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(serializer);
         template.setHashKeySerializer(new StringRedisSerializer());
@@ -67,45 +70,45 @@ public class RedisConfig {
         return template;
     }
 
-    // RedisChatRoomRepository 에서 사용중 위랑 병합 가능 여부 체크
+    // 채팅방 전용 RedisTemplate
     @Bean
-    public RedisTemplate<String, ChatRoomResponseDto> chatRoomDtoRedisTemplate(
-        LettuceConnectionFactory redisConnectionFactory) {
+    public RedisTemplate<String, ChatRoomResponseDto> chatRoomRedisTemplate(
+        LettuceConnectionFactory redisConnectionFactory,
+        ObjectMapper objectMapper) {
 
         RedisTemplate<String, ChatRoomResponseDto> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         Jackson2JsonRedisSerializer<ChatRoomResponseDto> serializer =
             new Jackson2JsonRedisSerializer<>(objectMapper, ChatRoomResponseDto.class);
 
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(serializer);
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(serializer);
+        template.afterPropertiesSet();
+
         return template;
     }
 
+    // Boolean 값 전용 RedisTemplate
     @Bean
     public RedisTemplate<String, Boolean> booleanRedisTemplate(
         RedisConnectionFactory redisConnectionFactory,
-        GenericJackson2JsonRedisSerializer serializer) {
+        ObjectMapper objectMapper) {
 
         RedisTemplate<String, Boolean> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
+
+        Jackson2JsonRedisSerializer<Boolean> serializer =
+            new Jackson2JsonRedisSerializer<>(objectMapper, Boolean.class);
+
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(serializer);
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(serializer);
+        template.afterPropertiesSet();
 
         return template;
-    }
-
-    // 직렬화를 위한 objectMapper 추가
-    @Bean
-    public ObjectMapper objectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        return objectMapper;
     }
 }
