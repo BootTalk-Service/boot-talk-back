@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatInfoResponseDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatRequestDto;
 import com.icandoit.boottalk.coffeeChat.dto.CoffeeChatResponseDto;
+import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatInfo;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,11 +19,14 @@ public class CoffeeChatService {
 
     @Transactional
     public CoffeeChatResponseDto register(Long userId, CoffeeChatRequestDto requestDto) {
+
+        CoffeeChatInfo coffeeChatInfo = coffeeChatInfoService.createCoffeeChatInfo(userId, requestDto.info());
+
         return CoffeeChatResponseDto.of(
             // 1. 커피챗 정보 등록
-            coffeeChatInfoService.createCoffeeChatInfo(userId, requestDto.info()),
+            CoffeeChatInfoResponseDto.from(coffeeChatInfo),
             // 2. 커피챗 시간 등록
-            coffeeChatTimeService.createCoffeeChatTimes(userId, requestDto.time())
+            coffeeChatTimeService.createCoffeeChatTimes(requestDto.time(), coffeeChatInfo)
         );
     }
 
@@ -44,9 +48,12 @@ public class CoffeeChatService {
 
     @Transactional
     public CoffeeChatResponseDto updateCoffeeChat(Long userId, CoffeeChatRequestDto requestDto) {
+
+        CoffeeChatInfo coffeeChatInfo = coffeeChatInfoService.updateMyCoffeeChatInfo(userId, requestDto.info());
+
         return CoffeeChatResponseDto.of(
-            coffeeChatInfoService.updateMyCoffeeChatInfo(userId, requestDto.info()),
-            coffeeChatTimeService.updateCoffeeChatTimes(userId, requestDto.time())
+            CoffeeChatInfoResponseDto.from(coffeeChatInfo),
+            coffeeChatTimeService.updateCoffeeChatTimes(userId, requestDto.time(), coffeeChatInfo)
         );
     }
 

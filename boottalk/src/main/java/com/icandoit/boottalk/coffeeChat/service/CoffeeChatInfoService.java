@@ -20,8 +20,7 @@ public class CoffeeChatInfoService {
 
     private final CoffeeChatCommonService coffeeChatCommonService;
 
-    public CoffeeChatInfoResponseDto createCoffeeChatInfo(Long userId,
-        CoffeeChatInfoRequestDto requestDto) {
+    public CoffeeChatInfo createCoffeeChatInfo(Long userId, CoffeeChatInfoRequestDto requestDto) {
 
         User user = coffeeChatCommonService.getUser(userId);
 
@@ -36,14 +35,12 @@ public class CoffeeChatInfoService {
             requestDto.jobType(),
             requestDto.introduction()
         );
-        CoffeeChatInfo savedInfo = coffeeChatInfoRepository.save(coffeeChatInfo);
-        return CoffeeChatInfoResponseDto.from(savedInfo);
+
+        return coffeeChatInfoRepository.save(coffeeChatInfo);
     }
 
     public CoffeeChatInfoResponseDto getMyCoffeeChatInfo(Long userId) {
-
-        CoffeeChatInfo coffeeChatInfo = coffeeChatCommonService.getCoffeeChatInfoByUserId(userId);
-        return CoffeeChatInfoResponseDto.from(coffeeChatInfo);
+        return CoffeeChatInfoResponseDto.from(coffeeChatCommonService.getCoffeeChatInfoByUserId(userId));
     }
 
     public CoffeeChatInfoResponseDto getCoffeeChatInfo(Long coffeeChatInfoId) {
@@ -53,13 +50,12 @@ public class CoffeeChatInfoService {
         );
     }
 
-    public CoffeeChatInfoResponseDto updateMyCoffeeChatInfo(
-        Long userId, CoffeeChatInfoRequestDto requestDto) {
+    public CoffeeChatInfo updateMyCoffeeChatInfo(Long userId, CoffeeChatInfoRequestDto requestDto) {
 
         CoffeeChatInfo coffeeChatInfo = coffeeChatCommonService.getCoffeeChatInfoByUserId(userId);
-
         coffeeChatInfo.update(requestDto);
-        return CoffeeChatInfoResponseDto.from(coffeeChatInfo);
+
+        return coffeeChatInfo;
     }
 
     public void deleteMyCoffeeChatInfo(Long userId) {
