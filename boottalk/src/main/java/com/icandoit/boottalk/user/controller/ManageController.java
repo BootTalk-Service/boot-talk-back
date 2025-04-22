@@ -48,7 +48,7 @@ public class ManageController {
 
 	@GetMapping("/navi")
 	public ResponseEntity<NaviUserInfoDto> getNavi(@AuthenticationPrincipal CustomOAuth2User user) {
-		return ResponseEntity.ok(NaviUserInfoDto.from(user.getName(),
+		return ResponseEntity.ok(NaviUserInfoDto.from(user.getServiceUserId(), user.getName(),
 			createPointHistoryService.getCurrentPointToNavi(user.getServiceUserId())));
 	}
 
