@@ -42,13 +42,6 @@ public class ChatRoomService {
 
     // 채팅 메시지 조회 (입장)
     public List<ChatMessageResponseDto> getMessages(Long userId, String roomUuid) {
-        ChatRoomStatus chatRoomStatus = getChatRoomStatus(roomUuid);
-
-        // 비활성화된 채팅방인 경우 예외 발생
-        if (!chatRoomStatus.isActive()) {
-            throw new CustomException(ErrorCode.CHAT_ROOM_NOT_ACTIVE);
-        }
-
         validateUserParticipantInRoom(userId, roomUuid);
 
         List<ChatMessage> chatMessages = chatMessageRepository.findByRoomUuid(roomUuid);
@@ -56,12 +49,6 @@ public class ChatRoomService {
         return chatMessages.stream()
             .map(ChatMessageResponseDto::from)
             .toList();
-    }
-
-    // ChatRoomStatus 조회
-    private ChatRoomStatus getChatRoomStatus(String roomUuid) {
-        return chatRoomStatusRepository.findByChatRoom_RoomUuid(roomUuid)
-            .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
     }
 
     private void validateUserParticipantInRoom(Long userId, String roomUuid) {
