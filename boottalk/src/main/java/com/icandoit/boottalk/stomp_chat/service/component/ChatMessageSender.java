@@ -26,7 +26,7 @@ public class ChatMessageSender {
     // 입장 메시지 전송
     public void sendEnterMessage(Long userId, String roomUuid) {
         // Redis에서 사용자가 입장했는지 확인
-        if (!redisChatUserRepository.hasUserEntered(roomUuid, userId)) {
+        if (!redisChatUserRepository.isUserEnteredInCache(roomUuid, userId)) {
             return;
         }
         ChatRoom chatRoom = chatRoomRepository.findByRoomUuid(roomUuid)
@@ -37,8 +37,10 @@ public class ChatMessageSender {
             ? chatRoom.getMentee().getUserId()
             : chatRoom.getMentor().getUserId();
 
+        String senderName = chatRoom.getMentor().getUserName();
+        String systemContent = senderName + "님이 입장하였습니다.";
         ChatMessageResponseDto enterMessage = new ChatMessageResponseDto(
-            roomUuid, 0L, receiverId, "님이 입장하였습니다.", MessageType.SYSTEM, LocalDateTime.now(), false
+            roomUuid, 0L, receiverId, systemContent, MessageType.SYSTEM, LocalDateTime.now(), false
         );
 
         // 공통화된 메시지 전송 메서드 사용

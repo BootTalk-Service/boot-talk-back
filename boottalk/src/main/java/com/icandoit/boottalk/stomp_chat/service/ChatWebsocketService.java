@@ -55,7 +55,7 @@ public class ChatWebsocketService {
         LocalDateTime enterTime = LocalDateTime.now();
 
         // 입장한 유저상태 저장
-        redisChatUserRepository.saveUserEnterStatus(roomUuid, userId);
+        redisChatUserRepository.cacheUserEntryInRoom(roomUuid, userId);
         // 메시지 조회 및 전송
         messageLoader.loadAndSendMessages(userId, roomUuid);
 
@@ -82,7 +82,7 @@ public class ChatWebsocketService {
 
         // 커피챗 예약 시간 내에만 채팅 가능하도록 체크
         checkChatRoomWithinAllowedTime(roomUuid);
-        boolean isReceiverInRoom = redisChatUserRepository.hasUserEntered(roomUuid,
+        boolean isReceiverInRoom = redisChatUserRepository.isUserEnteredInCache(roomUuid,
             requestDto.receiverId());
         log.info("senderId: {}, receiverId: {}", senderId, requestDto.receiverId());
 

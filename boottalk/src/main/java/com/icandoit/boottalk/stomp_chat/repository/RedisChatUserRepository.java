@@ -16,12 +16,12 @@ public class RedisChatUserRepository {
 
 
     // 사용자 입장 여부 체크
-    public boolean hasUserEntered(String roomUuid, Long userId) {
+    public boolean isUserEnteredInCache(String roomUuid, Long userId) {
         return redisTemplate.opsForValue().get(enteredStatus(roomUuid, userId)) != null;
     }
 
     // 사용자의 입장 여부 저장
-    public void saveUserEnterStatus(String roomUuid, Long userId) {
+    public void cacheUserEntryInRoom(String roomUuid, Long userId) {
         redisTemplate.opsForValue().set(enteredStatus(roomUuid, userId), true);
     }
 

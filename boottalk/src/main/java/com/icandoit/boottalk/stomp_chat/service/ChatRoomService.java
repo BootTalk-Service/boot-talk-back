@@ -13,6 +13,7 @@ import com.icandoit.boottalk.stomp_chat.entity.ChatRoomStatus;
 import com.icandoit.boottalk.stomp_chat.repository.ChatMessageRepository;
 import com.icandoit.boottalk.stomp_chat.repository.ChatRoomRepository;
 import com.icandoit.boottalk.stomp_chat.repository.ChatRoomStatusRepository;
+import com.icandoit.boottalk.stomp_chat.scheduler.ChatQuartzSchedulerService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,21 +28,18 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomStatusRepository chatRoomStatusRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final ChatQuartzSchedulerService chatQuartzSchedulerService;
 
     // 채팅방 생성
-    // todo: 멘토가 커피챗 신청 승인 시 호출로 변경 시 삭제 예정
     @Transactional
     public ChatRoomCreateResponse createChatRoom(CoffeeChatApplication application) {
 
-        // 이미 생성된 방이 있는지 확인
-        chatRoomRepository.findByCoffeeChatApplication(application)
-            .ifPresent(room -> {
-                log.warn("이미 채팅방이 존재합니다: {}", room.getRoomUuid());
-                throw new CustomException(ErrorCode.COFFEE_CHAT_ALREADY_EXISTS);
-            });
-
         ChatRoom chatRoom = chatRoomRepository.save(ChatRoom.of(application));
-
+        chatQuartzSchedulerService.scheduleStartAndEndJobs(
+            chatRoom.getRoomUuid(),
+            application.getCoffeeChatStartTime(),
+            application.getCoffeeChatEndTime()
+        );
         return ChatRoomCreateResponse.from(chatRoom.getRoomUuid());
     }
 

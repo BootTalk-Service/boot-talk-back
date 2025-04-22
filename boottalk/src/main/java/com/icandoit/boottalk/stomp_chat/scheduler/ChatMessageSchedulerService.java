@@ -1,4 +1,4 @@
-package com.icandoit.boottalk.stomp_chat.service;
+package com.icandoit.boottalk.stomp_chat.scheduler;
 
 import com.icandoit.boottalk.stomp_chat.dto.ChatMessageResponseDto;
 import com.icandoit.boottalk.stomp_chat.entity.ChatMessage;
@@ -30,17 +30,14 @@ public class ChatMessageSchedulerService {
         }
 
         for (String roomUuid : roomUuids) {
-            // DTO로 가져오기
             List<ChatMessageResponseDto> messagesToFlushDto = redisChatRepository.getMessagesForBatch(
                 roomUuid);
 
             if (!messagesToFlushDto.isEmpty()) {
-                // DTO → Entity 변환
                 List<ChatMessage> messagesToFlush = messagesToFlushDto.stream()
                     .map(ChatMessageResponseDto::toEntity)
                     .toList();
 
-                // DB 저장
                 chatMessageRepository.saveAll(messagesToFlush);
 
                 // Redis에서 앞부분 잘라내기 (DTO 기준으로)
