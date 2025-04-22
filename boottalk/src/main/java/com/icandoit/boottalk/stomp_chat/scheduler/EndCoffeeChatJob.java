@@ -18,7 +18,12 @@ public class EndCoffeeChatJob extends QuartzJobBean {
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-        String roomUuid = context.getMergedJobDataMap().getString("roomUuid");
-        chatRoomService.endCoffeeChat(roomUuid);
+        try {
+            String roomUuid = context.getMergedJobDataMap().getString("roomUuid");
+            chatRoomService.endCoffeeChat(roomUuid);
+        } catch (Exception e) {
+            // 예외가 발생하면 RuntimeException을 던진다.
+            throw new JobExecutionException("Error while ending coffee chat", e);
+        }
     }
 }
