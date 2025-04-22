@@ -1,6 +1,9 @@
 package com.icandoit.boottalk.stomp_chat.config;
 
 import com.icandoit.boottalk.social_login.jwt.JwtProvider;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.server.ServerHttpRequest;
@@ -23,7 +26,10 @@ public class AuthHandshakeInterceptor implements HandshakeInterceptor {
 		WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
 
 		if (request instanceof ServletServerHttpRequest servletRequest) {
-			String token = servletRequest.getServletRequest().getParameter("token");
+
+			HttpServletRequest httpServletRequest = servletRequest.getServletRequest();
+			String token = extractTokenFromRequest(httpServletRequest);
+
 			log.info("[Handshake] 받은 토큰: {}", token);
 
 			if (token != null && jwtProvider.validateToken(token)) {
@@ -42,5 +48,17 @@ public class AuthHandshakeInterceptor implements HandshakeInterceptor {
 	public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response,
 		WebSocketHandler wsHandler, Exception exception) {
 		// 생략
+	}
+
+	private String extractTokenFromRequest(HttpServletRequest request) {
+		Cookie[] cookies = request.getCookies();
+		if (cookies != null) {
+			for (Cookie cookie : cookies) {
+				if ("Authorization".equals(cookie.getName())) {
+					return cookie.getValue();
+				}
+			}
+		}
+		return null;
 	}
 }
