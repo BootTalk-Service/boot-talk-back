@@ -24,6 +24,7 @@ public enum ErrorCode {
 
     /* 401 UNAUTHORIZED */
     INVALID_TOKEN(401, "유효한 토큰이 아닙니다."),
+    AUTHENTICATION_FAILED(401, "사용자 인증에 실패했습니다."),
 
     /* 403 FORBIDDEN */
     FORBIDDEN(403, "권한이 없습니다."),
