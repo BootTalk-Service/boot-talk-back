@@ -7,6 +7,8 @@ import com.icandoit.boottalk.stomp_chat.entity.ChatRoom;
 import com.icandoit.boottalk.stomp_chat.entity.enums.MessageType;
 import com.icandoit.boottalk.stomp_chat.repository.ChatRoomRepository;
 import com.icandoit.boottalk.stomp_chat.repository.RedisChatUserRepository;
+import com.icandoit.boottalk.user.domain.repository.UserRepository;
+
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +23,7 @@ public class ChatMessageSender {
     private final ChatRoomRepository chatRoomRepository;
     private final RedisChatUserRepository redisChatUserRepository;
     private final SimpMessageSendingOperations template;
-
+    private final UserRepository userRepository;
 
     // 입장 메시지 전송
     public void sendEnterMessage(Long userId, String roomUuid) {
@@ -37,7 +39,8 @@ public class ChatMessageSender {
             ? chatRoom.getMentee().getUserId()
             : chatRoom.getMentor().getUserId();
 
-        String senderName = chatRoom.getMentor().getUserName();
+        String senderName = userRepository.getReferenceById(userId).getUserName();
+
         String systemContent = senderName + "님이 입장하였습니다.";
         ChatMessageResponseDto enterMessage = new ChatMessageResponseDto(
             roomUuid, 0L, receiverId, systemContent, MessageType.SYSTEM, LocalDateTime.now(), false
