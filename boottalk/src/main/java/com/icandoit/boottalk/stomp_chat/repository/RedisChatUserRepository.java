@@ -27,7 +27,7 @@ public class RedisChatUserRepository {
 
 
     // 사용자 알림 수신
-    public boolean shouldSendNotification(String roomUuid, Long receiverId) {
+    public boolean isNotificationNecessaryAndSend(String roomUuid, Long receiverId) {
 
         Boolean alreadySent = redisTemplate.hasKey(chatNotice(roomUuid, receiverId));
         if (Boolean.TRUE.equals(alreadySent)) {
