@@ -53,7 +53,6 @@ public enum ErrorCode {
     DUPLICATE_CERTIFICATION_EXIST(409, "동일한 인증이 이미 존재합니다."),
     NOT_PENDING_STATUS(409, "커피챗 신청이 '대기 중' 상태일 때만 수정할 수 있습니다."),
     COFFEE_CHAT_ALREADY_EXISTS(409, "이미 생성된 커피챗이 있습니다."),
-    ALREADY_CREATED_COFFEE_CHAT_TIME(409, "해당 유저의 커피챗 시간이 등록되어 있습니다."),
     COFFEE_CHAT_APPLICATION_ALREADY_EXISTS(409, "이미 해당 커피챗에 신청되었습니다."),
     COFFEE_CHAT_APPLICATION_TIME_ALREADY_EXISTS(400, "이미 신청된 시간입니다."),
     CHAT_ROOM_NOT_STARTED(409, "채팅 시간이 아직 시작되지 않았습니다."),

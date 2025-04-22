@@ -3,6 +3,7 @@ package com.icandoit.boottalk.social_login.config;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -36,6 +37,9 @@ public class SecurityConfiguration {
 	private final CustomUserService customUserService;
 	private final JwtFilter jwtFilter;
 
+	@Value("${server.url}")
+	private String BASE_URL;
+
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -68,6 +72,8 @@ public class SecurityConfiguration {
 			.oauth2Login(oauth2 -> {
 				log.info("OAuth2 로그인 설정");
 				oauth2
+					.redirectionEndpoint(endPoint -> endPoint
+						.baseUri("/api/login/oauth2/code/*"))
 					.authorizationEndpoint(endpoint -> endpoint. // 프론트엔드쪽에서 로그인 버튼을 눌렀을 때
 						baseUri("/api/oauth2/authorization")) // 해당 엔드포인트로 요청을 보내면 네이버 로그인 페이지로 리디렉션
 					.userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
@@ -77,7 +83,7 @@ public class SecurityConfiguration {
 			}) // 부트톡 서버와 네이버 서버간 인증코드와 엑세스 토큰을 주고 받기 위한 설정이 저장된 클래스
 			.logout(logout -> logout.logoutUrl("/logout")
 				.logoutSuccessHandler((request, response, auth) -> {
-					response.sendRedirect("http://localhost:3000/"); // 로그아웃 성공 시 메인페이지로 이동
+					response.sendRedirect(BASE_URL); // 로그아웃 성공 시 메인페이지로 이동
 				})
 				.clearAuthentication(true));
 
@@ -87,7 +93,7 @@ public class SecurityConfiguration {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://127.0.0.1:3000"));
+		configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://127.0.0.1:3000", BASE_URL));
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 		configuration.setAllowCredentials(true);
 		configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept"));

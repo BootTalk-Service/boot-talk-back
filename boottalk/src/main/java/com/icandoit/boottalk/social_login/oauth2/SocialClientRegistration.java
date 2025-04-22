@@ -6,9 +6,6 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
-
 //
 @Component
 public class SocialClientRegistration {
@@ -19,6 +16,9 @@ public class SocialClientRegistration {
 	@Value("${spring.security.oauth2.registration.naver.client-secret}")
 	private String clientSecret;
 
+	@Value("${server.url}")
+	private String BASE_URL;
+
 
 	//네이버 인증 서버에서 사용자로부터 권한 승인을 받으면 그로부터 인증 코드가 발급되고
 	//해당 코드로 다시 엑세스토큰을 발급받아 네이버 api를 통해 네이버 사용자 정보를 가져올 수 있도록 함.
@@ -28,7 +28,7 @@ public class SocialClientRegistration {
 		return ClientRegistration.withRegistrationId("naver")
 			.clientId(clientId)
 			.clientSecret(clientSecret)
-			.redirectUri("http://43.200.67.27:8080/login/oauth2/code/naver")
+			.redirectUri(BASE_URL + "/api/login/oauth2/code/naver")
 			.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
 			.scope("name", "email")
 			.authorizationUri("https://nid.naver.com/oauth2.0/authorize")

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
@@ -28,6 +29,9 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
 	private final JwtProvider jwtProvider;
 
+	@Value("${server.url}")
+	private String BASE_URL;
+
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 		Authentication authentication) throws IOException {
@@ -50,28 +54,15 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 		createCookie(response ,"Authorization"
 			, token);
 
-		Long userId = userDetails.getServiceUserId();
-
 		// 신규회원인 경우,추가정보 입력 url로 리다이렉션
 		if (UserRole.valueOf(role).equals(UserRole.NEW_USER)) {
-			response.sendRedirect("http://localhost:3000/social-register?token=" + token + "&userId=" + userId);
+			response.sendRedirect(BASE_URL + "/social-register");
 		} else {
 			// 기존 회원의 경우, 메인페이지로 리다이렉션
-			response.sendRedirect("http://localhost:3000?token=" + token + "&userId=" + userId);
+			response.sendRedirect(BASE_URL);
 		}
 	}
 
-	// 쿠키 생성
-	// private Cookie createCookie(String key, String value) {
-	//
-	// 	Cookie cookie = new Cookie(key, value);
-	// 	cookie.setMaxAge(60*60*60);
-	// 	//cookie.setSecure(true);
-	// 	cookie.setPath("/");
-	// 	cookie.setHttpOnly(true);
-	//
-	// 	return cookie;
-	// }
 	private void createCookie(HttpServletResponse response, String key, String value) {
 
 		ResponseCookie responseCookie = ResponseCookie.from(key, value)
@@ -81,12 +72,6 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 			.secure(false)
 			.sameSite("Lax")
 			.build();
-
-		// Cookie cookie = new Cookie(key, value);
-		// cookie.setMaxAge(60*60*60);
-		// // cookie.setSecure(true); 실제 서비스 배포시에 활성화 (https 에서만 해당 쿠키가 전달되게 함)
-		// cookie.setPath("/");
-		// cookie.setHttpOnly(true);
 
 		response.addHeader(HttpHeaders.SET_COOKIE, responseCookie.toString());
 	}

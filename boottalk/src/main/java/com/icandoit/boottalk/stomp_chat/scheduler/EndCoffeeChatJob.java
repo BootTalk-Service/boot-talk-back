@@ -1,6 +1,5 @@
 package com.icandoit.boottalk.stomp_chat.scheduler;
 
-
 import com.icandoit.boottalk.stomp_chat.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
