@@ -2,19 +2,20 @@ package com.icandoit.boottalk.user.service;
 
 import static com.icandoit.boottalk.libs.exception.ErrorCode.*;
 
+import java.sql.Timestamp;
+import java.time.Instant;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.libs.exception.CustomException;
-import com.icandoit.boottalk.libs.exception.ErrorCode;
 import com.icandoit.boottalk.user.domain.dto.UserDto;
 import com.icandoit.boottalk.user.domain.entity.User;
 import com.icandoit.boottalk.user.domain.form.UpdateForm;
 import com.icandoit.boottalk.user.domain.repository.UserRepository;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
