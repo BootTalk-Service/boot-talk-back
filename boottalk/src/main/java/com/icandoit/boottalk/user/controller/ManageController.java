@@ -43,7 +43,7 @@ public class ManageController {
 		UserDto userDto = manageService.getUser(userId);
 		List<GetCertificationResponseDto> myCertifications = certificationService.getMyCertifications(userId);
 
-		return ResponseEntity.ok(UserInfoDto.from(userDto, myCertifications, currentPoint));
+		return ResponseEntity.ok(UserInfoDto.from(userId, userDto, myCertifications, currentPoint));
 	}
 
 	@GetMapping("/navi")
