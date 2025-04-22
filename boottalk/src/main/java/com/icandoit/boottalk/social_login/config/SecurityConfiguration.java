@@ -81,10 +81,11 @@ public class SecurityConfiguration {
 					.successHandler(customSuccessHandler) // 로그인 성공 시 토큰을 발급하는 클래스
 					.clientRegistrationRepository(customClientRegistrationRepository.clientRegistrationRepository());
 			}) // 부트톡 서버와 네이버 서버간 인증코드와 엑세스 토큰을 주고 받기 위한 설정이 저장된 클래스
-			.logout(logout -> logout.logoutUrl("/logout")
+			.logout(logout -> logout.logoutUrl("/api/logout")
 				.logoutSuccessHandler((request, response, auth) -> {
 					response.sendRedirect(BASE_URL); // 로그아웃 성공 시 메인페이지로 이동
 				})
+				.deleteCookies("JSESSIONID", "Authorization") // 삭제할 쿠키 이름들 지정
 				.clearAuthentication(true));
 
 		return http.build();
