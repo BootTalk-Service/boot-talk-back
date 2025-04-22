@@ -2,7 +2,9 @@ package com.icandoit.boottalk.user.service;
 
 import static com.icandoit.boottalk.libs.exception.ErrorCode.*;
 
+import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.libs.exception.CustomException;
+import com.icandoit.boottalk.libs.exception.ErrorCode;
 import com.icandoit.boottalk.user.domain.dto.UserDto;
 import com.icandoit.boottalk.user.domain.entity.User;
 import com.icandoit.boottalk.user.domain.form.UpdateForm;
@@ -28,8 +30,12 @@ public class ManageService {
 
 	@Transactional
 	public UserDto updateUser(Long userId, UpdateForm form) {
+		if(!BootcampCategoryType.isValidKoreanName(form.desiredCareer())) {
+			throw new CustomException(INVALID_CATEGORY_NAME);
+		}
 
-		return UserDto.from(getUserInfo(userId).updateOf(form));
+		return UserDto.from(getUserInfo(userId).updateOf(form.profileImage(),
+			BootcampCategoryType.fromKoreanName(form.desiredCareer())));
 	}
 
 	@Transactional

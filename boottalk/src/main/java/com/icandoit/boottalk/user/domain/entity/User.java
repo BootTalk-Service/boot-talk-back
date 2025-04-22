@@ -52,9 +52,9 @@ public class User extends BaseEntity {
 	private boolean admin;
 
 
-	public User updateOf(UpdateForm form) {
-		this.profileImage = form.profileImage();
-		this.desiredCareer = form.desiredCareer();
+	public User updateOf(String profileImage, BootcampCategoryType desiredCareer) {
+		this.profileImage = profileImage;
+		this.desiredCareer = desiredCareer;
 		return this;
 	}
 }

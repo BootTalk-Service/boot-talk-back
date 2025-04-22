@@ -7,6 +7,6 @@ import lombok.Builder;
 @Builder
 public record UpdateForm(
     String profileImage,
-    BootcampCategoryType desiredCareer
+    String desiredCareer
 ) {
 }

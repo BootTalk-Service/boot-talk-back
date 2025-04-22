@@ -1,11 +1,14 @@
 package com.icandoit.boottalk.user.service;
 
+import static com.icandoit.boottalk.libs.exception.ErrorCode.*;
+
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
 import com.icandoit.boottalk.point_history.domain.type.EventType;
@@ -29,11 +32,16 @@ public class AddUserInfoService {
 		User user = userRepository.findById(userId).orElseThrow(
 			() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
+		if(!BootcampCategoryType.isValidKoreanName(form.desiredCareer())) {
+			throw new CustomException(INVALID_CATEGORY_NAME);
+		}
+
 		// 신규회원, 탈퇴한지 6개월이 지난 회원인 경우에만
 		// 포인트 적립
 		canReceivePoint(user);
 
-		user.updateOf(form);
+		user.updateOf(form.profileImage(),
+			BootcampCategoryType.fromKoreanName(form.desiredCareer()));
 	}
 
 	private void canReceivePoint(User user) {
