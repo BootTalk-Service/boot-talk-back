@@ -18,14 +18,12 @@ public class ChatRoomRedisManager {
         redisTemplate.opsForValue().set(RedisKeyPrefix.userRoom(userId), roomUuid);
     }
 
-
     // 방 Set에서 유저 제거 -> 유저 → 방 매핑 삭제
     public void removeUserFromRoom(Long userId, String roomUuid) {
         redisTemplate.opsForSet()
             .remove(RedisKeyPrefix.roomUsers(roomUuid), String.valueOf(userId));
         redisTemplate.delete(RedisKeyPrefix.userRoom(userId));
     }
-
 
     // 유저가 현재 속한 채팅방 UUID 조회
     public String findUserRoom(Long userId) {

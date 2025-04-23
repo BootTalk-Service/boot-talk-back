@@ -26,6 +26,7 @@ public class ChatMessageSender {
     // 입장 메시지 전송
     public void sendEnterMessage(Long userId, String roomUuid) {
         // Redis에서 사용자가 입장했는지 확인
+
         if (!redisChatUserRepository.isUserEnteredInCache(roomUuid, userId)) {
             return;
         }
@@ -43,7 +44,6 @@ public class ChatMessageSender {
             roomUuid, 0L, receiverId, systemContent, MessageType.SYSTEM, LocalDateTime.now(), false
         );
 
-        // 공통화된 메시지 전송 메서드 사용
         sendMessage(receiverId, enterMessage);
     }
 
