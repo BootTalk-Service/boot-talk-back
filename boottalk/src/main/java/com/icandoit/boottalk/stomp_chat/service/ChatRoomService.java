@@ -11,7 +11,6 @@ import com.icandoit.boottalk.stomp_chat.entity.ChatMessage;
 import com.icandoit.boottalk.stomp_chat.entity.ChatRoom;
 import com.icandoit.boottalk.stomp_chat.repository.ChatMessageRepository;
 import com.icandoit.boottalk.stomp_chat.repository.ChatRoomRepository;
-import com.icandoit.boottalk.stomp_chat.repository.ChatRoomStatusRepository;
 import com.icandoit.boottalk.stomp_chat.scheduler.ChatQuartzSchedulerService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
-    private final ChatRoomStatusRepository chatRoomStatusRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final ChatQuartzSchedulerService chatQuartzSchedulerService;
 
@@ -87,7 +85,6 @@ public class ChatRoomService {
             throw new CustomException(ErrorCode.CHAT_ROOM_FORBIDDEN);
         }
     }
-
 
 
 }
