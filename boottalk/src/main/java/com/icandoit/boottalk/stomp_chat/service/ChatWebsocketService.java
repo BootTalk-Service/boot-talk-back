@@ -51,7 +51,7 @@ public class ChatWebsocketService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public void handleUserEnter(Long userId, String roomUuid) {
+    public void handleUserEnter(Long userId, String userName, String roomUuid) {
         LocalDateTime enterTime = LocalDateTime.now();
 
         // 입장한 유저상태 저장
@@ -65,7 +65,7 @@ public class ChatWebsocketService {
         // 읽음 처리
         markUnreadMessagesAsRead(roomUuid, userId, enterTime);
 
-        messageSender.sendEnterMessage(userId, roomUuid);
+        messageSender.sendEnterMessage(userId, userName, roomUuid);
 
         redisChatUserRepository.resetNotificationStatus(roomUuid, userId);
     }
