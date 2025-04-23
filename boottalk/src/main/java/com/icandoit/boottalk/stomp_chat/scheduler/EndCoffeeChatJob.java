@@ -19,6 +19,7 @@ public class EndCoffeeChatJob extends QuartzJobBean {
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         try {
             String roomUuid = context.getMergedJobDataMap().getString("roomUuid");
+            log.info("EndCoffeeChatJob 실행됨 - roomUuid: {}", roomUuid);
             chatRoomService.endCoffeeChat(roomUuid);
         } catch (Exception e) {
             // 예외가 발생하면 RuntimeException을 던진다.
