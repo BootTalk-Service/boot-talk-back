@@ -105,7 +105,7 @@ public class ChatWebsocketService {
 
         // 알림 받을 유저가 방 이탈 후 최초 1회만 알림을 보냄.
         // 단기간 많은 알림 전송 방지
-        if (!isReceiverInRoom && redisChatUserRepository.shouldSendNotification(roomUuid,
+        if (!isReceiverInRoom && redisChatUserRepository.isNotificationNecessaryAndSend(roomUuid,
             requestDto.receiverId())) {
 
             eventPublisher.publishEvent(new NotificationEvent(
@@ -114,7 +114,6 @@ public class ChatWebsocketService {
             ));
         }
 
-        // Redis에 저장
         saveMessageWithFallback(messageToCache);
         messageSender.sendMessage(requestDto.receiverId(), messageToCache);
     }
@@ -149,9 +148,7 @@ public class ChatWebsocketService {
         log.info("입장 시 읽음 처리 완료 for userId={}, roomUuid={}", userId, roomUuid);
     }
 
-
     private void checkChatRoomWithinAllowedTime(String roomUuid) {
-        // Redis에서 채팅방 정보 조회
         ChatRoomResponseDto chatRoomDto = redisRoomRepository.findChatRoomByRoomUuidFromCache(
             roomUuid);
 
