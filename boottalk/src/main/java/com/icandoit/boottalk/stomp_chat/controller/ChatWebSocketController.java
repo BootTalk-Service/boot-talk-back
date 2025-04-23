@@ -41,9 +41,11 @@ public class ChatWebSocketController {
             throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
         }
 
-        Long userId = extractUserId(authentication);
+        CustomOAuth2User user = (CustomOAuth2User) authentication.getPrincipal();
+        Long userId = user.getServiceUserId();
+        String userName = user.getName();
         log.info("채팅 입장: userId = {}", userId);
-        chatWebsocketService.handleUserEnter(userId, roomUuid);
+        chatWebsocketService.handleUserEnter(userId, userName, roomUuid);
     }
 
     @MessageMapping("/chat.typing")
