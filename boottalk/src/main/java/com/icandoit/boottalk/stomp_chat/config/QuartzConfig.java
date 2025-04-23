@@ -1,5 +1,8 @@
 package com.icandoit.boottalk.stomp_chat.config;
 
+import lombok.RequiredArgsConstructor;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.quartz.spi.TriggerFiredBundle;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.annotation.Bean;
@@ -8,17 +11,15 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 
 @Configuration
+@RequiredArgsConstructor
 public class QuartzConfig {
 
     private final AutowireCapableBeanFactory beanFactory;
 
-    public QuartzConfig(AutowireCapableBeanFactory beanFactory) {
-        this.beanFactory = beanFactory;
-    }
-
     @Bean
     public SchedulerFactoryBean schedulerFactoryBean() {
         SchedulerFactoryBean factory = new SchedulerFactoryBean();
+        factory.setAutoStartup(true);
         factory.setJobFactory(springBeanJobFactory());
         return factory;
     }
@@ -33,6 +34,11 @@ public class QuartzConfig {
                 return job;
             }
         };
+    }
+
+    @Bean
+    public Scheduler scheduler(SchedulerFactoryBean schedulerFactoryBean) throws SchedulerException {
+        return schedulerFactoryBean.getScheduler();
     }
 }
 

@@ -27,7 +27,7 @@ public class ChatQuartzSchedulerService {
 
         try {
             scheduleJob(roomUuid, startTime, StartCoffeeChatJob.class, "start");
-            log.info("Start job scheduled: {}", startTime);
+            log.info("Start job scheduled: {}, roomUuid: {}", startTime, roomUuid);
         } catch (SchedulerException e) {
             log.error("시작 스케쥴러 작업 실패 - roomUuid : {}", roomUuid, e);
             throw new CustomException(ErrorCode.SCHEDULER_START_JOB_ERROR);
@@ -35,7 +35,7 @@ public class ChatQuartzSchedulerService {
 
         try {
             scheduleJob(roomUuid, endTime, EndCoffeeChatJob.class, "end");
-            log.info("End job scheduled: {}", endTime);
+            log.info("End job scheduled: {}, roomUuid:{}", endTime, roomUuid);
         } catch (SchedulerException e) {
             log.error("종료 스케쥴러 작업 실패 - roomUuid : {}", roomUuid, e);
             throw new CustomException(ErrorCode.SCHEDULER_END_JOB_ERROR);
