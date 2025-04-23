@@ -5,8 +5,6 @@ import java.sql.Timestamp;
 import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.libs.entity.BaseEntity;
 
-import com.icandoit.boottalk.user.domain.form.UpdateForm;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -52,9 +50,9 @@ public class User extends BaseEntity {
 	private boolean admin;
 
 
-	public User updateOf(UpdateForm form) {
-		this.profileImage = form.profileImage();
-		this.desiredCareer = form.desiredCareer();
+	public User updateOf(String profileImage, BootcampCategoryType desiredCareer) {
+		this.profileImage = profileImage;
+		this.desiredCareer = desiredCareer;
 		return this;
 	}
 }
