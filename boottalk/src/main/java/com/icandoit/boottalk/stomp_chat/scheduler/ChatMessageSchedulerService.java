@@ -6,6 +6,7 @@ import com.icandoit.boottalk.stomp_chat.repository.ChatMessageRepository;
 import com.icandoit.boottalk.stomp_chat.repository.RedisChatMessageRepository;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -23,17 +24,24 @@ public class ChatMessageSchedulerService {
 
     @Scheduled(fixedRate = 5 * 60 * 1000) // 5분마다 실행
     public void flushRedisToDatabase() {
-        Set<String> roomUuids = redisTemplate.opsForSet().members("chat:rooms");
 
-        if (roomUuids == null || roomUuids.isEmpty()) {
+        Set<String> keys = redisTemplate.keys("chat:room:info:*");
+
+        if (keys == null || keys.isEmpty()) {
             return;
         }
 
+        Set<String> roomUuids = keys.stream()
+            .map(key -> key.replace("chat:room:info:", ""))
+            .collect(Collectors.toSet());
+
         for (String roomUuid : roomUuids) {
+            // DTO로 가져오기
             List<ChatMessageResponseDto> messagesToFlushDto = redisChatRepository.getMessagesForBatch(
                 roomUuid);
 
             if (!messagesToFlushDto.isEmpty()) {
+                // DTO → Entity 변환
                 List<ChatMessage> messagesToFlush = messagesToFlushDto.stream()
                     .map(ChatMessageResponseDto::toEntity)
                     .toList();

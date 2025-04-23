@@ -6,13 +6,11 @@ import com.icandoit.boottalk.social_login.dto.CustomOAuth2User;
 import com.icandoit.boottalk.stomp_chat.dto.stompDto.ChatMessageRequestDto;
 import com.icandoit.boottalk.stomp_chat.dto.stompDto.ChatTypingRequestDto;
 import com.icandoit.boottalk.stomp_chat.service.ChatWebsocketService;
-import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 
@@ -27,7 +25,7 @@ public class ChatWebSocketController {
     public void send(@Payload ChatMessageRequestDto requestDto, Authentication authentication) {
         if (authentication == null) {
             log.error("인증 정보가 없습니다.");
-            throw new AccessDeniedException("인증되지 않은 사용자");
+            throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
         }
 
         Long userId = extractUserId(authentication);
@@ -40,7 +38,7 @@ public class ChatWebSocketController {
     public void enter(@DestinationVariable String roomUuid, Authentication authentication) {
         if (authentication == null) {
             log.error("인증 정보가 없습니다.");
-            throw new AccessDeniedException("인증되지 않은 사용자");
+            throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
         }
 
         Long userId = extractUserId(authentication);
@@ -48,12 +46,11 @@ public class ChatWebSocketController {
         chatWebsocketService.handleUserEnter(userId, roomUuid);
     }
 
-    // todo: 테스트 해보고 인증 Principal -> Authentication 변경 예정
     @MessageMapping("/chat.typing")
     public void typing(@Payload ChatTypingRequestDto requestDto, Authentication authentication) {
         if (authentication == null) {
             log.error("인증 정보가 없습니다.");
-            throw new AccessDeniedException("인증되지 않은 사용자");
+            throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
         }
 
         chatWebsocketService.sendTypingStatus(requestDto);

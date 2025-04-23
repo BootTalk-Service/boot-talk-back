@@ -1,7 +1,7 @@
 package com.icandoit.boottalk.stomp_chat.service;
 
 import com.icandoit.boottalk.coffeeChat.entity.CoffeeChatApplication;
-import com.icandoit.boottalk.coffeeChat.repository.CoffeeChatApplicationRepository;
+import com.icandoit.boottalk.coffeeChat.entity.enums.StatusType;
 import com.icandoit.boottalk.libs.exception.CustomException;
 import com.icandoit.boottalk.libs.exception.ErrorCode;
 import com.icandoit.boottalk.stomp_chat.dto.ChatMessageResponseDto;
@@ -9,10 +9,8 @@ import com.icandoit.boottalk.stomp_chat.dto.ChatRoomCreateResponse;
 import com.icandoit.boottalk.stomp_chat.dto.ChatRoomResponseDto;
 import com.icandoit.boottalk.stomp_chat.entity.ChatMessage;
 import com.icandoit.boottalk.stomp_chat.entity.ChatRoom;
-import com.icandoit.boottalk.stomp_chat.entity.ChatRoomStatus;
 import com.icandoit.boottalk.stomp_chat.repository.ChatMessageRepository;
 import com.icandoit.boottalk.stomp_chat.repository.ChatRoomRepository;
-import com.icandoit.boottalk.stomp_chat.repository.ChatRoomStatusRepository;
 import com.icandoit.boottalk.stomp_chat.scheduler.ChatQuartzSchedulerService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -26,11 +24,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
-    private final ChatRoomStatusRepository chatRoomStatusRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final ChatQuartzSchedulerService chatQuartzSchedulerService;
 
-    // 채팅방 생성
+  
+    // 채팅방 생성(커피챗 승인 시 생성)
     @Transactional
     public ChatRoomCreateResponse createChatRoom(CoffeeChatApplication application) {
 
@@ -53,15 +51,8 @@ public class ChatRoomService {
 
     // 채팅 메시지 조회 (입장)
     public List<ChatMessageResponseDto> getMessages(Long userId, String roomUuid) {
-        ChatRoomStatus chatRoomStatus = getChatRoomStatus(roomUuid);
-        ChatRoom chatRoom = chatRoomStatus.getChatRoom();
 
-        // 비활성화된 채팅방인 경우 예외 발생
-        if (!chatRoomStatus.isActive()) {
-            throw new CustomException(ErrorCode.CHAT_ROOM_NOT_ACTIVE);
-        }
-
-        validateChatRoomEntry(chatRoom, userId);
+        validateUserParticipantInRoom(userId, roomUuid);
 
         List<ChatMessage> chatMessages = chatMessageRepository.findByRoomUuid(roomUuid);
 
@@ -70,27 +61,31 @@ public class ChatRoomService {
             .toList();
     }
 
-
-    // ChatRoomStatus 조회
-    private ChatRoomStatus getChatRoomStatus(String roomUuid) {
-        return chatRoomStatusRepository.findByChatRoom_RoomUuid(roomUuid)
+    // 방 생성(isActive = true)
+    @Transactional
+    public void activateChatRoom(String roomUuid) {
+        ChatRoom room = chatRoomRepository.findByRoomUuid(roomUuid)
             .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+
+        room.getRoomStatus().setActive(true);
     }
 
-    // 채팅방 입장 권한 확인
-    private void validateChatRoomEntry(ChatRoom chatRoom, Long userId) {
-        if (!isMentor(chatRoom, userId) && !isMentee(chatRoom, userId)) {
+    @Transactional
+    public void endCoffeeChat(String roomUuid) {
+        ChatRoom chatRoom = chatRoomRepository.findByRoomUuid(roomUuid)
+            .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+
+        chatRoom.getRoomStatus().setActive(false);
+        chatRoom.getCoffeeChatApplication().setStatus(StatusType.COMPLETED);
+        log.info("커피챗 종료- 상태 변경 완료, roomUuid {}", roomUuid);
+    }
+
+    private void validateUserParticipantInRoom(Long userId, String roomUuid) {
+        ChatRoom chatRoom = chatRoomRepository.findByRoomUuid(roomUuid)
+            .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+
+        if (!chatRoom.isParticipant(userId)) {
             throw new CustomException(ErrorCode.CHAT_ROOM_FORBIDDEN);
         }
-    }
-
-    // 멘토인지 확인
-    private boolean isMentor(ChatRoom chatRoom, Long userId) {
-        return chatRoom.getMentor().getUserId().equals(userId);
-    }
-
-    // 멘티인지 확인
-    private boolean isMentee(ChatRoom chatRoom, Long userId) {
-        return chatRoom.getMentee().getUserId().equals(userId);
     }
 }

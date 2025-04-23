@@ -82,4 +82,19 @@ public class ChatRoom {
 
         return chatRoom;
     }
+
+    // 멘토인지 확인
+    public boolean isMentor(Long userId) {
+        return this.mentor.getUserId().equals(userId);
+    }
+
+    // 멘티인지 확인
+    public boolean isMentee(Long userId) {
+        return this.mentee.getUserId().equals(userId);
+    }
+
+    // 추가로 유용한 메서드
+    public boolean isParticipant(Long userId) {
+        return isMentor(userId) || isMentee(userId);
+    }
 }

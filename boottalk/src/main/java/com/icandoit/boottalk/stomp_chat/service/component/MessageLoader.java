@@ -21,34 +21,33 @@ public class MessageLoader {
 
     @Transactional(readOnly = true)
     public void loadAndSendMessages(Long userId, String roomUuid) {
-        // 1. 캐시 조회: DTO로 가져옴
+        // 캐시 조회: DTO로 가져옴
         List<ChatMessageResponseDto> cachedDtos = redisRepository.getMessages(roomUuid);
 
         if (cachedDtos.isEmpty()) {
-            // 2. DB에서 조회: Entity로 가져옴
+            // DB에서 조회: Entity로 가져옴
             List<ChatMessage> dbMessages = messageRepository.findByRoomUuid(roomUuid);
 
             if (!dbMessages.isEmpty()) {
-                // 3. Entity -> DTO 변환
+                // Entity -> DTO 변환
                 cachedDtos = dbMessages.stream()
                     .map(ChatMessageResponseDto::from)
                     .toList();
 
-                // 4. Redis에 DTO 저장
+                // Redis에 DTO 저장
                 redisRepository.saveAll(roomUuid, cachedDtos, Duration.ofMinutes(30));
                 System.out.println("[Server] DB에서 메시지 가져와 Redis 저장 완료: " + cachedDtos.size() + "건");
-            }
-            else {
+            } else {
                 System.out.println("[Server] Redis 에서 메시지 조회 성공: " + cachedDtos.size() + "건");
             }
         }
 
-        // 5. WebSocket으로 전송 (항상 DTO 사용)
+        // WebSocket으로 전송 (항상 DTO 사용)
         String destination = "/queue/chat/" + roomUuid + "/" + userId;
-        System.out.println("[Server] WebSocket 메시지 전송 시도: destination=" + destination + ", 메시지 수=" + cachedDtos.size());
+        System.out.println("[Server] WebSocket 메시지 전송 시도: destination=" + destination + ", 메시지 수="
+            + cachedDtos.size());
         for (ChatMessageResponseDto dto : cachedDtos) {
             template.convertAndSend(destination, dto);
         }
-        // template.convertAndSend(destination, cachedDtos);
     }
 }

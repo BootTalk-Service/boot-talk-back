@@ -82,11 +82,16 @@ public class ChatWebsocketService {
 
         // 커피챗 예약 시간 내에만 채팅 가능하도록 체크
         checkChatRoomWithinAllowedTime(roomUuid);
-        boolean isReceiverInRoom = redisChatUserRepository.isUserEnteredInCache(roomUuid,
-            requestDto.receiverId());
-        log.info("senderId: {}, receiverId: {}", senderId, requestDto.receiverId());
 
-        // 메시지를 DTO로 변환
+        boolean isReceiverInRoom = false;
+
+        try {
+            isReceiverInRoom = redisChatUserRepository.isUserEnteredInCache(roomUuid,
+                requestDto.receiverId());
+        } catch (RedisConnectionFailureException e) {
+            log.warn("redis 서버 연결 오류");
+        }
+
         ChatMessageResponseDto messageToCache = new ChatMessageResponseDto(
             roomUuid,
             senderId,
@@ -97,7 +102,9 @@ public class ChatWebsocketService {
             isReceiverInRoom
         );
 
-        if (!isReceiverInRoom && redisChatUserRepository.shouldSendNotification(roomUuid,
+        // 알림 받을 유저가 방 이탈 후 최초 1회만 알림을 보냄.
+        // 단기간 많은 알림 전송 방지
+        if (!isReceiverInRoom && redisChatUserRepository.isNotificationNecessaryAndSend(roomUuid,
             requestDto.receiverId())) {
 
             eventPublisher.publishEvent(new NotificationEvent(
@@ -106,19 +113,27 @@ public class ChatWebsocketService {
             ));
         }
 
-        // Redis에 저장
         saveMessageWithFallback(messageToCache);
-        log.info("메시지 Redis에 캐시됨: {}", messageToCache);
-        // 메시지 WebSocket으로 전송
         messageSender.sendMessage(requestDto.receiverId(), messageToCache);
     }
 
     public void sendTypingStatus(ChatTypingRequestDto requestDto) {
 
-        ChatTypingResponseDto response = new ChatTypingResponseDto(requestDto.receiverId(), requestDto.typing());
+        ChatTypingResponseDto response = new ChatTypingResponseDto(requestDto.receiverId(),
+            requestDto.typing());
 
         String destination = "/queue/chat/" + requestDto.roomUuid() + "/" + requestDto.receiverId();
         template.convertAndSend(destination, response);
+    }
+
+    // 사용자가 해당 채팅방에 입장했는지 확인하는 함수
+    private boolean isUserInChatRoom(String roomUuid, Long receiverId) {
+        return redisChatUserRepository.isUserEnteredInCache(roomUuid, receiverId);
+    }
+
+    // 알림 전송 필요 여부와 상태를 확인하고 처리하는 함수
+    private boolean handleNotificationForUser(String roomUuid, Long receiverId) {
+        return redisChatUserRepository.isNotificationNecessaryAndSend(roomUuid, receiverId);
     }
 
     public void markUnreadMessagesAsRead(String roomUuid, Long userId, LocalDateTime enterTime) {
@@ -126,6 +141,7 @@ public class ChatWebsocketService {
 
         boolean updated = false;
 
+        // 새로 받은 알림이 있다면 updated = true 
         for (ChatMessageResponseDto message : cachedMessages) {
             if (Objects.equals(message.getReceiverId(), userId)
                 && !message.isRead()
@@ -142,9 +158,7 @@ public class ChatWebsocketService {
         log.info("입장 시 읽음 처리 완료 for userId={}, roomUuid={}", userId, roomUuid);
     }
 
-
     private void checkChatRoomWithinAllowedTime(String roomUuid) {
-        // Redis에서 채팅방 정보 조회
         ChatRoomResponseDto chatRoomDto = redisRoomRepository.findChatRoomByRoomUuidFromCache(
             roomUuid);
 
@@ -169,8 +183,9 @@ public class ChatWebsocketService {
     public void saveMessageWithFallback(ChatMessageResponseDto message) {
         boolean isSavedToRedis = false;
         try {
-            redisChatRepository.save(message.getRoomUuid(), message, Duration.ofMinutes(30));
+            redisChatRepository.save(message.getRoomUuid(), message);
             isSavedToRedis = true;
+            log.info("메시지 Redis 에 캐시됨");
         } catch (RedisConnectionFailureException ex) {
             log.error("Redis 장애 발생: 메시지를 Redis에 저장하지 못했습니다. DB에 저장합니다.");
         }

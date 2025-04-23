@@ -27,20 +27,17 @@ public class BootcampCertificationController {
 	private final BootcampCertificationService certificationService;
 
 	@GetMapping
-	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<List<GetPendingCertificationResponseDto>> getAllCertifications() {
 		return ResponseEntity.ok(certificationService.getPendingCertifications());
 	}
 
 	@GetMapping("/{certificationId}")
-	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<GetCertificationInfoDto> getCertification(
 		@PathVariable Long certificationId) {
 		return ResponseEntity.ok(certificationService.findById(certificationId));
 	}
 
 	@PutMapping
-	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<CertificationResponseDto> updateCertification(@RequestBody CertificationUpdateRequestDto request){
 		return ResponseEntity.ok(certificationService.updateCertification(request));
 	}

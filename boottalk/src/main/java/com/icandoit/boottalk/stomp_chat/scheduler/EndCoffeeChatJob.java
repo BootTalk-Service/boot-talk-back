@@ -1,9 +1,6 @@
 package com.icandoit.boottalk.stomp_chat.scheduler;
 
-import com.icandoit.boottalk.libs.exception.CustomException;
-import com.icandoit.boottalk.libs.exception.ErrorCode;
-import com.icandoit.boottalk.stomp_chat.entity.ChatRoom;
-import com.icandoit.boottalk.stomp_chat.repository.ChatRoomRepository;
+import com.icandoit.boottalk.stomp_chat.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobExecutionContext;
@@ -16,17 +13,16 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class EndCoffeeChatJob extends QuartzJobBean {
 
-    private final ChatRoomRepository chatRoomRepository;
+    private final ChatRoomService chatRoomService;
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-        String roomUuid = context.getMergedJobDataMap().getString("roomUuid");
-
-        ChatRoom room = chatRoomRepository.findByRoomUuid(roomUuid)
-            .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
-
-        room.getRoomStatus().setActive(false);
-        chatRoomRepository.save(room);
-        log.info("채팅방 비활성화 완료: {}", roomUuid);
+        try {
+            String roomUuid = context.getMergedJobDataMap().getString("roomUuid");
+            chatRoomService.endCoffeeChat(roomUuid);
+        } catch (Exception e) {
+            // 예외가 발생하면 RuntimeException을 던진다.
+            throw new JobExecutionException("Error while ending coffee chat", e);
+        }
     }
 }
