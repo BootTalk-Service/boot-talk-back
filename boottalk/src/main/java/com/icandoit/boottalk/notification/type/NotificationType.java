@@ -17,7 +17,7 @@ public enum NotificationType {
 	CERTIFICATE_VERIFIED("/mypage?tab=profile", "수료증 인증이 완료되었습니다."),       // 수료증 인증 완료 알림
 	CERTIFICATE_REJECTED("/mypage?tab=certificates", "수료증 인증이 거절되었습니다."),// 수료증 인증 반려 알림
 	NEW_BOOT_CAMP("/bootcamps", "관심있는 직군의 새로운 부트캠프가 등록되었습니다."),// 새로운 부트캠프 등록
-    COFFEE_CHAT_REMINDER_30_MINUTES_AHEAD("/chat-rooms", "곧 커피챗이 시작됩니다. 늦지 않게 준비하시기 바랍니다!"),
+    COFFEE_CHAT_REMINDER_30_MINUTES_AHEAD("/chat", "곧 커피챗이 시작됩니다. 늦지 않게 준비하시기 바랍니다!"),
 	CHAT_MESSAGE_RECEIVED("/chat", "상대방이 메시지를 보냈어요. 커피챗을 이어가볼까요? ☕");
 
 	private final String urlFormat;
