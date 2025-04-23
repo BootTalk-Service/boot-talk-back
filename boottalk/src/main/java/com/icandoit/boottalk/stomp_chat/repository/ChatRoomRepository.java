@@ -16,6 +16,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
             JOIN c.coffeeChatApplication app
             JOIN app.coffeeChatInfo info
             WHERE app.mentee.userId = :userId OR info.mentor.userId = :userId
+            ORDER BY c.endAt DESC
         """)
     List<ChatRoom> findChatRoomsByUserId(@Param("userId") Long userId);
 
