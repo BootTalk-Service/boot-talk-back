@@ -19,7 +19,7 @@ public class RedisChatUserRepository {
 
 
     // 사용자 입장 여부 체크
-    public boolean hasUserEntered(String roomUuid, Long userId) {
+    public boolean isUserEnteredInCache(String roomUuid, Long userId) {
         return redisTemplate.opsForValue().get(enteredStatus(roomUuid, userId)) != null;
     }
 

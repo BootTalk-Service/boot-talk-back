@@ -27,7 +27,7 @@ public class ChatMessageSender {
     public void sendEnterMessage(Long userId, String roomUuid) {
         // Redis에서 사용자가 입장했는지 확인
         // 있다면 return ( 정책상 입장 메시지 1회 전송)
-        if (!redisChatUserRepository.hasUserEntered(roomUuid, userId)) {
+        if (!redisChatUserRepository.isUserEnteredInCache(roomUuid, userId)) {
             return;
         }
         ChatRoom chatRoom = chatRoomRepository.findByRoomUuid(roomUuid)

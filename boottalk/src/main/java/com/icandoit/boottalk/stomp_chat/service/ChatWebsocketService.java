@@ -86,7 +86,7 @@ public class ChatWebsocketService {
         boolean isReceiverInRoom = false;
 
         try {
-            isReceiverInRoom = redisChatUserRepository.hasUserEntered(roomUuid,
+            isReceiverInRoom = redisChatUserRepository.isUserEnteredInCache(roomUuid,
                 requestDto.receiverId());
         } catch (RedisConnectionFailureException e) {
             log.warn("redis 서버 연결 오류");
