@@ -84,13 +84,13 @@ public class SseEmitterService {
 
 	// 이벤트를 발행한 트랜잭션이 성공적으로 커밋된 후에만 해당 이벤트 핸들러들이 실행됨.
 
-	@Async
+	@Async("notificationTaskExecutor")
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
 	public void handlePointEvent(CreatePointEvent createPointEvent) {
 		sendPointNotification(createPointEvent.userId());
 	}
 
-	@Async
+	@Async("notificationTaskExecutor")
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
 	public void handleNotificationEvent(NotificationEvent notificationEvent) {
