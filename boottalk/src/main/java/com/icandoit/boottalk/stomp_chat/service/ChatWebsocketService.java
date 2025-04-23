@@ -55,7 +55,7 @@ public class ChatWebsocketService {
         LocalDateTime enterTime = LocalDateTime.now();
 
         // 입장한 유저상태 저장
-        redisChatUserRepository.saveUserEnterStatus(roomUuid, userId);
+        redisChatUserRepository.cacheUserEntryInRoom(roomUuid, userId);
         // 메시지 조회 및 전송
         messageLoader.loadAndSendMessages(userId, roomUuid);
 
@@ -92,7 +92,6 @@ public class ChatWebsocketService {
             log.warn("redis 서버 연결 오류");
         }
 
-        // 메시지를 DTO로 변환
         ChatMessageResponseDto messageToCache = new ChatMessageResponseDto(
             roomUuid,
             senderId,
@@ -127,11 +126,22 @@ public class ChatWebsocketService {
         template.convertAndSend(destination, response);
     }
 
+    // 사용자가 해당 채팅방에 입장했는지 확인하는 함수
+    private boolean isUserInChatRoom(String roomUuid, Long receiverId) {
+        return redisChatUserRepository.isUserEnteredInCache(roomUuid, receiverId);
+    }
+
+    // 알림 전송 필요 여부와 상태를 확인하고 처리하는 함수
+    private boolean handleNotificationForUser(String roomUuid, Long receiverId) {
+        return redisChatUserRepository.isNotificationNecessaryAndSend(roomUuid, receiverId);
+    }
+
     public void markUnreadMessagesAsRead(String roomUuid, Long userId, LocalDateTime enterTime) {
         List<ChatMessageResponseDto> cachedMessages = redisChatRepository.getMessages(roomUuid);
 
         boolean updated = false;
 
+        // 새로 받은 알림이 있다면 updated = true 
         for (ChatMessageResponseDto message : cachedMessages) {
             if (Objects.equals(message.getReceiverId(), userId)
                 && !message.isRead()

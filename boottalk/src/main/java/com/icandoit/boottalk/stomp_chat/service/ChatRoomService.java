@@ -27,9 +27,11 @@ public class ChatRoomService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatQuartzSchedulerService chatQuartzSchedulerService;
 
+  
     // 채팅방 생성(커피챗 승인 시 생성)
     @Transactional
     public ChatRoomCreateResponse createChatRoom(CoffeeChatApplication application) {
+
         ChatRoom chatRoom = chatRoomRepository.save(ChatRoom.of(application));
         chatQuartzSchedulerService.scheduleStartAndEndJobs(
             chatRoom.getRoomUuid(),
@@ -49,6 +51,7 @@ public class ChatRoomService {
 
     // 채팅 메시지 조회 (입장)
     public List<ChatMessageResponseDto> getMessages(Long userId, String roomUuid) {
+
         validateUserParticipantInRoom(userId, roomUuid);
 
         List<ChatMessage> chatMessages = chatMessageRepository.findByRoomUuid(roomUuid);
@@ -85,6 +88,4 @@ public class ChatRoomService {
             throw new CustomException(ErrorCode.CHAT_ROOM_FORBIDDEN);
         }
     }
-
-
 }

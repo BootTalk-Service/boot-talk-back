@@ -43,12 +43,12 @@ public class ManageController {
 		UserDto userDto = manageService.getUser(userId);
 		List<GetCertificationResponseDto> myCertifications = certificationService.getMyCertifications(userId);
 
-		return ResponseEntity.ok(UserInfoDto.from(userDto, myCertifications, currentPoint));
+		return ResponseEntity.ok(UserInfoDto.from(userId, userDto, myCertifications, currentPoint));
 	}
 
 	@GetMapping("/navi")
 	public ResponseEntity<NaviUserInfoDto> getNavi(@AuthenticationPrincipal CustomOAuth2User user) {
-		return ResponseEntity.ok(NaviUserInfoDto.from(user.getName(),
+		return ResponseEntity.ok(NaviUserInfoDto.from(user.getServiceUserId(), user.getName(),
 			createPointHistoryService.getCurrentPointToNavi(user.getServiceUserId())));
 	}
 

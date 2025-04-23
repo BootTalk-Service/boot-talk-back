@@ -24,7 +24,7 @@ public class RedisChatUserRepository {
     }
 
     // 사용자의 입장 여부 저장
-    public void saveUserEnterStatus(String roomUuid, Long userId) {
+    public void cacheUserEntryInRoom(String roomUuid, Long userId) {
         redisTemplate.opsForValue().set(enteredStatus(roomUuid, userId), true);
     }
 

@@ -17,6 +17,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.icandoit.boottalk.social_login.config.exception.CustomAccessDeniedException;
+import com.icandoit.boottalk.social_login.config.exception.CustomAuthenticationEntryPoint;
 import com.icandoit.boottalk.social_login.jwt.JwtFilter;
 import com.icandoit.boottalk.social_login.oauth2.CustomClientRegistrationRepository;
 import com.icandoit.boottalk.social_login.oauth2.CustomSuccessHandler;
@@ -39,33 +41,31 @@ public class SecurityConfiguration {
 
 	@Value("${server.url}")
 	private String BASE_URL;
-
+	private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+	private final CustomAccessDeniedException customAccessDeniedException;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		log.info("SecurityFilterChain 설정");
 
 		http
-			.cors(cors ->  cors.configurationSource(corsConfigurationSource()))
+			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 			.csrf(AbstractHttpConfigurer::disable)
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.formLogin(AbstractHttpConfigurer::disable)
-			// .exceptionHandling(exception -> {
-			// 	log.info("Exception Handling triggered");
-			// 	exception.authenticationEntryPoint((request, response, authException) -> {
-			// 		log.info("Unauthorized access attempt: {}", request.getRequestURI());
-			// 		response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-			// 	});
-			// })
-
-
-		// 세션 사용하지 않기 때문에
+			.exceptionHandling(exception -> {
+				exception.authenticationEntryPoint(customAuthenticationEntryPoint);
+				exception.accessDeniedHandler(customAccessDeniedException);
+			})
+			// 세션 사용하지 않기 때문에
 			.sessionManagement(session -> session
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
 				// 경로에 대한 접근 권한 설정
 				// TODO  : 추후에 접근 가능한 페이지 설정
-				.requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**", "/api/oauth2/authorization/**", "/login/**", "/api/bootcamps/**", "/api/reviews/**", "/api/test/**", "/connection", "/api/sse-connect").permitAll()
+				.requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**", "/api/oauth2/authorization/**",
+					"/login/**", "/api/login/**","/api/bootcamps/**", "/api/reviews/**", "/api/test/**", "/connection").permitAll()
+				.requestMatchers("/api/admin/**").hasAuthority("ADMIN")
 				.anyRequest().authenticated())
 			.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
 			//oauth2 로그인 설정
@@ -81,10 +81,11 @@ public class SecurityConfiguration {
 					.successHandler(customSuccessHandler) // 로그인 성공 시 토큰을 발급하는 클래스
 					.clientRegistrationRepository(customClientRegistrationRepository.clientRegistrationRepository());
 			}) // 부트톡 서버와 네이버 서버간 인증코드와 엑세스 토큰을 주고 받기 위한 설정이 저장된 클래스
-			.logout(logout -> logout.logoutUrl("/logout")
+			.logout(logout -> logout.logoutUrl("/api/logout")
 				.logoutSuccessHandler((request, response, auth) -> {
 					response.sendRedirect(BASE_URL); // 로그아웃 성공 시 메인페이지로 이동
 				})
+				.deleteCookies("JSESSIONID", "Authorization") // 삭제할 쿠키 이름들 지정
 				.clearAuthentication(true));
 
 		return http.build();
@@ -93,7 +94,7 @@ public class SecurityConfiguration {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://127.0.0.1:3000", BASE_URL));
+		configuration.setAllowedOrigins(List.of("http://localhost:3000", BASE_URL));
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 		configuration.setAllowCredentials(true);
 		configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept"));

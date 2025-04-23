@@ -24,6 +24,7 @@ public class ChatMessageSchedulerService {
 
     @Scheduled(fixedRate = 5 * 60 * 1000) // 5분마다 실행
     public void flushRedisToDatabase() {
+
         Set<String> keys = redisTemplate.keys("chat:room:info:*");
 
         if (keys == null || keys.isEmpty()) {
@@ -45,7 +46,6 @@ public class ChatMessageSchedulerService {
                     .map(ChatMessageResponseDto::toEntity)
                     .toList();
 
-                // DB 저장
                 chatMessageRepository.saveAll(messagesToFlush);
 
                 // Redis에서 앞부분 잘라내기 (DTO 기준으로)

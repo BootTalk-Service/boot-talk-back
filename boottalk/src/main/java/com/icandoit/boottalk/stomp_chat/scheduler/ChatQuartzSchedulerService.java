@@ -24,6 +24,7 @@ public class ChatQuartzSchedulerService {
 
     public void scheduleStartAndEndJobs(String roomUuid, LocalDateTime startTime,
         LocalDateTime endTime) {
+
         try {
             scheduleJob(roomUuid, startTime, StartCoffeeChatJob.class, "start");
         } catch (SchedulerException e) {
@@ -41,6 +42,7 @@ public class ChatQuartzSchedulerService {
 
     private void scheduleJob(String roomUuid, LocalDateTime time, Class<? extends Job> jobClass,
         String type) throws SchedulerException {
+
         JobDetail jobDetail = JobBuilder.newJob(jobClass)
             .withIdentity(type + "_" + roomUuid)
             .usingJobData("roomUuid", roomUuid)

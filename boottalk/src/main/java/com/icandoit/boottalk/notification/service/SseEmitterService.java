@@ -86,14 +86,14 @@ public class SseEmitterService {
 
 	@Async
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-	public void HandlePointEvent(CreatePointEvent createPointEvent) {
+	public void handlePointEvent(CreatePointEvent createPointEvent) {
 		sendPointNotification(createPointEvent.userId());
 	}
 
 	@Async
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-	public void HandleNotificationEvent(NotificationEvent notificationEvent) {
+	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
+	public void handleNotificationEvent(NotificationEvent notificationEvent) {
 		sendToClient(notificationEvent.userId(), notificationEvent.notificationRequestDto());
 	}
 

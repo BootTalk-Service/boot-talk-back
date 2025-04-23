@@ -46,7 +46,6 @@ public class ChatWebSocketController {
         chatWebsocketService.handleUserEnter(userId, roomUuid);
     }
 
-    // todo: 테스트 해보고 인증 Principal -> Authentication 변경 예정
     @MessageMapping("/chat.typing")
     public void typing(@Payload ChatTypingRequestDto requestDto, Authentication authentication) {
         if (authentication == null) {
