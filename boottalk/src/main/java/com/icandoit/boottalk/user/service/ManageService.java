@@ -10,9 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.icandoit.boottalk.bootcamp.entity.enums.BootcampCategoryType;
 import com.icandoit.boottalk.libs.exception.CustomException;
-import com.icandoit.boottalk.user.domain.dto.UserDto;
+import com.icandoit.boottalk.user.domain.dto.UserResponseDto;
 import com.icandoit.boottalk.user.domain.entity.User;
-import com.icandoit.boottalk.user.domain.form.UpdateForm;
+import com.icandoit.boottalk.user.domain.dto.UserUpdateDto;
 import com.icandoit.boottalk.user.domain.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -24,18 +24,18 @@ public class ManageService {
 	private final UserRepository userRepository;
 
 	@Transactional
-	public UserDto getUser(Long userId) {
+	public UserResponseDto getUser(Long userId) {
 
-		return UserDto.from(getUserInfo(userId));
+		return UserResponseDto.from(getUserInfo(userId));
 	}
 
 	@Transactional
-	public UserDto updateUser(Long userId, UpdateForm form) {
+	public UserResponseDto updateUser(Long userId, UserUpdateDto form) {
 		if(!BootcampCategoryType.isValidKoreanName(form.desiredCareer())) {
 			throw new CustomException(INVALID_CATEGORY_NAME);
 		}
 
-		return UserDto.from(getUserInfo(userId).updateOf(form.profileImage(),
+		return UserResponseDto.from(getUserInfo(userId).updateOf(form.profileImage(),
 			BootcampCategoryType.fromKoreanName(form.desiredCareer())));
 	}
 

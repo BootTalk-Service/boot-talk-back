@@ -6,14 +6,14 @@ import com.icandoit.boottalk.user.domain.entity.User;
 import lombok.Builder;
 
 @Builder
-public record UserDto(
+public record UserResponseDto(
 	String name,
 	String email,
 	String profileImage,
 	BootcampCategoryType desiredCareer
 ) {
-	public static UserDto from(User user) {
-		return UserDto.builder()
+	public static UserResponseDto from(User user) {
+		return UserResponseDto.builder()
 			.name(user.getUserName())
 			.email(user.getEmail())
 			.profileImage(user.getProfileImage())

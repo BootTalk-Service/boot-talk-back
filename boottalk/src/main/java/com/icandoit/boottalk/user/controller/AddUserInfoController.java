@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.icandoit.boottalk.social_login.dto.CustomOAuth2User;
-import com.icandoit.boottalk.user.domain.form.UpdateForm;
+import com.icandoit.boottalk.user.domain.dto.UserUpdateDto;
 import com.icandoit.boottalk.user.service.AddUserInfoService;
 
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ public class AddUserInfoController {
   private final AddUserInfoService addUserInfoService;
 
   @PostMapping
-  public ResponseEntity<String> addUserInfo(@RequestBody UpdateForm form,
+  public ResponseEntity<String> addUserInfo(@RequestBody UserUpdateDto form,
       @AuthenticationPrincipal CustomOAuth2User user) {
 
     addUserInfoService.addUserInfo(form, user.getServiceUserId());

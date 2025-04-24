@@ -19,9 +19,9 @@ import com.icandoit.boottalk.bootcamp.service.BootcampCertificationService;
 import com.icandoit.boottalk.point_history.service.CreatePointHistoryService;
 import com.icandoit.boottalk.social_login.dto.CustomOAuth2User;
 import com.icandoit.boottalk.user.domain.dto.NaviUserInfoDto;
-import com.icandoit.boottalk.user.domain.dto.UserDto;
+import com.icandoit.boottalk.user.domain.dto.UserResponseDto;
 import com.icandoit.boottalk.user.domain.dto.UserInfoDto;
-import com.icandoit.boottalk.user.domain.form.UpdateForm;
+import com.icandoit.boottalk.user.domain.dto.UserUpdateDto;
 import com.icandoit.boottalk.user.service.ManageService;
 
 import lombok.RequiredArgsConstructor;
@@ -40,10 +40,10 @@ public class ManageController {
 		Long userId = user.getServiceUserId();
 
 		int currentPoint = createPointHistoryService.getCurrentPointToNavi(userId);
-		UserDto userDto = manageService.getUser(userId);
+		UserResponseDto userResponseDto = manageService.getUser(userId);
 		List<GetCertificationResponseDto> myCertifications = certificationService.getMyCertifications(userId);
 
-		return ResponseEntity.ok(UserInfoDto.from(userId, userDto, myCertifications, currentPoint));
+		return ResponseEntity.ok(UserInfoDto.from(userId, userResponseDto, myCertifications, currentPoint));
 	}
 
 	@GetMapping("/navi")
@@ -53,8 +53,8 @@ public class ManageController {
 	}
 
 	@PutMapping
-	public ResponseEntity<UserDto> updateUser(@AuthenticationPrincipal CustomOAuth2User user,
-		@RequestBody UpdateForm form) {
+	public ResponseEntity<UserResponseDto> updateUser(@AuthenticationPrincipal CustomOAuth2User user,
+		@RequestBody UserUpdateDto form) {
 
 		return ResponseEntity.ok(manageService.updateUser(user.getServiceUserId(), form));
 	}

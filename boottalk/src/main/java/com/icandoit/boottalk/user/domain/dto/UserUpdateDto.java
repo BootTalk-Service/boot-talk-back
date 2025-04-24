@@ -1,9 +1,9 @@
-package com.icandoit.boottalk.user.domain.form;
+package com.icandoit.boottalk.user.domain.dto;
 
 import lombok.Builder;
 
 @Builder
-public record UpdateForm(
+public record UserUpdateDto(
     String profileImage,
     String desiredCareer
 ) {
