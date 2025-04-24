@@ -23,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 public class PointHistoryController {
 
 	private final SearchPointHistoryService searchPointHistoryService;
-	private final CreatePointHistoryService createPointHistoryService;
 
 
 	@GetMapping
