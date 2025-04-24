@@ -14,7 +14,7 @@ public record UserInfoDto(
 	int currentPoint,
 	List<GetCertificationResponseDto> certifications
 ) {
-	public static UserInfoDto from(Long userId, UserDto userInfo, List<GetCertificationResponseDto> certifications, int curPoint) {
+	public static UserInfoDto from(Long userId, UserResponseDto userInfo, List<GetCertificationResponseDto> certifications, int curPoint) {
 		return new UserInfoDto(
 			userId,
 			userInfo.name(),

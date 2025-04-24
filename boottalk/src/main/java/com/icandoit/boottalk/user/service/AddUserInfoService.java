@@ -14,7 +14,7 @@ import com.icandoit.boottalk.libs.exception.ErrorCode;
 import com.icandoit.boottalk.point_history.domain.type.EventType;
 import com.icandoit.boottalk.point_history.service.CreatePointHistoryService;
 import com.icandoit.boottalk.user.domain.entity.User;
-import com.icandoit.boottalk.user.domain.form.UpdateForm;
+import com.icandoit.boottalk.user.domain.dto.UserUpdateDto;
 import com.icandoit.boottalk.user.domain.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ public class AddUserInfoService {
 	private final CreatePointHistoryService createPointHistoryService;
 
 	@Transactional
-	public void addUserInfo(UpdateForm form, long userId) {
+	public void addUserInfo(UserUpdateDto form, long userId) {
 
 		User user = userRepository.findById(userId).orElseThrow(
 			() -> new CustomException(ErrorCode.USER_NOT_FOUND));
