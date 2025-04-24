@@ -14,7 +14,7 @@
 ### 주요 기능 
 
 ### ⚙ 프로젝트 아키텍쳐
-![아키텍쳐](https://github.com/user-attachments/assets/9b4e5b81-caab-4983-aa06-356531c2c4c2)
+![image](https://github.com/user-attachments/assets/d24e6be1-4bb9-43e0-9c41-b4332634cd31)
 
 
 ### 💽 ERD
