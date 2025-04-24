@@ -19,6 +19,7 @@ public class StartCoffeeChatJob extends QuartzJobBean {
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         try {
             String roomUuid = context.getMergedJobDataMap().getString("roomUuid");
+            log.info("StartCoffeeChatJob 실행됨 - roomUuid: {}", roomUuid);
             chatRoomService.activateChatRoom(roomUuid);
         } catch (Exception e) {
             throw new JobExecutionException("Error while starting coffee chat", e);
