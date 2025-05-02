@@ -73,12 +73,10 @@ public class NotificationQuartzJob extends QuartzJobBean {
 		List<Long> targetUserIds = userRepository.findByIdsByDesiredCareer(category);
 
 		for (Long userId : targetUserIds) {
-			for (String bootcampId : bootcampIds) {
-				try {
-					publishNotificationEvent(userId, bootcampId);
-				} catch (Exception e) {
-					log.error("알림 발송 실패 - userId: {}, bootcampId: {}, error: {}", userId, bootcampId, e.getMessage());
-				}
+			try {
+				publishNotificationEvent(userId);
+			} catch (Exception e) {
+				log.error("알림 발송 실패 - userId: {}, error: {}", userId, e.getMessage());
 			}
 		}
 
@@ -86,13 +84,13 @@ public class NotificationQuartzJob extends QuartzJobBean {
 		log.info("처리 완료된 Redis key 삭제: {}", key);
 	}
 
-	private void publishNotificationEvent(Long userId, String bootcampId) {
+	private void publishNotificationEvent(Long userId) {
 		NotificationRequestDto requestDto = new NotificationRequestDto(
 			NotificationType.NEW_BOOT_CAMP,
-			Long.valueOf(bootcampId)
+			null
 		);
 
 		eventPublisher.publishEvent(new NotificationEvent(userId, requestDto));
-		log.info("알림 발송 완료 - userId: {}, bootcampId: {}", userId, bootcampId);
+		log.info("알림 발송 완료 - userId: {}", userId);
 	}
 }
